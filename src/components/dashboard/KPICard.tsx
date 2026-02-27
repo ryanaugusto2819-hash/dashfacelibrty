@@ -68,8 +68,8 @@ const KPICard = ({ title, value, icon: Icon, trend, trendUp, trendNeutral, previ
             {title}
           </span>
           <button
-            onClick={() => setLocalHidden((v) => !v)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded text-muted-foreground/50 hover:text-muted-foreground"
+            onClick={(e) => { e.stopPropagation(); setLocalHidden((v) => !v); }}
+            className="p-0.5 rounded text-muted-foreground/40 hover:text-muted-foreground transition-colors"
           >
             {localHidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
           </button>
