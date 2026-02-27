@@ -41,6 +41,7 @@ const Index = () => {
   const [range, setRange] = useState("30days");
   const [customRange, setCustomRange] = useState<{ from: Date; to: Date } | undefined>();
   const [data, setData] = useState<any[]>([]);
+  const [salesData, setSalesData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,24 +61,30 @@ const Index = () => {
           to = dates.to;
         }
 
-        const { data: result, error: fnError } = await supabase.functions.invoke(
-          "facebookMetrics",
-          {
-            body: {
-              from: format(from, "yyyy-MM-dd"),
-              to: format(to, "yyyy-MM-dd"),
-            },
-          }
-        );
+        const fromStr = format(from, "yyyy-MM-dd");
+        const toStr = format(to, "yyyy-MM-dd");
 
-        if (fnError) throw new Error("Erro ao buscar métricas");
+        const [metricsRes, salesRes] = await Promise.all([
+          supabase.functions.invoke("facebookMetrics", {
+            body: { from: fromStr, to: toStr },
+          }),
+          supabase.functions.invoke("salesFromSheet"),
+        ]);
 
-        const items = result?.data ?? [];
+        if (metricsRes.error) throw new Error("Erro ao buscar métricas");
+
+        const items = metricsRes.data?.data ?? [];
         setData(Array.isArray(items) ? items : []);
+
+        // Filter sales by date range
+        const allSales = Array.isArray(salesRes.data) ? salesRes.data : [];
+        const filtered = allSales.filter((s: any) => s.date >= fromStr && s.date <= toStr);
+        setSalesData(filtered);
       } catch (err: any) {
         console.error("Erro:", err);
         setError(err.message || "Erro inesperado");
         setData([]);
+        setSalesData([]);
       } finally {
         setLoading(false);
       }
@@ -90,8 +97,8 @@ const Index = () => {
     const totalSpent = data.reduce((sum, d) => sum + Number(d.spend || 0), 0);
     const totalLeads = data.reduce((sum, d) => sum + Number(d.leads || 0), 0);
     const costPerLead = totalLeads > 0 ? totalSpent / totalLeads : 0;
-    const totalRevenue = 0;
-    const totalSales = 0;
+    const totalRevenue = salesData.reduce((sum, s) => sum + Number(s.revenue || 0), 0);
+    const totalSales = salesData.reduce((sum, s) => sum + Number(s.sales || 0), 0);
     const conversionRate = totalLeads > 0 ? (totalSales / totalLeads) * 100 : 0;
     const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
     const roi = totalSpent > 0 ? ((totalRevenue - totalSpent) / totalSpent) * 100 : 0;
@@ -100,8 +107,8 @@ const Index = () => {
     const lucro50 = totalRevenue * 0.5 - totalSpent;
     const lucro40 = totalRevenue * 0.4 - totalSpent;
 
-    return { totalSpent, totalLeads, costPerLead, roi, conversionRate, averageTicket, lucro70, lucro60, lucro50, lucro40 };
-  }, [data]);
+    return { totalSpent, totalLeads, costPerLead, roi, conversionRate, averageTicket, totalSales, totalRevenue, lucro70, lucro60, lucro50, lucro40 };
+  }, [data, salesData]);
 
   return (
     <div className="min-h-screen bg-background">
