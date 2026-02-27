@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { DollarSign, Users, Target, BarChart3, Percent } from "lucide-react";
+import { DollarSign, Users, Target, BarChart3, Percent, TrendingUp, Receipt, Wallet } from "lucide-react";
 import { format, subDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import KPICard from "@/components/dashboard/KPICard";
@@ -81,28 +81,30 @@ const Index = () => {
   // ===========================
 
   const kpi = useMemo(() => {
-    if (!data.length) {
-      return {
-        totalSpent: 0,
-        totalLeads: 0,
-        costPerLead: 0,
-        roi: 0,
-      };
-    }
-
     const totalSpent = data.reduce((sum, d) => sum + Number(d.spend || 0), 0);
-
-    const totalLeads = data.reduce((sum, d) => sum + Number(d.messaging || 0), 0);
-
+    const totalLeads = data.reduce((sum, d) => sum + Number(d.leads || 0), 0);
     const costPerLead = totalLeads > 0 ? totalSpent / totalLeads : 0;
-
-    const roi = 0; // pode integrar depois com faturamento real
+    const totalRevenue = 0; // integrar com faturamento real
+    const totalSales = 0;   // integrar com vendas reais
+    const conversionRate = totalLeads > 0 ? (totalSales / totalLeads) * 100 : 0;
+    const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
+    const roi = totalSpent > 0 ? ((totalRevenue - totalSpent) / totalSpent) * 100 : 0;
+    const lucro70 = totalRevenue * 0.7 - totalSpent;
+    const lucro60 = totalRevenue * 0.6 - totalSpent;
+    const lucro50 = totalRevenue * 0.5 - totalSpent;
+    const lucro40 = totalRevenue * 0.4 - totalSpent;
 
     return {
       totalSpent,
       totalLeads,
       costPerLead,
       roi,
+      conversionRate,
+      averageTicket,
+      lucro70,
+      lucro60,
+      lucro50,
+      lucro40,
     };
   }, [data]);
 
@@ -135,14 +137,17 @@ const Index = () => {
 
       <main className="max-w-[1440px] mx-auto px-6 py-6 space-y-6">
         {/* KPI Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
           <KPICard title="Valor Gasto" value={`R$ ${fmt(kpi.totalSpent)}`} icon={DollarSign} />
-
           <KPICard title="Leads" value={kpi.totalLeads.toLocaleString("pt-BR")} icon={Users} />
-
           <KPICard title="Custo / Lead" value={`R$ ${fmt(kpi.costPerLead)}`} icon={Target} />
-
           <KPICard title="ROI" value={`${fmt(kpi.roi)}%`} icon={Percent} />
+          <KPICard title="Tx. Conversão" value={`${fmt(kpi.conversionRate)}%`} icon={TrendingUp} />
+          <KPICard title="Ticket Médio" value={`R$ ${fmt(kpi.averageTicket)}`} icon={Receipt} />
+          <KPICard title="Lucro 70%" value={`R$ ${fmt(kpi.lucro70)}`} icon={Wallet} />
+          <KPICard title="Lucro 60%" value={`R$ ${fmt(kpi.lucro60)}`} icon={Wallet} />
+          <KPICard title="Lucro 50%" value={`R$ ${fmt(kpi.lucro50)}`} icon={Wallet} />
+          <KPICard title="Lucro 40%" value={`R$ ${fmt(kpi.lucro40)}`} icon={Wallet} />
         </div>
 
         {/* Gráfico */}
