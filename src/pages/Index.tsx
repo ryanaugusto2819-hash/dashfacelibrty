@@ -39,6 +39,7 @@ const SkeletonCard = () => (
 
 const Index = () => {
   const [range, setRange] = useState("30days");
+  const [customRange, setCustomRange] = useState<{ from: Date; to: Date } | undefined>();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +50,15 @@ const Index = () => {
         setLoading(true);
         setError(null);
 
-        const { from, to } = getDateRange(range);
+        let from: Date, to: Date;
+        if (range === "custom" && customRange) {
+          from = customRange.from;
+          to = customRange.to;
+        } else {
+          const dates = getDateRange(range);
+          from = dates.from;
+          to = dates.to;
+        }
 
         const { data: result, error: fnError } = await supabase.functions.invoke(
           "facebookMetrics",
@@ -75,7 +84,7 @@ const Index = () => {
     };
 
     fetchData();
-  }, [range]);
+  }, [range, customRange]);
 
   const kpi = useMemo(() => {
     const totalSpent = data.reduce((sum, d) => sum + Number(d.spend || 0), 0);
@@ -113,7 +122,7 @@ const Index = () => {
             {loading && (
               <RefreshCw className="h-4 w-4 text-primary animate-spin" />
             )}
-            <DateFilter selected={range} onSelect={setRange} />
+            <DateFilter selected={range} onSelect={setRange} customRange={customRange} onCustomRange={setCustomRange} />
           </div>
         </div>
       </header>
