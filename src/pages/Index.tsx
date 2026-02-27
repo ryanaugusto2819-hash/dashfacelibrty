@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { DollarSign, Users, Target, BarChart3, Percent, TrendingUp, Receipt, Wallet } from "lucide-react";
+import { DollarSign, Users, Target, BarChart3, Percent, TrendingUp, Receipt, Wallet, Activity, RefreshCw } from "lucide-react";
 import { format, subDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import KPICard from "@/components/dashboard/KPICard";
@@ -15,7 +15,6 @@ const fmt = (n: number) =>
 
 const getDateRange = (range: string) => {
   const today = new Date();
-
   switch (range) {
     case "7days":
       return { from: subDays(today, 6), to: today };
@@ -28,15 +27,21 @@ const getDateRange = (range: string) => {
   }
 };
 
+const SkeletonCard = () => (
+  <div className="glass-card p-5">
+    <div className="flex items-start justify-between mb-3">
+      <div className="shimmer h-3 w-20 rounded" />
+      <div className="shimmer h-8 w-8 rounded-lg" />
+    </div>
+    <div className="shimmer h-7 w-28 rounded mt-1" />
+  </div>
+);
+
 const Index = () => {
   const [range, setRange] = useState("30days");
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // ===========================
-  // BUSCAR DADOS DA API
-  // ===========================
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,11 +61,7 @@ const Index = () => {
           }
         );
 
-        if (fnError) {
-          throw new Error("Erro ao buscar métricas");
-        }
-
-        console.log("Resposta da API:", result);
+        if (fnError) throw new Error("Erro ao buscar métricas");
 
         const items = result?.data ?? [];
         setData(Array.isArray(items) ? items : []);
@@ -76,16 +77,12 @@ const Index = () => {
     fetchData();
   }, [range]);
 
-  // ===========================
-  // CALCULAR KPIs
-  // ===========================
-
   const kpi = useMemo(() => {
     const totalSpent = data.reduce((sum, d) => sum + Number(d.spend || 0), 0);
     const totalLeads = data.reduce((sum, d) => sum + Number(d.leads || 0), 0);
     const costPerLead = totalLeads > 0 ? totalSpent / totalLeads : 0;
-    const totalRevenue = 0; // integrar com faturamento real
-    const totalSales = 0;   // integrar com vendas reais
+    const totalRevenue = 0;
+    const totalSales = 0;
     const conversionRate = totalLeads > 0 ? (totalSales / totalLeads) * 100 : 0;
     const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
     const roi = totalSpent > 0 ? ((totalRevenue - totalSpent) / totalSpent) * 100 : 0;
@@ -94,67 +91,116 @@ const Index = () => {
     const lucro50 = totalRevenue * 0.5 - totalSpent;
     const lucro40 = totalRevenue * 0.4 - totalSpent;
 
-    return {
-      totalSpent,
-      totalLeads,
-      costPerLead,
-      roi,
-      conversionRate,
-      averageTicket,
-      lucro70,
-      lucro60,
-      lucro50,
-      lucro40,
-    };
+    return { totalSpent, totalLeads, costPerLead, roi, conversionRate, averageTicket, lucro70, lucro60, lucro50, lucro40 };
   }, [data]);
-
-  if (loading) {
-    return <div className="p-6">Carregando métricas...</div>;
-  }
-
-  if (error) {
-    return <div className="p-6 text-red-500">Erro: {error}</div>;
-  }
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border/40 px-6 py-4">
+      <header className="sticky top-0 z-50 border-b border-border/30 bg-background/80 backdrop-blur-xl px-6 py-4">
         <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
               <BarChart3 className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">Facebook Ads</h1>
-              <p className="text-xs text-muted-foreground">Dashboard de Performance</p>
+              <h1 className="text-xl font-display font-bold tracking-tight">Facebook Ads</h1>
+              <p className="text-[11px] text-muted-foreground tracking-wide">Dashboard de Performance</p>
             </div>
           </div>
 
-          <DateFilter selected={range} onSelect={setRange} />
+          <div className="flex items-center gap-3">
+            {loading && (
+              <RefreshCw className="h-4 w-4 text-primary animate-spin" />
+            )}
+            <DateFilter selected={range} onSelect={setRange} />
+          </div>
         </div>
       </header>
 
-      <main className="max-w-[1440px] mx-auto px-6 py-6 space-y-6">
-        {/* KPI Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          <KPICard title="Valor Gasto" value={`R$ ${fmt(kpi.totalSpent)}`} icon={DollarSign} />
-          <KPICard title="Leads" value={kpi.totalLeads.toLocaleString("pt-BR")} icon={Users} />
-          <KPICard title="Custo / Lead" value={`R$ ${fmt(kpi.costPerLead)}`} icon={Target} />
-          <KPICard title="ROI" value={`${fmt(kpi.roi)}%`} icon={Percent} />
-          <KPICard title="Tx. Conversão" value={`${fmt(kpi.conversionRate)}%`} icon={TrendingUp} />
-          <KPICard title="Ticket Médio" value={`R$ ${fmt(kpi.averageTicket)}`} icon={Receipt} />
-          <KPICard title="Lucro 70%" value={`R$ ${fmt(kpi.lucro70)}`} icon={Wallet} />
-          <KPICard title="Lucro 60%" value={`R$ ${fmt(kpi.lucro60)}`} icon={Wallet} />
-          <KPICard title="Lucro 50%" value={`R$ ${fmt(kpi.lucro50)}`} icon={Wallet} />
-          <KPICard title="Lucro 40%" value={`R$ ${fmt(kpi.lucro40)}`} icon={Wallet} />
-        </div>
+      <main className="max-w-[1440px] mx-auto px-6 py-8 space-y-8">
+        {/* Error Banner */}
+        {error && (
+          <div className="glass-card border-loss/30 bg-loss/5 p-4 flex items-center gap-3 animate-fade-in-up">
+            <Activity className="h-4 w-4 text-loss flex-shrink-0" />
+            <p className="text-sm text-loss">{error}</p>
+          </div>
+        )}
 
-        {/* Gráfico */}
-        <SpendChart data={data} range={range} />
+        {/* Section: KPIs */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-1 w-1 rounded-full bg-primary" />
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Visão Geral
+            </h2>
+          </div>
 
-        {/* Tabela */}
-        <AdsTable ads={data} />
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              <div className="animate-fade-in-up" style={{ animationDelay: "0ms" }}>
+                <KPICard title="Valor Gasto" value={`R$ ${fmt(kpi.totalSpent)}`} icon={DollarSign} variant="blue" />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "50ms" }}>
+                <KPICard title="Leads" value={kpi.totalLeads.toLocaleString("pt-BR")} icon={Users} variant="cyan" />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "100ms" }}>
+                <KPICard title="Custo / Lead" value={`R$ ${fmt(kpi.costPerLead)}`} icon={Target} variant="orange" />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "150ms" }}>
+                <KPICard title="ROI" value={`${fmt(kpi.roi)}%`} icon={Percent} variant="green" />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+                <KPICard title="Tx. Conversão" value={`${fmt(kpi.conversionRate)}%`} icon={TrendingUp} variant="purple" />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "250ms" }}>
+                <KPICard title="Ticket Médio" value={`R$ ${fmt(kpi.averageTicket)}`} icon={Receipt} variant="blue" />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
+                <KPICard title="Lucro 70%" value={`R$ ${fmt(kpi.lucro70)}`} icon={Wallet} variant="green" />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "350ms" }}>
+                <KPICard title="Lucro 60%" value={`R$ ${fmt(kpi.lucro60)}`} icon={Wallet} variant="green" />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "400ms" }}>
+                <KPICard title="Lucro 50%" value={`R$ ${fmt(kpi.lucro50)}`} icon={Wallet} variant="orange" />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "450ms" }}>
+                <KPICard title="Lucro 40%" value={`R$ ${fmt(kpi.lucro40)}`} icon={Wallet} variant="orange" />
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Section: Chart */}
+        {!loading && (
+          <section className="animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-1 w-1 rounded-full bg-success" />
+              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Evolução
+              </h2>
+            </div>
+            <SpendChart data={data} range={range} />
+          </section>
+        )}
+
+        {/* Section: Table */}
+        {!loading && (
+          <section className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-1 w-1 rounded-full bg-warning" />
+              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Detalhamento
+              </h2>
+            </div>
+            <AdsTable ads={data} />
+          </section>
+        )}
       </main>
     </div>
   );
