@@ -196,9 +196,6 @@ const Index = () => {
               <div className="animate-fade-in-up" style={{ animationDelay: "500ms" }}>
                 <KPICard title="Lucro 50%" value={`R$ ${fmt(kpi.lucro50)}`} icon={Wallet} variant="orange" />
               </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: "550ms" }}>
-                <KPICard title="Lucro 40%" value={`R$ ${fmt(kpi.lucro40)}`} icon={Wallet} variant="orange" />
-              </div>
             </div>
           )}
         </section>
