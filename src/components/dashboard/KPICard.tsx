@@ -9,6 +9,7 @@ interface KPICardProps {
   trendNeutral?: boolean;
   previousValue?: string;
   variant?: "blue" | "green" | "orange" | "purple" | "cyan" | "default";
+  hidden?: boolean;
 }
 
 const variantStyles: Record<string, { glow: string; iconBg: string; iconColor: string; accent: string }> = {
@@ -50,7 +51,7 @@ const variantStyles: Record<string, { glow: string; iconBg: string; iconColor: s
   },
 };
 
-const KPICard = ({ title, value, icon: Icon, trend, trendUp, trendNeutral, previousValue, variant = "default" }: KPICardProps) => {
+const KPICard = ({ title, value, icon: Icon, trend, trendUp, trendNeutral, previousValue, variant = "default", hidden = false }: KPICardProps) => {
   const style = variantStyles[variant] ?? variantStyles.default;
 
   return (
@@ -67,7 +68,9 @@ const KPICard = ({ title, value, icon: Icon, trend, trendUp, trendNeutral, previ
         </div>
       </div>
 
-      <p className="text-2xl font-display font-bold tracking-tight leading-none">{value}</p>
+      <p className="text-2xl font-display font-bold tracking-tight leading-none">
+        {hidden ? "••••••" : value}
+      </p>
 
       {trend && (
         <div className="flex items-center gap-2 mt-3">
@@ -89,7 +92,7 @@ const KPICard = ({ title, value, icon: Icon, trend, trendUp, trendNeutral, previ
             )}
             {trend}
           </div>
-          {previousValue && (
+          {previousValue && !hidden && (
             <span className="text-[10px] text-muted-foreground truncate">
               ant: {previousValue}
             </span>
