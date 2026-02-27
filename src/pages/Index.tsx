@@ -220,7 +220,7 @@ const Index = () => {
                 Detalhamento
               </h2>
             </div>
-            <AdsTable ads={data} />
+            <AdsTable ads={data} salesData={salesData} />
           </section>
         )}
       </main>

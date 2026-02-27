@@ -8,8 +8,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
+interface SaleEntry {
+  date: string;
+  creative: string;
+  sales: number;
+  revenue: number;
+}
+
 interface AdsTableProps {
   ads: any[];
+  salesData?: SaleEntry[];
 }
 
 const fmt = (n: number | null | undefined) => {
@@ -20,7 +28,7 @@ const fmt = (n: number | null | undefined) => {
 const th = "text-muted-foreground text-[10px] font-semibold uppercase tracking-widest text-right whitespace-nowrap px-3 py-3";
 const td = "text-right text-sm tabular-nums px-3 py-3 whitespace-nowrap";
 
-const AdsTable = ({ ads }: AdsTableProps) => {
+const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
   if (!ads || ads.length === 0) {
     return (
       <div className="glass-card p-6 text-center text-muted-foreground text-sm">
@@ -62,10 +70,15 @@ const AdsTable = ({ ads }: AdsTableProps) => {
           </TableHeader>
           <TableBody>
             {ads.map((ad, i) => {
+              const adName = ad.ad_name || ad.name || "";
+              const matchedSales = salesData.filter(s =>
+                adName.toLowerCase().includes(s.creative.toLowerCase()) ||
+                s.creative.toLowerCase().includes(adName.toLowerCase())
+              );
               const spend = ad.spend ?? ad.spent ?? 0;
               const leads = ad.leads ?? 0;
-              const sales = ad.sales ?? 0;
-              const revenue = ad.revenue ?? 0;
+              const sales = matchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);
+              const revenue = matchedSales.reduce((sum, s) => sum + Number(s.revenue || 0), 0);
               const cpl = ad.costPerLead ?? ad.cpl ?? (leads > 0 ? spend / leads : 0);
               const cpa = ad.cpa ?? (sales > 0 ? spend / sales : 0);
               const convRate = leads > 0 ? (sales / leads) * 100 : 0;
