@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { DollarSign, Users, Target, BarChart3, Percent } from "lucide-react";
 import { format, subDays } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
 import KPICard from "@/components/dashboard/KPICard";
 import DateFilter from "@/components/dashboard/DateFilter";
 import AdsTable from "@/components/dashboard/AdsTable";
@@ -45,24 +46,24 @@ const Index = () => {
 
         const { from, to } = getDateRange(range);
 
-        const res = await fetch("/api/facebookMetrics", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            from: format(from, "yyyy-MM-dd"),
-            to: format(to, "yyyy-MM-dd"),
-          }),
-        });
+        const { data: result, error: fnError } = await supabase.functions.invoke(
+          "facebookMetrics",
+          {
+            body: {
+              from: format(from, "yyyy-MM-dd"),
+              to: format(to, "yyyy-MM-dd"),
+            },
+          }
+        );
 
-        if (!res.ok) {
+        if (fnError) {
           throw new Error("Erro ao buscar métricas");
         }
 
-        const json = await res.json();
+        console.log("Resposta da API:", result);
 
-        console.log("Resposta da API:", json);
-
-        setData(Array.isArray(json) ? json : []);
+        const items = result?.data ?? [];
+        setData(Array.isArray(items) ? items : []);
       } catch (err: any) {
         console.error("Erro:", err);
         setError(err.message || "Erro inesperado");
