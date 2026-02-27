@@ -1,4 +1,5 @@
-import { LucideIcon, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useState } from "react";
+import { LucideIcon, TrendingUp, TrendingDown, Minus, Eye, EyeOff } from "lucide-react";
 
 interface KPICardProps {
   title: string;
@@ -51,8 +52,10 @@ const variantStyles: Record<string, { glow: string; iconBg: string; iconColor: s
   },
 };
 
-const KPICard = ({ title, value, icon: Icon, trend, trendUp, trendNeutral, previousValue, variant = "default", hidden = false }: KPICardProps) => {
+const KPICard = ({ title, value, icon: Icon, trend, trendUp, trendNeutral, previousValue, variant = "default", hidden: globalHidden = false }: KPICardProps) => {
   const style = variantStyles[variant] ?? variantStyles.default;
+  const [localHidden, setLocalHidden] = useState(false);
+  const isHidden = globalHidden || localHidden;
 
   return (
     <div className={`glass-card relative overflow-hidden p-5 transition-all duration-300 hover:scale-[1.02] hover:border-border/80 group ${style.glow}`}>
@@ -60,16 +63,24 @@ const KPICard = ({ title, value, icon: Icon, trend, trendUp, trendNeutral, previ
       <div className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r ${style.accent} opacity-60`} />
 
       <div className="flex items-start justify-between mb-3">
-        <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-          {title}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            {title}
+          </span>
+          <button
+            onClick={() => setLocalHidden((v) => !v)}
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded text-muted-foreground/50 hover:text-muted-foreground"
+          >
+            {localHidden ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+          </button>
+        </div>
         <div className={`p-2 rounded-lg ${style.iconBg} transition-transform duration-300 group-hover:scale-110`}>
           <Icon className={`h-4 w-4 ${style.iconColor}`} />
         </div>
       </div>
 
       <p className="text-2xl font-display font-bold tracking-tight leading-none">
-        {hidden ? "••••••" : value}
+        {isHidden ? "••••••" : value}
       </p>
 
       {trend && (
@@ -90,9 +101,9 @@ const KPICard = ({ title, value, icon: Icon, trend, trendUp, trendNeutral, previ
             ) : (
               <TrendingDown className="h-3 w-3" />
             )}
-            {trend}
+            {isHidden ? "••••" : trend}
           </div>
-          {previousValue && !hidden && (
+          {previousValue && !isHidden && (
             <span className="text-[10px] text-muted-foreground truncate">
               ant: {previousValue}
             </span>
