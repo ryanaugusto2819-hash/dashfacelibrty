@@ -107,7 +107,9 @@ const Index = () => {
     const lucro50 = totalRevenue * 0.5 - totalSpent;
     const lucro40 = totalRevenue * 0.4 - totalSpent;
 
-    return { totalSpent, totalLeads, costPerLead, roi, conversionRate, averageTicket, totalSales, totalRevenue, lucro70, lucro60, lucro50, lucro40 };
+    const cpa = totalSales > 0 ? totalSpent / totalSales : 0;
+
+    return { totalSpent, totalLeads, costPerLead, cpa, roi, conversionRate, averageTicket, totalSales, totalRevenue, lucro70, lucro60, lucro50, lucro40 };
   }, [data, salesData]);
 
   return (
@@ -169,6 +171,9 @@ const Index = () => {
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "150ms" }}>
                 <KPICard title="Vendas" value={kpi.totalSales.toLocaleString("pt-BR")} icon={Receipt} variant="purple" />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "175ms" }}>
+                <KPICard title="CPA" value={`R$ ${fmt(kpi.cpa)}`} icon={Target} variant="orange" />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "200ms" }}>
                 <KPICard title="Faturamento" value={`R$ ${fmt(kpi.totalRevenue)}`} icon={Wallet} variant="green" />
