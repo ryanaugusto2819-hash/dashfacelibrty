@@ -1,28 +1,96 @@
-import { useState } from "react";
-import {
-  DollarSign,
-  Users,
-  Target,
-  ShoppingCart,
-  TrendingUp,
-  BarChart3,
-  Percent,
-  ArrowRightLeft,
-  Receipt,
-  Wallet,
-} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { DollarSign, Users, Target, ShoppingCart, TrendingUp, BarChart3, Percent } from "lucide-react";
+import { format, subDays } from "date-fns";
 import KPICard from "@/components/dashboard/KPICard";
 import DateFilter from "@/components/dashboard/DateFilter";
 import AdsTable from "@/components/dashboard/AdsTable";
 import SpendChart from "@/components/dashboard/SpendChart";
-import { kpiDataByRange, adsMetrics, dailyData } from "@/data/mockData";
 
-const fmt = (n: number) =>
-  n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmt = (n: number) => n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const getDateRange = (range: string) => {
+  const today = new Date();
+
+  switch (range) {
+    case "7days":
+      return { from: subDays(today, 6), to: today };
+    case "30days":
+      return { from: subDays(today, 29), to: today };
+    case "today":
+      return { from: today, to: today };
+    default:
+      return { from: subDays(today, 29), to: today };
+  }
+};
 
 const Index = () => {
   const [range, setRange] = useState("30days");
-  const kpi = kpiDataByRange[range] ?? kpiDataByRange["30days"];
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // ===========================
+  // BUSCAR DADOS DA API
+  // ===========================
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+
+      const { from, to } = getDateRange(range);
+
+      const res = await fetch("/server/facebookMetrics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: format(from, "yyyy-MM-dd"),
+          to: format(to, "yyyy-MM-dd"),
+        }),
+      });
+
+      const json = await res.json();
+      setData(json);
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [range]);
+
+  // ===========================
+  // CALCULAR KPIs
+  // ===========================
+
+  const kpi = useMemo(() => {
+    if (!data.length)
+      return {
+        totalSpent: 0,
+        totalLeads: 0,
+        costPerLead: 0,
+        totalRevenue: 0,
+        totalSales: 0,
+        roi: 0,
+      };
+
+    const totalSpent = data.reduce((sum, d) => sum + d.spend, 0);
+    const totalLeads = data.reduce((sum, d) => sum + d.messaging, 0);
+
+    const costPerLead = totalLeads > 0 ? totalSpent / totalLeads : 0;
+
+    // ⚠️ Ajuste aqui se quiser integrar vendas reais depois
+    const totalSales = 0;
+    const totalRevenue = 0;
+    const roi = totalSpent > 0 ? (totalRevenue / totalSpent) * 100 : 0;
+
+    return {
+      totalSpent,
+      totalLeads,
+      costPerLead,
+      totalRevenue,
+      totalSales,
+      roi,
+    };
+  }, [data]);
+
+  if (loading) return <div className="p-6">Carregando métricas...</div>;
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,32 +110,23 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Content */}
       <main className="max-w-[1440px] mx-auto px-6 py-6 space-y-6">
         {/* KPI Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-          <KPICard title="Valor Gasto" value={`R$ ${fmt(kpi.totalSpent)}`} icon={DollarSign} trend="12.5%" trendUp={false} glowClass="metric-glow-blue" gradientClass="bg-primary" />
-          <KPICard title="Leads" value={kpi.totalLeads.toLocaleString("pt-BR")} icon={Users} trend="8.3%" trendUp glowClass="metric-glow-cyan" gradientClass="bg-info" />
-          <KPICard title="Custo / Lead" value={`R$ ${fmt(kpi.costPerLead)}`} icon={Target} trend="3.1%" trendUp={false} glowClass="metric-glow-orange" gradientClass="bg-warning" />
-          <KPICard title="Custo / Venda" value={`R$ ${fmt(kpi.costPerSale)}`} icon={ShoppingCart} trend="5.2%" trendUp={false} glowClass="metric-glow-purple" gradientClass="bg-[hsl(280_65%_60%)]" />
-          <KPICard title="Faturamento" value={`R$ ${fmt(kpi.totalRevenue)}`} icon={TrendingUp} trend="15.7%" trendUp glowClass="metric-glow-green" gradientClass="bg-success" />
-          <KPICard title="Vendas" value={kpi.totalSales.toLocaleString("pt-BR")} icon={ShoppingCart} trend="10.2%" trendUp glowClass="metric-glow-cyan" gradientClass="bg-info" />
-          <KPICard title="ROI" value={`${fmt(kpi.roi)}%`} icon={Percent} trend="4.8%" trendUp glowClass="metric-glow-green" gradientClass="bg-success" />
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
+          <KPICard title="Valor Gasto" value={`R$ ${fmt(kpi.totalSpent)}`} icon={DollarSign} />
+
+          <KPICard title="Leads" value={kpi.totalLeads.toLocaleString("pt-BR")} icon={Users} />
+
+          <KPICard title="Custo / Lead" value={`R$ ${fmt(kpi.costPerLead)}`} icon={Target} />
+
+          <KPICard title="ROI" value={`${fmt(kpi.roi)}%`} icon={Percent} />
         </div>
 
-        {/* KPI Grid 2 */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <KPICard title="Taxa de Conversão" value={`${fmt(kpi.conversionRate)}%`} icon={ArrowRightLeft} trend="2.1%" trendUp glowClass="metric-glow-cyan" gradientClass="bg-info" />
-          <KPICard title="Ticket Médio" value={`R$ ${fmt(kpi.averageTicket)}`} icon={Receipt} trend="3.4%" trendUp glowClass="metric-glow-purple" gradientClass="bg-[hsl(280_65%_60%)]" />
-          <KPICard title="Lucro Est. 70%" value={`R$ ${fmt(kpi.totalRevenue * 0.7 - kpi.totalSpent)}`} icon={Wallet} glowClass="metric-glow-green" gradientClass="bg-success" />
-          <KPICard title="Lucro Est. 60%" value={`R$ ${fmt(kpi.totalRevenue * 0.6 - kpi.totalSpent)}`} icon={Wallet} glowClass="metric-glow-green" gradientClass="bg-success" />
-          <KPICard title="Lucro Est. 50%" value={`R$ ${fmt(kpi.totalRevenue * 0.5 - kpi.totalSpent)}`} icon={Wallet} glowClass="metric-glow-orange" gradientClass="bg-warning" />
-          <KPICard title="Lucro Est. 40%" value={`R$ ${fmt(kpi.totalRevenue * 0.4 - kpi.totalSpent)}`} icon={Wallet} glowClass="metric-glow-orange" gradientClass="bg-warning" />
-        </div>
-        <SpendChart data={dailyData} range={range} />
+        {/* Chart */}
+        <SpendChart data={data} range={range} />
 
-        {/* Ads Table */}
-        <AdsTable ads={adsMetrics} />
+        {/* Tabela (pode ajustar depois) */}
+        <AdsTable ads={[]} />
       </main>
     </div>
   );
