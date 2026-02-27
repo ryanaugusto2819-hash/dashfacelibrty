@@ -153,11 +153,11 @@ const Index = () => {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               <div className="animate-fade-in-up" style={{ animationDelay: "0ms" }}>
                 <KPICard title="Valor Gasto" value={`R$ ${fmt(kpi.totalSpent)}`} icon={DollarSign} variant="blue" />
               </div>
@@ -168,24 +168,30 @@ const Index = () => {
                 <KPICard title="Custo / Lead" value={`R$ ${fmt(kpi.costPerLead)}`} icon={Target} variant="orange" />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "150ms" }}>
-                <KPICard title="ROI" value={`${fmt(kpi.roi)}%`} icon={Percent} variant="green" />
+                <KPICard title="Vendas" value={kpi.totalSales.toLocaleString("pt-BR")} icon={Receipt} variant="purple" />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-                <KPICard title="Tx. Conversão" value={`${fmt(kpi.conversionRate)}%`} icon={TrendingUp} variant="purple" />
+                <KPICard title="Faturamento" value={`R$ ${fmt(kpi.totalRevenue)}`} icon={Wallet} variant="green" />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "250ms" }}>
-                <KPICard title="Ticket Médio" value={`R$ ${fmt(kpi.averageTicket)}`} icon={Receipt} variant="blue" />
+                <KPICard title="ROI" value={`${fmt(kpi.roi)}%`} icon={Percent} variant="green" />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
-                <KPICard title="Lucro 70%" value={`R$ ${fmt(kpi.lucro70)}`} icon={Wallet} variant="green" />
+                <KPICard title="Tx. Conversão" value={`${fmt(kpi.conversionRate)}%`} icon={TrendingUp} variant="cyan" />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "350ms" }}>
-                <KPICard title="Lucro 60%" value={`R$ ${fmt(kpi.lucro60)}`} icon={Wallet} variant="green" />
+                <KPICard title="Ticket Médio" value={`R$ ${fmt(kpi.averageTicket)}`} icon={Receipt} variant="blue" />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "400ms" }}>
-                <KPICard title="Lucro 50%" value={`R$ ${fmt(kpi.lucro50)}`} icon={Wallet} variant="orange" />
+                <KPICard title="Lucro 70%" value={`R$ ${fmt(kpi.lucro70)}`} icon={Wallet} variant="green" />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "450ms" }}>
+                <KPICard title="Lucro 60%" value={`R$ ${fmt(kpi.lucro60)}`} icon={Wallet} variant="green" />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "500ms" }}>
+                <KPICard title="Lucro 50%" value={`R$ ${fmt(kpi.lucro50)}`} icon={Wallet} variant="orange" />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "550ms" }}>
                 <KPICard title="Lucro 40%" value={`R$ ${fmt(kpi.lucro40)}`} icon={Wallet} variant="orange" />
               </div>
             </div>
