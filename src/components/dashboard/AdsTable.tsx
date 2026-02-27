@@ -30,18 +30,18 @@ const AdsTable = ({ ads }: AdsTableProps) => {
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider min-w-[200px]">Anúncio</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Status</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Gasto</TableHead>
-              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">CPM</TableHead>
-              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">CTR</TableHead>
-              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Hook Rate</TableHead>
-              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Body Rate</TableHead>
-              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">CPL</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Vendas</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">CPA</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Leads</TableHead>
-              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Vendas</TableHead>
-              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Faturamento</TableHead>
-              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">ROI</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">CPL</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Tx Conv.</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Ticket Médio</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Body Rate</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Hook Rate</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">CTR</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">CPM</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Faturamento</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">ROI</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Lucro 70%</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Lucro 60%</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Lucro 50%</TableHead>
@@ -61,30 +61,30 @@ const AdsTable = ({ ads }: AdsTableProps) => {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.spent)}</TableCell>
-                <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.cpm)}</TableCell>
-                <TableCell className="text-right text-sm tabular-nums">{fmt(ad.ctr)}%</TableCell>
-                <TableCell className="text-right text-sm tabular-nums">
-                  <span className={ad.hookRate >= 40 ? "text-profit" : ad.hookRate >= 30 ? "text-warning" : "text-loss"}>
-                    {fmt(ad.hookRate)}%
-                  </span>
-                </TableCell>
+                <TableCell className="text-right text-sm tabular-nums">{ad.sales}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.cpa)}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">{ad.leads}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.cpl)}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">{fmt(ad.conversionRate)}%</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.averageTicket)}</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
                   <span className={ad.bodyRate >= 30 ? "text-profit" : ad.bodyRate >= 20 ? "text-warning" : "text-loss"}>
                     {fmt(ad.bodyRate)}%
                   </span>
                 </TableCell>
-                <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.cpl)}</TableCell>
-                <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.cpa)}</TableCell>
-                <TableCell className="text-right text-sm tabular-nums">{ad.leads}</TableCell>
-                <TableCell className="text-right text-sm tabular-nums">{ad.sales}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">
+                  <span className={ad.hookRate >= 40 ? "text-profit" : ad.hookRate >= 30 ? "text-warning" : "text-loss"}>
+                    {fmt(ad.hookRate)}%
+                  </span>
+                </TableCell>
+                <TableCell className="text-right text-sm tabular-nums">{fmt(ad.ctr)}%</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.cpm)}</TableCell>
                 <TableCell className="text-right text-sm tabular-nums font-medium">R$ {fmt(ad.revenue)}</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
                   <span className={((ad.revenue - ad.spent) / ad.spent * 100) > 0 ? "text-profit" : "text-loss"}>
                     {fmt((ad.revenue - ad.spent) / ad.spent * 100)}%
                   </span>
                 </TableCell>
-                <TableCell className="text-right text-sm tabular-nums">{fmt(ad.conversionRate)}%</TableCell>
-                <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.averageTicket)}</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
                   <span className={ad.revenue * 0.7 - ad.spent > 0 ? "text-profit" : "text-loss"}>
                     R$ {fmt(ad.revenue * 0.7 - ad.spent)}
