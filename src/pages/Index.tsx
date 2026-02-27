@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { DollarSign, Users, Target, BarChart3, Percent, TrendingUp, Receipt, Wallet, Activity, RefreshCw } from "lucide-react";
-import { format, subDays } from "date-fns";
+import { format, subDays, differenceInDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import KPICard from "@/components/dashboard/KPICard";
 import DateFilter from "@/components/dashboard/DateFilter";
@@ -27,6 +27,44 @@ const getDateRange = (range: string) => {
   }
 };
 
+const getPreviousDateRange = (from: Date, to: Date) => {
+  const days = differenceInDays(to, from) + 1;
+  return {
+    from: subDays(from, days),
+    to: subDays(from, 1),
+  };
+};
+
+const calcKpis = (data: any[], salesData: any[]) => {
+  const totalSpent = data.reduce((sum, d) => sum + Number(d.spend || 0), 0);
+  const totalLeads = data.reduce((sum, d) => sum + Number(d.leads || 0), 0);
+  const costPerLead = totalLeads > 0 ? totalSpent / totalLeads : 0;
+  const totalRevenue = salesData.reduce((sum, s) => sum + Number(s.revenue || 0), 0);
+  const totalSales = salesData.reduce((sum, s) => sum + Number(s.sales || 0), 0);
+  const conversionRate = totalLeads > 0 ? (totalSales / totalLeads) * 100 : 0;
+  const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
+  const roi = totalSpent > 0 ? ((totalRevenue - totalSpent) / totalSpent) * 100 : 0;
+  const lucro70 = totalRevenue * 0.7 - totalSpent;
+  const lucro60 = totalRevenue * 0.6 - totalSpent;
+  const lucro50 = totalRevenue * 0.5 - totalSpent;
+  const lucro40 = totalRevenue * 0.4 - totalSpent;
+  const cpa = totalSales > 0 ? totalSpent / totalSales : 0;
+
+  return { totalSpent, totalLeads, costPerLead, cpa, roi, conversionRate, averageTicket, totalSales, totalRevenue, lucro70, lucro60, lucro50, lucro40 };
+};
+
+const calcTrend = (current: number, previous: number, invertColors = false) => {
+  if (previous === 0 && current === 0) return { trend: "0%", trendUp: false, trendNeutral: true };
+  if (previous === 0) return { trend: "+100%", trendUp: !invertColors, trendNeutral: false };
+  const pct = ((current - previous) / Math.abs(previous)) * 100;
+  const isUp = pct > 0;
+  return {
+    trend: `${isUp ? "+" : ""}${pct.toFixed(1)}%`,
+    trendUp: invertColors ? !isUp : isUp,
+    trendNeutral: Math.abs(pct) < 0.5,
+  };
+};
+
 const SkeletonCard = () => (
   <div className="glass-card p-5">
     <div className="flex items-start justify-between mb-3">
@@ -42,6 +80,8 @@ const Index = () => {
   const [customRange, setCustomRange] = useState<{ from: Date; to: Date } | undefined>();
   const [data, setData] = useState<any[]>([]);
   const [salesData, setSalesData] = useState<any[]>([]);
+  const [prevData, setPrevData] = useState<any[]>([]);
+  const [prevSalesData, setPrevSalesData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,12 +101,19 @@ const Index = () => {
           to = dates.to;
         }
 
+        const prev = getPreviousDateRange(from, to);
+
         const fromStr = format(from, "yyyy-MM-dd");
         const toStr = format(to, "yyyy-MM-dd");
+        const prevFromStr = format(prev.from, "yyyy-MM-dd");
+        const prevToStr = format(prev.to, "yyyy-MM-dd");
 
-        const [metricsRes, salesRes] = await Promise.all([
+        const [metricsRes, prevMetricsRes, salesRes] = await Promise.all([
           supabase.functions.invoke("facebookMetrics", {
             body: { from: fromStr, to: toStr },
+          }),
+          supabase.functions.invoke("facebookMetrics", {
+            body: { from: prevFromStr, to: prevToStr },
           }),
           supabase.functions.invoke("salesFromSheet"),
         ]);
@@ -76,15 +123,23 @@ const Index = () => {
         const items = metricsRes.data?.data ?? [];
         setData(Array.isArray(items) ? items : []);
 
+        const prevItems = prevMetricsRes.data?.data ?? [];
+        setPrevData(Array.isArray(prevItems) ? prevItems : []);
+
         // Filter sales by date range
         const allSales = Array.isArray(salesRes.data) ? salesRes.data : [];
         const filtered = allSales.filter((s: any) => s.date >= fromStr && s.date <= toStr);
         setSalesData(filtered);
+
+        const prevFiltered = allSales.filter((s: any) => s.date >= prevFromStr && s.date <= prevToStr);
+        setPrevSalesData(prevFiltered);
       } catch (err: any) {
         console.error("Erro:", err);
         setError(err.message || "Erro inesperado");
         setData([]);
         setSalesData([]);
+        setPrevData([]);
+        setPrevSalesData([]);
       } finally {
         setLoading(false);
       }
@@ -93,24 +148,22 @@ const Index = () => {
     fetchData();
   }, [range, customRange]);
 
-  const kpi = useMemo(() => {
-    const totalSpent = data.reduce((sum, d) => sum + Number(d.spend || 0), 0);
-    const totalLeads = data.reduce((sum, d) => sum + Number(d.leads || 0), 0);
-    const costPerLead = totalLeads > 0 ? totalSpent / totalLeads : 0;
-    const totalRevenue = salesData.reduce((sum, s) => sum + Number(s.revenue || 0), 0);
-    const totalSales = salesData.reduce((sum, s) => sum + Number(s.sales || 0), 0);
-    const conversionRate = totalLeads > 0 ? (totalSales / totalLeads) * 100 : 0;
-    const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
-    const roi = totalSpent > 0 ? ((totalRevenue - totalSpent) / totalSpent) * 100 : 0;
-    const lucro70 = totalRevenue * 0.7 - totalSpent;
-    const lucro60 = totalRevenue * 0.6 - totalSpent;
-    const lucro50 = totalRevenue * 0.5 - totalSpent;
-    const lucro40 = totalRevenue * 0.4 - totalSpent;
+  const kpi = useMemo(() => calcKpis(data, salesData), [data, salesData]);
+  const prevKpi = useMemo(() => calcKpis(prevData, prevSalesData), [prevData, prevSalesData]);
 
-    const cpa = totalSales > 0 ? totalSpent / totalSales : 0;
-
-    return { totalSpent, totalLeads, costPerLead, cpa, roi, conversionRate, averageTicket, totalSales, totalRevenue, lucro70, lucro60, lucro50, lucro40 };
-  }, [data, salesData]);
+  // Metrics where lower is better (invert trend colors)
+  const spentTrend = calcTrend(kpi.totalSpent, prevKpi.totalSpent, true);
+  const leadsTrend = calcTrend(kpi.totalLeads, prevKpi.totalLeads);
+  const cplTrend = calcTrend(kpi.costPerLead, prevKpi.costPerLead, true);
+  const salesTrend = calcTrend(kpi.totalSales, prevKpi.totalSales);
+  const cpaTrend = calcTrend(kpi.cpa, prevKpi.cpa, true);
+  const revenueTrend = calcTrend(kpi.totalRevenue, prevKpi.totalRevenue);
+  const roiTrend = calcTrend(kpi.roi, prevKpi.roi);
+  const convTrend = calcTrend(kpi.conversionRate, prevKpi.conversionRate);
+  const ticketTrend = calcTrend(kpi.averageTicket, prevKpi.averageTicket);
+  const lucro70Trend = calcTrend(kpi.lucro70, prevKpi.lucro70);
+  const lucro60Trend = calcTrend(kpi.lucro60, prevKpi.lucro60);
+  const lucro50Trend = calcTrend(kpi.lucro50, prevKpi.lucro50);
 
   return (
     <div className="min-h-screen bg-background">
@@ -161,40 +214,64 @@ const Index = () => {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
               <div className="animate-fade-in-up" style={{ animationDelay: "0ms" }}>
-                <KPICard title="Valor Gasto" value={`R$ ${fmt(kpi.totalSpent)}`} icon={DollarSign} variant="blue" />
+                <KPICard title="Valor Gasto" value={`R$ ${fmt(kpi.totalSpent)}`} icon={DollarSign} variant="blue"
+                  trend={spentTrend.trend} trendUp={spentTrend.trendUp} trendNeutral={spentTrend.trendNeutral}
+                  previousValue={`R$ ${fmt(prevKpi.totalSpent)}`} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "50ms" }}>
-                <KPICard title="Leads" value={kpi.totalLeads.toLocaleString("pt-BR")} icon={Users} variant="cyan" />
+                <KPICard title="Leads" value={kpi.totalLeads.toLocaleString("pt-BR")} icon={Users} variant="cyan"
+                  trend={leadsTrend.trend} trendUp={leadsTrend.trendUp} trendNeutral={leadsTrend.trendNeutral}
+                  previousValue={prevKpi.totalLeads.toLocaleString("pt-BR")} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "100ms" }}>
-                <KPICard title="Custo / Lead" value={`R$ ${fmt(kpi.costPerLead)}`} icon={Target} variant="orange" />
+                <KPICard title="Custo / Lead" value={`R$ ${fmt(kpi.costPerLead)}`} icon={Target} variant="orange"
+                  trend={cplTrend.trend} trendUp={cplTrend.trendUp} trendNeutral={cplTrend.trendNeutral}
+                  previousValue={`R$ ${fmt(prevKpi.costPerLead)}`} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "150ms" }}>
-                <KPICard title="Vendas" value={kpi.totalSales.toLocaleString("pt-BR")} icon={Receipt} variant="purple" />
+                <KPICard title="Vendas" value={kpi.totalSales.toLocaleString("pt-BR")} icon={Receipt} variant="purple"
+                  trend={salesTrend.trend} trendUp={salesTrend.trendUp} trendNeutral={salesTrend.trendNeutral}
+                  previousValue={prevKpi.totalSales.toLocaleString("pt-BR")} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "175ms" }}>
-                <KPICard title="CPA" value={`R$ ${fmt(kpi.cpa)}`} icon={Target} variant="orange" />
+                <KPICard title="CPA" value={`R$ ${fmt(kpi.cpa)}`} icon={Target} variant="orange"
+                  trend={cpaTrend.trend} trendUp={cpaTrend.trendUp} trendNeutral={cpaTrend.trendNeutral}
+                  previousValue={`R$ ${fmt(prevKpi.cpa)}`} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-                <KPICard title="Faturamento" value={`R$ ${fmt(kpi.totalRevenue)}`} icon={Wallet} variant="green" />
+                <KPICard title="Faturamento" value={`R$ ${fmt(kpi.totalRevenue)}`} icon={Wallet} variant="green"
+                  trend={revenueTrend.trend} trendUp={revenueTrend.trendUp} trendNeutral={revenueTrend.trendNeutral}
+                  previousValue={`R$ ${fmt(prevKpi.totalRevenue)}`} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "250ms" }}>
-                <KPICard title="ROI" value={`${fmt(kpi.roi)}%`} icon={Percent} variant="green" />
+                <KPICard title="ROI" value={`${fmt(kpi.roi)}%`} icon={Percent} variant="green"
+                  trend={roiTrend.trend} trendUp={roiTrend.trendUp} trendNeutral={roiTrend.trendNeutral}
+                  previousValue={`${fmt(prevKpi.roi)}%`} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
-                <KPICard title="Tx. Conversão" value={`${fmt(kpi.conversionRate)}%`} icon={TrendingUp} variant="cyan" />
+                <KPICard title="Tx. Conversão" value={`${fmt(kpi.conversionRate)}%`} icon={TrendingUp} variant="cyan"
+                  trend={convTrend.trend} trendUp={convTrend.trendUp} trendNeutral={convTrend.trendNeutral}
+                  previousValue={`${fmt(prevKpi.conversionRate)}%`} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "350ms" }}>
-                <KPICard title="Ticket Médio" value={`R$ ${fmt(kpi.averageTicket)}`} icon={Receipt} variant="blue" />
+                <KPICard title="Ticket Médio" value={`R$ ${fmt(kpi.averageTicket)}`} icon={Receipt} variant="blue"
+                  trend={ticketTrend.trend} trendUp={ticketTrend.trendUp} trendNeutral={ticketTrend.trendNeutral}
+                  previousValue={`R$ ${fmt(prevKpi.averageTicket)}`} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "400ms" }}>
-                <KPICard title="Lucro 70%" value={`R$ ${fmt(kpi.lucro70)}`} icon={Wallet} variant="green" />
+                <KPICard title="Lucro 70%" value={`R$ ${fmt(kpi.lucro70)}`} icon={Wallet} variant="green"
+                  trend={lucro70Trend.trend} trendUp={lucro70Trend.trendUp} trendNeutral={lucro70Trend.trendNeutral}
+                  previousValue={`R$ ${fmt(prevKpi.lucro70)}`} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "450ms" }}>
-                <KPICard title="Lucro 60%" value={`R$ ${fmt(kpi.lucro60)}`} icon={Wallet} variant="green" />
+                <KPICard title="Lucro 60%" value={`R$ ${fmt(kpi.lucro60)}`} icon={Wallet} variant="green"
+                  trend={lucro60Trend.trend} trendUp={lucro60Trend.trendUp} trendNeutral={lucro60Trend.trendNeutral}
+                  previousValue={`R$ ${fmt(prevKpi.lucro60)}`} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "500ms" }}>
-                <KPICard title="Lucro 50%" value={`R$ ${fmt(kpi.lucro50)}`} icon={Wallet} variant="orange" />
+                <KPICard title="Lucro 50%" value={`R$ ${fmt(kpi.lucro50)}`} icon={Wallet} variant="orange"
+                  trend={lucro50Trend.trend} trendUp={lucro50Trend.trendUp} trendNeutral={lucro50Trend.trendNeutral}
+                  previousValue={`R$ ${fmt(prevKpi.lucro50)}`} />
               </div>
             </div>
           )}

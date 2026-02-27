@@ -1,4 +1,4 @@
-import { LucideIcon } from "lucide-react";
+import { LucideIcon, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface KPICardProps {
   title: string;
@@ -6,6 +6,8 @@ interface KPICardProps {
   icon: LucideIcon;
   trend?: string;
   trendUp?: boolean;
+  trendNeutral?: boolean;
+  previousValue?: string;
   variant?: "blue" | "green" | "orange" | "purple" | "cyan" | "default";
 }
 
@@ -48,7 +50,7 @@ const variantStyles: Record<string, { glow: string; iconBg: string; iconColor: s
   },
 };
 
-const KPICard = ({ title, value, icon: Icon, trend, trendUp, variant = "default" }: KPICardProps) => {
+const KPICard = ({ title, value, icon: Icon, trend, trendUp, trendNeutral, previousValue, variant = "default" }: KPICardProps) => {
   const style = variantStyles[variant] ?? variantStyles.default;
 
   return (
@@ -68,11 +70,30 @@ const KPICard = ({ title, value, icon: Icon, trend, trendUp, variant = "default"
       <p className="text-2xl font-display font-bold tracking-tight leading-none">{value}</p>
 
       {trend && (
-        <div className="flex items-center gap-1.5 mt-3">
-          <span className={`text-xs font-semibold ${trendUp ? "text-profit" : "text-loss"}`}>
-            {trendUp ? "↑" : "↓"} {trend}
-          </span>
-          <span className="text-[10px] text-muted-foreground">vs anterior</span>
+        <div className="flex items-center gap-2 mt-3">
+          <div
+            className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+              trendNeutral
+                ? "bg-muted/50 text-muted-foreground"
+                : trendUp
+                ? "bg-profit/10 text-profit"
+                : "bg-loss/10 text-loss"
+            }`}
+          >
+            {trendNeutral ? (
+              <Minus className="h-3 w-3" />
+            ) : trendUp ? (
+              <TrendingUp className="h-3 w-3" />
+            ) : (
+              <TrendingDown className="h-3 w-3" />
+            )}
+            {trend}
+          </div>
+          {previousValue && (
+            <span className="text-[10px] text-muted-foreground truncate">
+              ant: {previousValue}
+            </span>
+          )}
         </div>
       )}
     </div>
