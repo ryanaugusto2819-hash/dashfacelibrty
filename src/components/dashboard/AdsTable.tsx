@@ -38,6 +38,8 @@ const AdsTable = ({ ads }: AdsTableProps) => {
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">CPA</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Leads</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Vendas</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Faturamento</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">ROI</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Tx Conv.</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Ticket Médio</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Lucro 70%</TableHead>
@@ -75,6 +77,12 @@ const AdsTable = ({ ads }: AdsTableProps) => {
                 <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.cpa)}</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">{ad.leads}</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">{ad.sales}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums font-medium">R$ {fmt(ad.revenue)}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">
+                  <span className={((ad.revenue - ad.spent) / ad.spent * 100) > 0 ? "text-profit" : "text-loss"}>
+                    {fmt((ad.revenue - ad.spent) / ad.spent * 100)}%
+                  </span>
+                </TableCell>
                 <TableCell className="text-right text-sm tabular-nums">{fmt(ad.conversionRate)}%</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.averageTicket)}</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
