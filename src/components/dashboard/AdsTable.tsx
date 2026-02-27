@@ -17,8 +17,8 @@ const fmt = (n: number | null | undefined) => {
   return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
-const th = "text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right";
-const td = "text-right text-sm tabular-nums";
+const th = "text-muted-foreground text-[10px] font-semibold uppercase tracking-widest text-right whitespace-nowrap px-3 py-3";
+const td = "text-right text-sm tabular-nums px-3 py-3 whitespace-nowrap";
 
 const AdsTable = ({ ads }: AdsTableProps) => {
   if (!ads || ads.length === 0) {
@@ -31,14 +31,14 @@ const AdsTable = ({ ads }: AdsTableProps) => {
 
   return (
     <div className="glass-card overflow-hidden">
-      <div className="p-5 border-b border-border/50">
+      <div className="p-6 border-b border-border/30">
         <h2 className="text-lg font-display font-semibold">Métricas por Anúncio</h2>
-        <p className="text-xs text-muted-foreground mt-1">Performance individual de cada criativo</p>
+        <p className="text-[11px] text-muted-foreground mt-1 tracking-wide">Performance individual de cada criativo</p>
       </div>
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="border-border/30 hover:bg-transparent">
+            <TableRow className="border-border/20 hover:bg-transparent bg-secondary/20">
               <TableHead className={`${th} min-w-[200px] text-left`}>Anúncio</TableHead>
               <TableHead className={th}>Status</TableHead>
               <TableHead className={th}>Gasto</TableHead>
@@ -77,8 +77,8 @@ const AdsTable = ({ ads }: AdsTableProps) => {
               const lucro40 = revenue * 0.4 - spend;
 
               return (
-                <TableRow key={ad.ad_id || ad.id || i} className="border-border/20 hover:bg-secondary/30 transition-colors">
-                  <TableCell className="font-medium text-sm">{ad.ad_name || ad.name || "—"}</TableCell>
+                <TableRow key={ad.ad_id || ad.id || i} className="border-border/10 hover:bg-secondary/40 transition-colors even:bg-secondary/10">
+                  <TableCell className="font-medium text-sm px-3 py-3 whitespace-nowrap">{ad.ad_name || ad.name || "—"}</TableCell>
                   <TableCell className={td}>
                     <Badge
                       variant={ad.status === "active" ? "default" : "secondary"}
