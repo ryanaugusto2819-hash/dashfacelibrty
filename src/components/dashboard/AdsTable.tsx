@@ -60,13 +60,13 @@ const AdsTable = ({ ads }: AdsTableProps) => {
                     {ad.status === "active" ? "Ativo" : "Pausado"}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.spent)}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">R${fmt(ad.spent)}</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">{ad.sales}</TableCell>
-                <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.cpa)}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">R${fmt(ad.cpa)}</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">{ad.leads}</TableCell>
-                <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.cpl)}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">R${fmt(ad.cpl)}</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">{fmt(ad.conversionRate)}%</TableCell>
-                <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.averageTicket)}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">R${fmt(ad.averageTicket)}</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
                   <span className={ad.bodyRate >= 30 ? "text-profit" : ad.bodyRate >= 20 ? "text-warning" : "text-loss"}>
                     {fmt(ad.bodyRate)}%
@@ -78,8 +78,8 @@ const AdsTable = ({ ads }: AdsTableProps) => {
                   </span>
                 </TableCell>
                 <TableCell className="text-right text-sm tabular-nums">{fmt(ad.ctr)}%</TableCell>
-                <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.cpm)}</TableCell>
-                <TableCell className="text-right text-sm tabular-nums font-medium">R$ {fmt(ad.revenue)}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">R${fmt(ad.cpm)}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums font-medium">R${fmt(ad.revenue)}</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
                   <span className={((ad.revenue - ad.spent) / ad.spent * 100) > 0 ? "text-profit" : "text-loss"}>
                     {fmt((ad.revenue - ad.spent) / ad.spent * 100)}%
@@ -87,22 +87,22 @@ const AdsTable = ({ ads }: AdsTableProps) => {
                 </TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
                   <span className={ad.revenue * 0.7 - ad.spent > 0 ? "text-profit" : "text-loss"}>
-                    R$ {fmt(ad.revenue * 0.7 - ad.spent)}
+                    R${fmt(ad.revenue * 0.7 - ad.spent)}
                   </span>
                 </TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
                   <span className={ad.revenue * 0.6 - ad.spent > 0 ? "text-profit" : "text-loss"}>
-                    R$ {fmt(ad.revenue * 0.6 - ad.spent)}
+                    R${fmt(ad.revenue * 0.6 - ad.spent)}
                   </span>
                 </TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
                   <span className={ad.revenue * 0.5 - ad.spent > 0 ? "text-profit" : "text-loss"}>
-                    R$ {fmt(ad.revenue * 0.5 - ad.spent)}
+                    R${fmt(ad.revenue * 0.5 - ad.spent)}
                   </span>
                 </TableCell>
                 <TableCell className="text-right text-sm tabular-nums">
                   <span className={ad.revenue * 0.4 - ad.spent > 0 ? "text-profit" : "text-loss"}>
-                    R$ {fmt(ad.revenue * 0.4 - ad.spent)}
+                    R${fmt(ad.revenue * 0.4 - ad.spent)}
                   </span>
                 </TableCell>
               </TableRow>
