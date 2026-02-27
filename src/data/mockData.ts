@@ -27,6 +27,9 @@ export interface AdMetric {
   cpa: number;
   leads: number;
   sales: number;
+  conversionRate: number;
+  averageTicket: number;
+  revenue: number;
 }
 
 export interface DailyData {
@@ -73,14 +76,14 @@ export const kpiDataByRange: Record<string, KPIData> = {
 };
 
 export const adsMetrics: AdMetric[] = [
-  { id: "1", name: "Criativo VSL - Dor Principal", status: "active", spent: 4520.30, impressions: 245000, clicks: 7350, cpm: 18.45, ctr: 3.0, hookRate: 42.5, bodyRate: 28.3, cpl: 24.80, cpa: 112.50, leads: 182, sales: 40 },
-  { id: "2", name: "Carrossel - Prova Social", status: "active", spent: 3890.15, impressions: 198000, clicks: 5940, cpm: 19.65, ctr: 3.0, hookRate: 38.2, bodyRate: 25.1, cpl: 28.40, cpa: 138.90, leads: 137, sales: 28 },
-  { id: "3", name: "Story - Depoimento Ana", status: "active", spent: 2780.00, impressions: 165000, clicks: 5445, cpm: 16.85, ctr: 3.3, hookRate: 45.8, bodyRate: 31.2, cpl: 22.10, cpa: 105.40, leads: 126, sales: 26 },
-  { id: "4", name: "Reels - Antes e Depois", status: "active", spent: 5120.80, impressions: 312000, clicks: 9360, cpm: 16.41, ctr: 3.0, hookRate: 51.2, bodyRate: 33.7, cpl: 21.50, cpa: 98.50, leads: 238, sales: 52 },
-  { id: "5", name: "Imagem - Oferta Relâmpago", status: "paused", spent: 1890.45, impressions: 95000, clicks: 2375, cpm: 19.90, ctr: 2.5, hookRate: 28.4, bodyRate: 18.9, cpl: 35.60, cpa: 189.00, leads: 53, sales: 10 },
-  { id: "6", name: "VSL Curto - Urgência", status: "active", spent: 3450.20, impressions: 201000, clicks: 6633, cpm: 17.16, ctr: 3.3, hookRate: 47.1, bodyRate: 30.8, cpl: 23.90, cpa: 115.00, leads: 144, sales: 30 },
-  { id: "7", name: "Criativo UGC - Maria", status: "active", spent: 4210.60, impressions: 278000, clicks: 8896, cpm: 15.15, ctr: 3.2, hookRate: 52.3, bodyRate: 35.1, cpl: 20.80, cpa: 93.50, leads: 202, sales: 45 },
-  { id: "8", name: "Estático - Benefícios", status: "paused", spent: 980.50, impressions: 52000, clicks: 1040, cpm: 18.86, ctr: 2.0, hookRate: 22.1, bodyRate: 14.5, cpl: 42.60, cpa: 245.10, leads: 23, sales: 4 },
+  { id: "1", name: "Criativo VSL - Dor Principal", status: "active", spent: 4520.30, impressions: 245000, clicks: 7350, cpm: 18.45, ctr: 3.0, hookRate: 42.5, bodyRate: 28.3, cpl: 24.80, cpa: 112.50, leads: 182, sales: 40, conversionRate: 22.0, averageTicket: 897.00, revenue: 35880 },
+  { id: "2", name: "Carrossel - Prova Social", status: "active", spent: 3890.15, impressions: 198000, clicks: 5940, cpm: 19.65, ctr: 3.0, hookRate: 38.2, bodyRate: 25.1, cpl: 28.40, cpa: 138.90, leads: 137, sales: 28, conversionRate: 20.4, averageTicket: 881.50, revenue: 24682 },
+  { id: "3", name: "Story - Depoimento Ana", status: "active", spent: 2780.00, impressions: 165000, clicks: 5445, cpm: 16.85, ctr: 3.3, hookRate: 45.8, bodyRate: 31.2, cpl: 22.10, cpa: 105.40, leads: 126, sales: 26, conversionRate: 20.6, averageTicket: 850.00, revenue: 22100 },
+  { id: "4", name: "Reels - Antes e Depois", status: "active", spent: 5120.80, impressions: 312000, clicks: 9360, cpm: 16.41, ctr: 3.0, hookRate: 51.2, bodyRate: 33.7, cpl: 21.50, cpa: 98.50, leads: 238, sales: 52, conversionRate: 21.8, averageTicket: 920.00, revenue: 47840 },
+  { id: "5", name: "Imagem - Oferta Relâmpago", status: "paused", spent: 1890.45, impressions: 95000, clicks: 2375, cpm: 19.90, ctr: 2.5, hookRate: 28.4, bodyRate: 18.9, cpl: 35.60, cpa: 189.00, leads: 53, sales: 10, conversionRate: 18.9, averageTicket: 750.00, revenue: 7500 },
+  { id: "6", name: "VSL Curto - Urgência", status: "active", spent: 3450.20, impressions: 201000, clicks: 6633, cpm: 17.16, ctr: 3.3, hookRate: 47.1, bodyRate: 30.8, cpl: 23.90, cpa: 115.00, leads: 144, sales: 30, conversionRate: 20.8, averageTicket: 865.00, revenue: 25950 },
+  { id: "7", name: "Criativo UGC - Maria", status: "active", spent: 4210.60, impressions: 278000, clicks: 8896, cpm: 15.15, ctr: 3.2, hookRate: 52.3, bodyRate: 35.1, cpl: 20.80, cpa: 93.50, leads: 202, sales: 45, conversionRate: 22.3, averageTicket: 910.00, revenue: 40950 },
+  { id: "8", name: "Estático - Benefícios", status: "paused", spent: 980.50, impressions: 52000, clicks: 1040, cpm: 18.86, ctr: 2.0, hookRate: 22.1, bodyRate: 14.5, cpl: 42.60, cpa: 245.10, leads: 23, sales: 4, conversionRate: 17.4, averageTicket: 680.00, revenue: 2720 },
 ];
 
 export const dailyData: DailyData[] = Array.from({ length: 30 }, (_, i) => {
