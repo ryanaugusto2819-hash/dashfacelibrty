@@ -8,6 +8,8 @@ export interface KPIData {
   totalRevenue: number;
   totalSales: number;
   roi: number;
+  conversionRate: number;
+  averageTicket: number;
 }
 
 export interface AdMetric {
@@ -43,6 +45,8 @@ export const kpiDataByRange: Record<string, KPIData> = {
     totalRevenue: 8970.00,
     totalSales: 10,
     roi: 619.6,
+    conversionRate: 21.3,
+    averageTicket: 897.00,
   },
   "7days": {
     totalSpent: 8721.45,
@@ -52,6 +56,8 @@ export const kpiDataByRange: Record<string, KPIData> = {
     totalRevenue: 52890.00,
     totalSales: 60,
     roi: 506.4,
+    conversionRate: 19.2,
+    averageTicket: 881.50,
   },
   "30days": {
     totalSpent: 34580.20,
@@ -61,6 +67,8 @@ export const kpiDataByRange: Record<string, KPIData> = {
     totalRevenue: 198450.00,
     totalSales: 250,
     roi: 473.8,
+    conversionRate: 20.0,
+    averageTicket: 793.80,
   },
 };
 
