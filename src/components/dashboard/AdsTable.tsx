@@ -38,6 +38,12 @@ const AdsTable = ({ ads }: AdsTableProps) => {
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">CPA</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Leads</TableHead>
               <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Vendas</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Tx Conv.</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Ticket Médio</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Lucro 70%</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Lucro 60%</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Lucro 50%</TableHead>
+              <TableHead className="text-muted-foreground text-xs font-semibold uppercase tracking-wider text-right">Lucro 40%</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -69,6 +75,28 @@ const AdsTable = ({ ads }: AdsTableProps) => {
                 <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.cpa)}</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">{ad.leads}</TableCell>
                 <TableCell className="text-right text-sm tabular-nums">{ad.sales}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">{fmt(ad.conversionRate)}%</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">R$ {fmt(ad.averageTicket)}</TableCell>
+                <TableCell className="text-right text-sm tabular-nums">
+                  <span className={ad.revenue * 0.7 - ad.spent > 0 ? "text-profit" : "text-loss"}>
+                    R$ {fmt(ad.revenue * 0.7 - ad.spent)}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right text-sm tabular-nums">
+                  <span className={ad.revenue * 0.6 - ad.spent > 0 ? "text-profit" : "text-loss"}>
+                    R$ {fmt(ad.revenue * 0.6 - ad.spent)}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right text-sm tabular-nums">
+                  <span className={ad.revenue * 0.5 - ad.spent > 0 ? "text-profit" : "text-loss"}>
+                    R$ {fmt(ad.revenue * 0.5 - ad.spent)}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right text-sm tabular-nums">
+                  <span className={ad.revenue * 0.4 - ad.spent > 0 ? "text-profit" : "text-loss"}>
+                    R$ {fmt(ad.revenue * 0.4 - ad.spent)}
+                  </span>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
