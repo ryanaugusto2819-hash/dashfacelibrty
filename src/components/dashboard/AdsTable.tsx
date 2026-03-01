@@ -170,7 +170,7 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
                 const spend = ad.spend ?? ad.spent ?? 0;
                 const leads = ad.leads ?? 0;
                 const sales = matchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);
-                const revenue = matchedSales.reduce((sum, s) => sum + Number(s.revenue || 0), 0);
+                const revenue = matchedSales.reduce((sum, s) => sum + Number(s.revenue || 0), 0) / 7.49;
                 const cpl = ad.costPerLead ?? ad.cpl ?? (leads > 0 ? spend / leads : 0);
                 const cpa = ad.cpa ?? (sales > 0 ? spend / sales : 0);
                 const convRate = leads > 0 ? (sales / leads) * 100 : 0;

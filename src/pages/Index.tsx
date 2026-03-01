@@ -35,11 +35,14 @@ const getPreviousDateRange = (from: Date, to: Date) => {
   };
 };
 
+const UYU_TO_BRL = 7.49; // Cotação Peso Uruguaio → Real
+
 const calcKpis = (data: any[], salesData: any[]) => {
   const totalSpent = data.reduce((sum, d) => sum + Number(d.spend || 0), 0);
   const totalLeads = data.reduce((sum, d) => sum + Number(d.leads || 0), 0);
   const costPerLead = totalLeads > 0 ? totalSpent / totalLeads : 0;
-  const totalRevenue = salesData.reduce((sum, s) => sum + Number(s.revenue || 0), 0);
+  const totalRevenueRaw = salesData.reduce((sum, s) => sum + Number(s.revenue || 0), 0);
+  const totalRevenue = totalRevenueRaw / UYU_TO_BRL;
   const totalSales = salesData.reduce((sum, s) => sum + Number(s.sales || 0), 0);
   const conversionRate = totalLeads > 0 ? (totalSales / totalLeads) * 100 : 0;
   const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
