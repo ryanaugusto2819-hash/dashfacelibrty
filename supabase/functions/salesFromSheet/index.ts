@@ -16,9 +16,13 @@ interface SheetSale {
 async function getAccessToken(serviceAccountKey: string): Promise<string> {
   const key = JSON.parse(serviceAccountKey);
 
-  const header = btoa(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  function toBase64Url(str: string): string {
+    return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+
+  const headerB64 = toBase64Url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const now = Math.floor(Date.now() / 1000);
-  const claimSet = btoa(
+  const claimSetB64 = toBase64Url(
     JSON.stringify({
       iss: key.client_email,
       scope: "https://www.googleapis.com/auth/spreadsheets.readonly",
@@ -28,14 +32,14 @@ async function getAccessToken(serviceAccountKey: string): Promise<string> {
     })
   );
 
-  const unsignedToken = `${header}.${claimSet}`;
+  const unsignedToken = `${headerB64}.${claimSetB64}`;
 
   // Import the private key
   const pemContents = key.private_key
     .replace(/-----BEGIN PRIVATE KEY-----/, "")
     .replace(/-----END PRIVATE KEY-----/, "")
     .replace(/\n/g, "");
-  const binaryKey = Uint8Array.from(atob(pemContents), (c) => c.charCodeAt(0));
+  const binaryKey = Uint8Array.from(atob(pemContents), (c: string) => c.charCodeAt(0));
 
   const cryptoKey = await crypto.subtle.importKey(
     "pkcs8",
@@ -51,12 +55,9 @@ async function getAccessToken(serviceAccountKey: string): Promise<string> {
     new TextEncoder().encode(unsignedToken)
   );
 
-  const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+  const signatureB64 = toBase64Url(String.fromCharCode(...new Uint8Array(signature)));
 
-  const jwt = `${header.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")}.${claimSet.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")}.${signatureBase64}`;
+  const jwt = `${headerB64}.${claimSetB64}.${signatureB64}`;
 
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
