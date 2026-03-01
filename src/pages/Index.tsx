@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { DollarSign, Users, Target, BarChart3, Percent, TrendingUp, Receipt, Wallet, Activity, RefreshCw, Eye, EyeOff } from "lucide-react";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { DollarSign, Users, Target, BarChart3, Percent, TrendingUp, Receipt, Wallet, Activity, RefreshCw, Eye, EyeOff, Clock } from "lucide-react";
 import { format, subDays, differenceInDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import KPICard from "@/components/dashboard/KPICard";
@@ -85,6 +85,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hideValues, setHideValues] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   const fetchData = async () => {
     try {
@@ -142,6 +143,7 @@ const Index = () => {
       setPrevSalesData([]);
     } finally {
       setLoading(false);
+      setLastUpdate(new Date());
     }
   };
 
@@ -184,6 +186,12 @@ const Index = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            {lastUpdate && (
+              <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                Atualizado às {lastUpdate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+              </span>
+            )}
             {loading && (
               <RefreshCw className="h-4 w-4 text-primary animate-spin" />
             )}
