@@ -86,67 +86,69 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   const [hideValues, setHideValues] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        let from: Date, to: Date;
-        if (range === "custom" && customRange) {
-          from = customRange.from;
-          to = customRange.to;
-        } else {
-          const dates = getDateRange(range);
-          from = dates.from;
-          to = dates.to;
-        }
-
-        const prev = getPreviousDateRange(from, to);
-
-        const fromStr = format(from, "yyyy-MM-dd");
-        const toStr = format(to, "yyyy-MM-dd");
-        const prevFromStr = format(prev.from, "yyyy-MM-dd");
-        const prevToStr = format(prev.to, "yyyy-MM-dd");
-
-        const [metricsRes, prevMetricsRes, salesRes] = await Promise.all([
-          supabase.functions.invoke("facebookMetrics", {
-            body: { from: fromStr, to: toStr },
-          }),
-          supabase.functions.invoke("facebookMetrics", {
-            body: { from: prevFromStr, to: prevToStr },
-          }),
-          supabase.functions.invoke("salesFromSheet"),
-        ]);
-
-        if (metricsRes.error) throw new Error("Erro ao buscar métricas");
-
-        const items = metricsRes.data?.data ?? [];
-        setData(Array.isArray(items) ? items : []);
-
-        const prevItems = prevMetricsRes.data?.data ?? [];
-        setPrevData(Array.isArray(prevItems) ? prevItems : []);
-
-        // Filter sales by date range
-        const allSales = Array.isArray(salesRes.data) ? salesRes.data : [];
-        const filtered = allSales.filter((s: any) => s.date >= fromStr && s.date <= toStr);
-        setSalesData(filtered);
-
-        const prevFiltered = allSales.filter((s: any) => s.date >= prevFromStr && s.date <= prevToStr);
-        setPrevSalesData(prevFiltered);
-      } catch (err: any) {
-        console.error("Erro:", err);
-        setError(err.message || "Erro inesperado");
-        setData([]);
-        setSalesData([]);
-        setPrevData([]);
-        setPrevSalesData([]);
-      } finally {
-        setLoading(false);
+      let from: Date, to: Date;
+      if (range === "custom" && customRange) {
+        from = customRange.from;
+        to = customRange.to;
+      } else {
+        const dates = getDateRange(range);
+        from = dates.from;
+        to = dates.to;
       }
-    };
 
+      const prev = getPreviousDateRange(from, to);
+
+      const fromStr = format(from, "yyyy-MM-dd");
+      const toStr = format(to, "yyyy-MM-dd");
+      const prevFromStr = format(prev.from, "yyyy-MM-dd");
+      const prevToStr = format(prev.to, "yyyy-MM-dd");
+
+      const [metricsRes, prevMetricsRes, salesRes] = await Promise.all([
+        supabase.functions.invoke("facebookMetrics", {
+          body: { from: fromStr, to: toStr },
+        }),
+        supabase.functions.invoke("facebookMetrics", {
+          body: { from: prevFromStr, to: prevToStr },
+        }),
+        supabase.functions.invoke("salesFromSheet"),
+      ]);
+
+      if (metricsRes.error) throw new Error("Erro ao buscar métricas");
+
+      const items = metricsRes.data?.data ?? [];
+      setData(Array.isArray(items) ? items : []);
+
+      const prevItems = prevMetricsRes.data?.data ?? [];
+      setPrevData(Array.isArray(prevItems) ? prevItems : []);
+
+      // Filter sales by date range
+      const allSales = Array.isArray(salesRes.data) ? salesRes.data : [];
+      const filtered = allSales.filter((s: any) => s.date >= fromStr && s.date <= toStr);
+      setSalesData(filtered);
+
+      const prevFiltered = allSales.filter((s: any) => s.date >= prevFromStr && s.date <= prevToStr);
+      setPrevSalesData(prevFiltered);
+    } catch (err: any) {
+      console.error("Erro:", err);
+      setError(err.message || "Erro inesperado");
+      setData([]);
+      setSalesData([]);
+      setPrevData([]);
+      setPrevSalesData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
+    const interval = setInterval(fetchData, 60_000); // Atualiza a cada 1 minuto
+    return () => clearInterval(interval);
   }, [range, customRange]);
 
   const kpi = useMemo(() => calcKpis(data, salesData), [data, salesData]);
