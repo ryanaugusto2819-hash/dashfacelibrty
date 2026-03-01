@@ -149,8 +149,6 @@ const Index = () => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 60_000); // Atualiza a cada 1 minuto
-    return () => clearInterval(interval);
   }, [range, customRange]);
 
   const kpi = useMemo(() => calcKpis(data, salesData), [data, salesData]);
@@ -192,9 +190,14 @@ const Index = () => {
                 Atualizado às {lastUpdate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
               </span>
             )}
-            {loading && (
-              <RefreshCw className="h-4 w-4 text-primary animate-spin" />
-            )}
+            <button
+              onClick={fetchData}
+              disabled={loading}
+              className="p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
+              title="Atualizar dados"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            </button>
             <button
               onClick={() => setHideValues((v) => !v)}
               className="p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
