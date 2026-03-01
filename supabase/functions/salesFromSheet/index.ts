@@ -93,8 +93,8 @@ serve(async (req) => {
 
     const accessToken = await getAccessToken(serviceAccountKey);
 
-    // Fetch all rows from the first sheet (adjust range as needed)
-    const range = "A:D";
+    // Fetch all rows from the first sheet
+    const range = "A:T";
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}`;
 
     const res = await fetch(url, {
@@ -117,12 +117,15 @@ serve(async (req) => {
       });
     }
 
-    // Skip header row, map columns: date | creative | sales | revenue
+    // Columns: A=pedido_id, B=nome, C=telefone, D=cedula, E=produto, F=quantidade(5), G=valor(6),
+    // H=cidade, I=departamento, J=codigo_rastreamento, K=status_pagamento, L=data_criacao(11),
+    // M=data_envio, N=data_pagamento, O=hora_pagamento, P=comprovante_url, Q=vendedor,
+    // R=ultima_atualizacao, S=Criativo(18), T=status_envios
     const data: SheetSale[] = rows.slice(1).map((row) => ({
-      date: row[0] || "",
-      creative: row[1] || "",
-      sales: parseInt(row[2]) || 0,
-      revenue: parseFloat(row[3]) || 0,
+      date: row[11] || "",
+      creative: row[18] || "",
+      sales: parseInt(row[5]) || 0,
+      revenue: parseFloat(row[6]) || 0,
     }));
 
     return new Response(JSON.stringify(data), {
