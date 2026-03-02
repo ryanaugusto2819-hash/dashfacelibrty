@@ -79,7 +79,7 @@ const SkeletonCard = () => (
 );
 
 const Index = () => {
-  const [range, setRange] = useState("30days");
+  const [range, setRange] = useState("today");
   const [customRange, setCustomRange] = useState<{ from: Date; to: Date } | undefined>();
   const [data, setData] = useState<any[]>([]);
   const [salesData, setSalesData] = useState<any[]>([]);
