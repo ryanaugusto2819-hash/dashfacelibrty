@@ -163,10 +163,13 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
             <TableBody>
               {ads.map((ad, i) => {
                 const adName = ad.ad_name || ad.name || "";
-                const matchedSales = salesData.filter(s =>
-                  adName.toLowerCase().includes(s.creative.toLowerCase()) ||
-                  s.creative.toLowerCase().includes(adName.toLowerCase())
-                );
+                const matchedSales = salesData.filter(s => {
+                  if (!s.creative || !adName) return false;
+                  const c = s.creative.toLowerCase().trim();
+                  const a = adName.toLowerCase().trim();
+                  if (!c || !a) return false;
+                  return a.includes(c) || c.includes(a);
+                });
                 const spend = ad.spend ?? ad.spent ?? 0;
                 const leads = ad.leads ?? 0;
                 const sales = matchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);
