@@ -15,7 +15,10 @@ const fmt = (n: number) =>
 
 const getDateRange = (range: string) => {
   const today = new Date();
+  const yesterday = subDays(today, 1);
   switch (range) {
+    case "yesterday":
+      return { from: yesterday, to: yesterday };
     case "7days":
       return { from: subDays(today, 6), to: today };
     case "30days":
