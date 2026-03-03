@@ -21,6 +21,7 @@ interface DateFilterProps {
 
 const presets = [
   { value: "today", label: "Hoje" },
+  { value: "yesterday", label: "Ontem" },
   { value: "7days", label: "Últimos 7 dias" },
   { value: "30days", label: "Últimos 30 dias" },
 ];
