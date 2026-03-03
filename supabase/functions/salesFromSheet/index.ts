@@ -125,7 +125,7 @@ serve(async (req) => {
     const data: SheetSale[] = rows.slice(1).map((row) => ({
       date: row[11] || "",
       creative: row[18] || "",
-      sales: parseInt(row[5]) || 0,
+      sales: 1, // Cada linha = 1 venda
       revenue: parseFloat(row[6]) || 0,
     }));
 
