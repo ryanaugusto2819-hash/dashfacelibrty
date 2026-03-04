@@ -286,6 +286,43 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
                   </TableRow>
                 );
               })}
+              {/* Unmatched sales row */}
+              {(() => {
+                const adNames = ads.map(ad => (ad.ad_name || ad.name || "").toLowerCase().trim()).filter(Boolean);
+                const unmatchedSales = salesData.filter(s => {
+                  if (!s.creative) return true;
+                  const c = s.creative.toLowerCase().trim();
+                  if (!c || c === "sem criativo" || c === "não identificado") return true;
+                  return !adNames.includes(c);
+                });
+                const uSales = unmatchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);
+                const uRevenue = unmatchedSales.reduce((sum, s) => sum + Number(s.revenue || 0), 0) / 7.49;
+                if (uSales === 0) return null;
+                return (
+                  <TableRow className="border-border/10 hover:bg-secondary/40 transition-colors bg-muted/30">
+                    <TableCell className="font-medium text-sm px-3 py-3 whitespace-nowrap italic text-muted-foreground">Sem criativo</TableCell>
+                    <TableCell className={td}><Badge variant="secondary" className="bg-muted text-muted-foreground border-0 text-xs">—</Badge></TableCell>
+                    <TableCell className={td}>R$0,00</TableCell>
+                    <TableCell className={td}>{uSales.toLocaleString("pt-BR")}</TableCell>
+                    <TableCell className={td}>—</TableCell>
+                    <TableCell className={td}>—</TableCell>
+                    <TableCell className={td}>—</TableCell>
+                    <TableCell className={td}>—</TableCell>
+                    <TableCell className={td}>R${fmt(uSales > 0 ? uRevenue / uSales : 0)}</TableCell>
+                    <TableCell className={td}>—</TableCell>
+                    <TableCell className={td}>—</TableCell>
+                    <TableCell className={td}>—</TableCell>
+                    <TableCell className={td}>—</TableCell>
+                    <TableCell className={td}>R${fmt(uRevenue)}</TableCell>
+                    <TableCell className={td}>—</TableCell>
+                    <TableCell className={td}>—</TableCell>
+                    <TableCell className={td}>—</TableCell>
+                    <TableCell className={td}>—</TableCell>
+                    <TableCell className={td}>—</TableCell>
+                    <TableCell className="px-3 py-3" />
+                  </TableRow>
+                );
+              })()}
             </TableBody>
           </Table>
         </div>
