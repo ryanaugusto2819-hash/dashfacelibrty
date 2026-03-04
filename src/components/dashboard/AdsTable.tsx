@@ -168,7 +168,7 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
                   const c = s.creative.toLowerCase().trim();
                   const a = adName.toLowerCase().trim();
                   if (!c || !a) return false;
-                  return a.includes(c) || c.includes(a);
+                  return a === c;
                 });
                 const spend = ad.spend ?? ad.spent ?? 0;
                 const leads = ad.leads ?? 0;
