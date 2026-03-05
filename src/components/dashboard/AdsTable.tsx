@@ -24,6 +24,7 @@ interface SaleEntry {
   creative: string;
   sales: number;
   revenue: number;
+  country: string;
 }
 
 interface AdVideo {
