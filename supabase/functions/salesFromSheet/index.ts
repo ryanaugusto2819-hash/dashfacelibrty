@@ -95,8 +95,8 @@ serve(async (req) => {
 
     const accessToken = await getAccessToken(serviceAccountKey);
 
-    // Fetch all rows from the first sheet
-    const range = "A:T";
+    // Fetch all rows from the first sheet (extended to U for 'pais' column)
+    const range = "A:U";
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}`;
 
     const res = await fetch(url, {
