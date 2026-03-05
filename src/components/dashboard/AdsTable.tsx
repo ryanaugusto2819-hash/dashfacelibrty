@@ -177,8 +177,9 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
                 const revenue = matchedSales.reduce((sum, s) => {
                   const raw = Number(s.revenue || 0);
                   const country = (s.country || "").toLowerCase();
-                  if (country.includes("argentin")) return sum + raw / 266;
-                  return sum + raw / 7.49;
+                  const creative = (s.creative || "").toLowerCase().trim();
+                  const isAR = country.includes("argentin") || creative.endsWith(" ar");
+                  return sum + raw / (isAR ? 266 : 7.49);
                 }, 0);
                 const cpl = ad.costPerLead ?? ad.cpl ?? (leads > 0 ? spend / leads : 0);
                 const cpa = ad.cpa ?? (sales > 0 ? spend / sales : 0);
