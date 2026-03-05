@@ -302,7 +302,12 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
                   return !adNames.includes(c);
                 });
                 const uSales = unmatchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);
-                const uRevenue = unmatchedSales.reduce((sum, s) => sum + Number(s.revenue || 0), 0) / 7.49;
+                const uRevenue = unmatchedSales.reduce((sum, s) => {
+                  const raw = Number(s.revenue || 0);
+                  const country = (s.country || "").toLowerCase();
+                  if (country.includes("argentin")) return sum + raw / 266;
+                  return sum + raw / 7.49;
+                }, 0);
                 if (uSales === 0) return null;
                 return (
                   <TableRow className="border-border/10 hover:bg-secondary/40 transition-colors bg-muted/30">
