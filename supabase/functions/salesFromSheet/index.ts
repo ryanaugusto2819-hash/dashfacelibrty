@@ -123,11 +123,13 @@ serve(async (req) => {
     // H=cidade, I=departamento, J=codigo_rastreamento, K=status_pagamento, L=data_criacao(11),
     // M=data_envio, N=data_pagamento, O=hora_pagamento, P=comprovante_url, Q=vendedor,
     // R=ultima_atualizacao, S=Criativo(18), T=status_envios
+    // U=pais(20)
     const data: SheetSale[] = rows.slice(1).map((row) => ({
       date: row[11] || "",
       creative: row[18] || "",
       sales: 1, // Cada linha = 1 venda
       revenue: parseFloat(row[6]) || 0,
+      country: (row[20] || "").trim().toLowerCase(),
     }));
 
     return new Response(JSON.stringify(data), {
