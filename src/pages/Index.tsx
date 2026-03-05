@@ -7,6 +7,14 @@ import DateFilter from "@/components/dashboard/DateFilter";
 import AdsTable from "@/components/dashboard/AdsTable";
 import SpendChart from "@/components/dashboard/SpendChart";
 
+interface SaleEntry {
+  date: string;
+  creative: string;
+  sales: number;
+  revenue: number;
+  country: string;
+}
+
 const fmt = (n: number) =>
   n.toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
@@ -38,14 +46,21 @@ const getPreviousDateRange = (from: Date, to: Date) => {
   };
 };
 
-const UYU_TO_BRL = 7.49; // Cotação Peso Uruguaio → Real
+const UYU_TO_BRL = 7.49;
+const ARS_TO_BRL = 266;
 
-const calcKpis = (data: any[], salesData: any[]) => {
+const convertRevenue = (sale: SaleEntry) => {
+  const raw = Number(sale.revenue || 0);
+  const country = (sale.country || "").toLowerCase();
+  if (country.includes("argentin")) return raw / ARS_TO_BRL;
+  return raw / UYU_TO_BRL; // Default: Uruguay
+};
+
+const calcKpis = (data: any[], salesData: SaleEntry[]) => {
   const totalSpent = data.reduce((sum, d) => sum + Number(d.spend || 0), 0);
   const totalLeads = data.reduce((sum, d) => sum + Number(d.leads || 0), 0);
   const costPerLead = totalLeads > 0 ? totalSpent / totalLeads : 0;
-  const totalRevenueRaw = salesData.reduce((sum, s) => sum + Number(s.revenue || 0), 0);
-  const totalRevenue = totalRevenueRaw / UYU_TO_BRL;
+  const totalRevenue = salesData.reduce((sum, s) => sum + convertRevenue(s), 0);
   const totalSales = salesData.reduce((sum, s) => sum + Number(s.sales || 0), 0);
   const conversionRate = totalLeads > 0 ? (totalSales / totalLeads) * 100 : 0;
   const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0;

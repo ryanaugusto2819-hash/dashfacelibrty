@@ -24,6 +24,7 @@ interface SaleEntry {
   creative: string;
   sales: number;
   revenue: number;
+  country: string;
 }
 
 interface AdVideo {
@@ -173,7 +174,12 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
                 const spend = ad.spend ?? ad.spent ?? 0;
                 const leads = ad.leads ?? 0;
                 const sales = matchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);
-                const revenue = matchedSales.reduce((sum, s) => sum + Number(s.revenue || 0), 0) / 7.49;
+                const revenue = matchedSales.reduce((sum, s) => {
+                  const raw = Number(s.revenue || 0);
+                  const country = (s.country || "").toLowerCase();
+                  if (country.includes("argentin")) return sum + raw / 266;
+                  return sum + raw / 7.49;
+                }, 0);
                 const cpl = ad.costPerLead ?? ad.cpl ?? (leads > 0 ? spend / leads : 0);
                 const cpa = ad.cpa ?? (sales > 0 ? spend / sales : 0);
                 const convRate = leads > 0 ? (sales / leads) * 100 : 0;
@@ -296,7 +302,12 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
                   return !adNames.includes(c);
                 });
                 const uSales = unmatchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);
-                const uRevenue = unmatchedSales.reduce((sum, s) => sum + Number(s.revenue || 0), 0) / 7.49;
+                const uRevenue = unmatchedSales.reduce((sum, s) => {
+                  const raw = Number(s.revenue || 0);
+                  const country = (s.country || "").toLowerCase();
+                  if (country.includes("argentin")) return sum + raw / 266;
+                  return sum + raw / 7.49;
+                }, 0);
                 if (uSales === 0) return null;
                 return (
                   <TableRow className="border-border/10 hover:bg-secondary/40 transition-colors bg-muted/30">
