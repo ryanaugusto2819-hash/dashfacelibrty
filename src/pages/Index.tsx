@@ -7,6 +7,14 @@ import DateFilter from "@/components/dashboard/DateFilter";
 import AdsTable from "@/components/dashboard/AdsTable";
 import SpendChart from "@/components/dashboard/SpendChart";
 
+interface SaleEntry {
+  date: string;
+  creative: string;
+  sales: number;
+  revenue: number;
+  country: string;
+}
+
 const fmt = (n: number) =>
   n.toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
