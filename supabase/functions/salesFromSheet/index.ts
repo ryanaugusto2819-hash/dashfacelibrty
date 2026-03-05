@@ -11,6 +11,7 @@ interface SheetSale {
   creative: string;
   sales: number;
   revenue: number;
+  country: string;
 }
 
 async function getAccessToken(serviceAccountKey: string): Promise<string> {
