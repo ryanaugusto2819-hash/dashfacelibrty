@@ -418,6 +418,7 @@ const Index = () => {
               <LogOut className="h-4 w-4" />
             </button>
           </div>
+        </div>
       </header>
 
       <main className="max-w-[1440px] mx-auto px-6 py-8 space-y-8">
