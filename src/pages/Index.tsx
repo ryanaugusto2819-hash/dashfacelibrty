@@ -179,11 +179,17 @@ const Index = () => {
 
   const isAdCountry = (ad: any, country: "uruguay" | "argentina") => {
     const campaignName = (ad.campaign_name || "").toUpperCase();
-    // Check for (AR-...) or (UY-...) pattern in campaign name
     const isAR = campaignName.includes("(AR-") || campaignName.includes("(AR ");
     const isUY = campaignName.includes("(UY-") || campaignName.includes("(UY ");
     if (country === "argentina") return isAR;
-    return isUY || !isAR; // Default to UY if neither pattern found
+    return isUY || !isAR;
+  };
+
+  const isAdNicho = (ad: any, nicho: "adulto" | "prosta") => {
+    const campaignName = (ad.campaign_name || "").toLowerCase();
+    if (nicho === "adulto") return campaignName.includes("adulto");
+    if (nicho === "prosta") return campaignName.includes("prosta");
+    return true;
   };
 
   const filteredData = useMemo(() => {
