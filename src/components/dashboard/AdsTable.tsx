@@ -260,7 +260,7 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, i) => {
+              {filteredRows.map((row, i) => {
                 const { ad, adName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 } = row;
                 const video = adVideos[adName];
                 const isActive = ad.status === "active";
