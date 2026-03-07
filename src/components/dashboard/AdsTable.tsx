@@ -305,9 +305,14 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
                 const adNames = ads.map(ad => (ad.ad_name || ad.name || "").toLowerCase().trim()).filter(Boolean);
                 const unmatchedSales = salesData.filter(s => {
                   if (!s.creative) return true;
-                  const c = s.creative.toLowerCase().trim().replace(/ ar$/, "");
-                  if (!c || c === "sem criativo" || c === "não identificado" || c === "sem crtiativo" || c === "criativo não identificado") return true;
-                  return !adNames.includes(c);
+                  const cFull = s.creative.toLowerCase().trim();
+                  if (!cFull || cFull === "sem criativo" || cFull === "não identificado" || cFull === "sem crtiativo" || cFull === "criativo não identificado") return true;
+                  // Exact match
+                  if (adNames.includes(cFull)) return false;
+                  // Stripped match (only if no ad with full name exists)
+                  const cStripped = cFull.replace(/ ar$/, "");
+                  if (cStripped !== cFull && !adNames.includes(cFull) && adNames.includes(cStripped)) return false;
+                  return true;
                 });
                 const uSales = unmatchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);
                 const uRevenue = unmatchedSales.reduce((sum, s) => {
