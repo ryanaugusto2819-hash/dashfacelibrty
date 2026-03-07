@@ -401,8 +401,23 @@ const Index = () => {
               {hideValues ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
             <DateFilter selected={range} onSelect={setRange} customRange={customRange} onCustomRange={setCustomRange} />
+            {isAdmin && (
+              <button
+                onClick={() => navigate("/admin")}
+                className="p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                title="Gerenciar Usuários"
+              >
+                <Shield className="h-4 w-4" />
+              </button>
+            )}
+            <button
+              onClick={signOut}
+              className="p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              title="Sair"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
-        </div>
       </header>
 
       <main className="max-w-[1440px] mx-auto px-6 py-8 space-y-8">
