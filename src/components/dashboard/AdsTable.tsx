@@ -151,7 +151,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
     const cpa = ad.cpa ?? (sales > 0 ? spend / sales : 0);
     const convRate = leads > 0 ? (sales / leads) * 100 : 0;
     const avgTicket = sales > 0 ? revenue / sales : 0;
-    const roi = spend > 0 ? ((revenue - spend) / spend) * 100 : 0;
+    const roi = spend > 0 ? revenue / spend : 0;
     const lucro70 = revenue * 0.7 - spend;
     const lucro60 = revenue * 0.6 - spend;
     const lucro50 = revenue * 0.5 - spend;
@@ -190,7 +190,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
       const cpa = ad.cpa ?? (sales > 0 ? spend / sales : 0);
       const convRate = leads > 0 ? (sales / leads) * 100 : 0;
       const avgTicket = sales > 0 ? revenue / sales : 0;
-      const roi = spend > 0 ? ((revenue - spend) / spend) * 100 : 0;
+      const roi = spend > 0 ? revenue / spend : 0;
       const lucro70 = revenue * 0.7 - spend;
       const lucro60 = revenue * 0.6 - spend;
       const lucro50 = revenue * 0.5 - spend;
@@ -274,8 +274,8 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
   const thBase = "text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap cursor-pointer select-none hover:text-foreground transition-colors";
 
   const RoiIndicator = ({ value }: { value: number }) => {
-    if (value > 50) return <TrendingUp className="h-3.5 w-3.5 text-profit inline ml-1" />;
-    if (value < 0) return <TrendingDown className="h-3.5 w-3.5 text-loss inline ml-1" />;
+    if (value > 1.5) return <TrendingUp className="h-3.5 w-3.5 text-profit inline ml-1" />;
+    if (value < 1) return <TrendingDown className="h-3.5 w-3.5 text-loss inline ml-1" />;
     return <Minus className="h-3.5 w-3.5 text-muted-foreground inline ml-1" />;
   };
 
@@ -402,7 +402,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
                 <th onClick={() => toggleSort("cpm")} className={`text-right ${thBase} bg-warning/[0.02] border-r border-border/10`}>CPM <SortIcon col="cpm" /></th>
                 {/* Receita */}
                 <th onClick={() => toggleSort("revenue")} className={`text-right ${thBase} bg-success/[0.02]`}>Faturamento <SortIcon col="revenue" /></th>
-                <th onClick={() => toggleSort("roi")} className={`text-right ${thBase} bg-success/[0.02] border-r border-border/10`}>ROI <SortIcon col="roi" /></th>
+                <th onClick={() => toggleSort("roi")} className={`text-right ${thBase} bg-success/[0.02] border-r border-border/10`}>ROAS <SortIcon col="roi" /></th>
                 {/* Lucro */}
                 <th onClick={() => toggleSort("lucro70")} className={`text-right ${thBase} bg-[hsl(280,65%,60%)]/[0.02]`}>70% <SortIcon col="lucro70" /></th>
                 <th onClick={() => toggleSort("lucro60")} className={`text-right ${thBase} bg-[hsl(280,65%,60%)]/[0.02]`}>60% <SortIcon col="lucro60" /></th>
@@ -486,12 +486,12 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
                     <td className={`${tc} bg-success/[0.01] font-semibold`}><MetricCell current={revenue} prev={prev?.revenue} prefix="R$" /></td>
                     <td className={`${tc} bg-success/[0.01] border-r border-border/[0.06]`}>
                       <div>
-                        <span className={`font-semibold ${roi > 0 ? "text-profit" : "text-loss"}`}>
-                          {fmt(roi)}%
+                        <span className={`font-semibold ${roi >= 1 ? "text-profit" : "text-loss"}`}>
+                          {fmt(roi)}x
                         </span>
                         <RoiIndicator value={roi} />
                         {prev && prev.roi !== 0 && (
-                          <div className="text-[10px] text-muted-foreground/60 mt-0.5">{fmt(prev.roi)}%</div>
+                          <div className="text-[10px] text-muted-foreground/60 mt-0.5">{fmt(prev.roi)}x</div>
                         )}
                       </div>
                     </td>

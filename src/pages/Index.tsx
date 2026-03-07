@@ -67,7 +67,7 @@ const calcKpis = (data: any[], salesData: SaleEntry[]) => {
   const totalSales = salesData.reduce((sum, s) => sum + Number(s.sales || 0), 0);
   const conversionRate = totalLeads > 0 ? (totalSales / totalLeads) * 100 : 0;
   const averageTicket = totalSales > 0 ? totalRevenue / totalSales : 0;
-  const roi = totalSpent > 0 ? ((totalRevenue - totalSpent) / totalSpent) * 100 : 0;
+  const roi = totalSpent > 0 ? totalRevenue / totalSpent : 0;
   const lucro70 = totalRevenue * 0.7 - totalSpent;
   const lucro60 = totalRevenue * 0.6 - totalSpent;
   const lucro50 = totalRevenue * 0.5 - totalSpent;
@@ -402,9 +402,9 @@ const Index = () => {
                   previousValue={`R$ ${fmt(prevKpi.totalRevenue)}`} hidden={hideValues} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "250ms" }}>
-                <KPICard title="ROI" value={`${fmt(kpi.roi)}%`} icon={Percent} variant="green"
+                <KPICard title="ROAS" value={`${fmt(kpi.roi)}x`} icon={Percent} variant="green"
                   trend={roiTrend.trend} trendUp={roiTrend.trendUp} trendNeutral={roiTrend.trendNeutral}
-                  previousValue={`${fmt(prevKpi.roi)}%`} hidden={hideValues} />
+                  previousValue={`${fmt(prevKpi.roi)}x`} hidden={hideValues} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
                 <KPICard title="Tx. Conversão" value={`${fmt(kpi.conversionRate)}%`} icon={TrendingUp} variant="cyan"
