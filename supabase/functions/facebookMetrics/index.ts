@@ -16,6 +16,7 @@ interface MetaInsight {
   cpc: string;
   actions?: { action_type: string; value: string }[];
   video_play_actions?: { action_type: string; value: string }[];
+  video_3s_watched_actions?: { action_type: string; value: string }[];
   video_p95_watched_actions?: { action_type: string; value: string }[];
   ad_id: string;
   ad_name: string;
