@@ -497,7 +497,7 @@ const Index = () => {
                   previousValue={`R$ ${fmt(prevKpi.lucro70)}`} hidden={hideValues} />
               </div>
               <div className="animate-fade-in-up relative" style={{ animationDelay: "450ms" }}>
-                {!isAdmin && <div className="absolute inset-0 z-10 backdrop-blur-md bg-background/30 rounded-xl flex items-center justify-center"><span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">Admin</span></div>}
+                {!isAdmin && <div className="absolute inset-0 z-10 backdrop-blur-xl bg-background/70 rounded-xl flex items-center justify-center"><span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">🔒 Admin</span></div>}
                 <KPICard title="Lucro 60%" value={`R$ ${fmt(kpi.lucro60)}`} icon={Wallet} variant="green"
                   trend={lucro60Trend.trend} trendUp={lucro60Trend.trendUp} trendNeutral={lucro60Trend.trendNeutral}
                   previousValue={`R$ ${fmt(prevKpi.lucro60)}`} hidden={hideValues} />
