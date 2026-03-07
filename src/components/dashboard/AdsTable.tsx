@@ -27,6 +27,8 @@ interface AdVideo {
   file_name: string | null;
 }
 
+type CountryFilter = "all" | "uruguay" | "argentina";
+
 interface AdsTableProps {
   ads: any[];
   salesData?: SaleEntry[];
