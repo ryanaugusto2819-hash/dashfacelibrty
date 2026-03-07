@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Video, Upload, Trash2, Play, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Video, Upload, Trash2, Play, TrendingUp, TrendingDown, Minus, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
