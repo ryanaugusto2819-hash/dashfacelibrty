@@ -25,6 +25,7 @@ interface ProcessedMetric {
   date: string;
   ad_id: string;
   ad_name: string;
+  campaign_name: string;
   spend: number;
   impressions: number;
   clicks: number;
@@ -99,6 +100,7 @@ serve(async (req) => {
       "video_p95_watched_actions",
       "ad_id",
       "ad_name",
+      "campaign_name",
     ].join(",");
 
     const timeRange = JSON.stringify({ since: from, until: to });
@@ -147,6 +149,7 @@ serve(async (req) => {
         date: row.date_start,
         ad_id: row.ad_id,
         ad_name: row.ad_name,
+        campaign_name: (row as any).campaign_name || "",
         spend,
         impressions,
         clicks,
