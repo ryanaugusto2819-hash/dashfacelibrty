@@ -160,7 +160,46 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
     return { ad, adName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 };
   });
 
-  // Unmatched sales
+  // Build previous period rows map for comparison
+  const prevAllAdNames = prevAds.map(a => (a.ad_name || a.name || "").toLowerCase().trim()).filter(Boolean);
+  const prevRowsMap = useMemo(() => {
+    const map = new Map<string, typeof rows[0]>();
+    prevAds.forEach((ad) => {
+      const adName = ad.ad_name || ad.name || "";
+      const adNameNorm = adName.toLowerCase().trim();
+      const matchedSales = prevSalesData.filter(s => {
+        if (!s.creative || !adName) return false;
+        const cFull = s.creative.toLowerCase().trim();
+        if (!cFull) return false;
+        if (adNameNorm === cFull) return true;
+        const cStripped = cFull.replace(/ ar$/, "");
+        if (cStripped !== cFull && !prevAllAdNames.includes(cFull) && adNameNorm === cStripped) return true;
+        return false;
+      });
+      const spend = ad.spend ?? ad.spent ?? 0;
+      const leads = ad.leads ?? 0;
+      const sales = matchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);
+      const revenue = matchedSales.reduce((sum, s) => {
+        const raw = Number(s.revenue || 0);
+        const country = (s.country || "").toLowerCase();
+        const creative = (s.creative || "").toLowerCase().trim();
+        const isAR = country.includes("argentin") || creative.endsWith(" ar");
+        return sum + raw / (isAR ? 266 : 7.49);
+      }, 0);
+      const cpl = ad.costPerLead ?? ad.cpl ?? (leads > 0 ? spend / leads : 0);
+      const cpa = ad.cpa ?? (sales > 0 ? spend / sales : 0);
+      const convRate = leads > 0 ? (sales / leads) * 100 : 0;
+      const avgTicket = sales > 0 ? revenue / sales : 0;
+      const roi = spend > 0 ? ((revenue - spend) / spend) * 100 : 0;
+      const lucro70 = revenue * 0.7 - spend;
+      const lucro60 = revenue * 0.6 - spend;
+      const lucro50 = revenue * 0.5 - spend;
+      const lucro40 = revenue * 0.4 - spend;
+      map.set(adNameNorm, { ad, adName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 });
+    });
+    return map;
+  }, [prevAds, prevSalesData, prevAllAdNames]);
+
   const unmatchedSales = salesData.filter(s => {
     if (!s.creative) return true;
     const cFull = s.creative.toLowerCase().trim();
