@@ -457,8 +457,22 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
                     </td>
                     <td className={`${tc} bg-primary/[0.01] border-r border-border/[0.06]`}><MetricCell current={cpl} prev={prev?.cpl} prefix="R$" /></td>
                     {/* Conversão */}
-                    <td className={`${tc} bg-info/[0.01]`}><MetricCell current={leads} prev={prev?.leads} /></td>
-                    <td className={`${tc} bg-info/[0.01] font-medium`}><MetricCell current={sales} prev={prev?.sales} /></td>
+                    <td className={`${tc} bg-info/[0.01]`}>
+                      <div>
+                        <div>{Math.round(leads)}</div>
+                        {prev && prev.leads > 0 && (
+                          <div className="text-[10px] text-muted-foreground/60 mt-0.5">{Math.round(prev.leads)}</div>
+                        )}
+                      </div>
+                    </td>
+                    <td className={`${tc} bg-info/[0.01] font-medium`}>
+                      <div>
+                        <div>{Math.round(sales)}</div>
+                        {prev && prev.sales > 0 && (
+                          <div className="text-[10px] text-muted-foreground/60 mt-0.5">{Math.round(prev.sales)}</div>
+                        )}
+                      </div>
+                    </td>
                     <td className={`${tc} bg-info/[0.01]`}>
                       <div>
                         <span className={convRate >= 10 ? "text-profit" : convRate >= 5 ? "text-warning" : "text-muted-foreground"}>
