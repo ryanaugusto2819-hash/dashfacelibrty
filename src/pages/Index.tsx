@@ -111,6 +111,7 @@ const Index = () => {
   const [hideValues, setHideValues] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "argentina">("all");
+  const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "prosta">("all");
 
   const fetchData = async () => {
     try {
@@ -178,17 +179,25 @@ const Index = () => {
 
   const isAdCountry = (ad: any, country: "uruguay" | "argentina") => {
     const campaignName = (ad.campaign_name || "").toUpperCase();
-    // Check for (AR-...) or (UY-...) pattern in campaign name
     const isAR = campaignName.includes("(AR-") || campaignName.includes("(AR ");
     const isUY = campaignName.includes("(UY-") || campaignName.includes("(UY ");
     if (country === "argentina") return isAR;
-    return isUY || !isAR; // Default to UY if neither pattern found
+    return isUY || !isAR;
+  };
+
+  const isAdNicho = (ad: any, nicho: "adulto" | "prosta") => {
+    const campaignName = (ad.campaign_name || "").toLowerCase();
+    if (nicho === "adulto") return campaignName.includes("adulto");
+    if (nicho === "prosta") return campaignName.includes("prosta");
+    return true;
   };
 
   const filteredData = useMemo(() => {
-    if (countryFilter === "all") return data;
-    return data.filter(ad => isAdCountry(ad, countryFilter));
-  }, [data, countryFilter]);
+    let result = data;
+    if (countryFilter !== "all") result = result.filter(ad => isAdCountry(ad, countryFilter));
+    if (nichoFilter !== "all") result = result.filter(ad => isAdNicho(ad, nichoFilter));
+    return result;
+  }, [data, countryFilter, nichoFilter]);
 
   const filteredSalesData = useMemo(() => {
     if (countryFilter === "all") return salesData;
@@ -201,9 +210,11 @@ const Index = () => {
   }, [salesData, countryFilter]);
 
   const filteredPrevData = useMemo(() => {
-    if (countryFilter === "all") return prevData;
-    return prevData.filter(ad => isAdCountry(ad, countryFilter));
-  }, [prevData, countryFilter]);
+    let result = prevData;
+    if (countryFilter !== "all") result = result.filter(ad => isAdCountry(ad, countryFilter));
+    if (nichoFilter !== "all") result = result.filter(ad => isAdNicho(ad, nichoFilter));
+    return result;
+  }, [prevData, countryFilter, nichoFilter]);
 
   const filteredPrevSalesData = useMemo(() => {
     if (countryFilter === "all") return prevSalesData;
@@ -325,6 +336,13 @@ const Index = () => {
                 <TabsTrigger value="all" className="text-xs px-3 h-6">Todos</TabsTrigger>
                 <TabsTrigger value="uruguay" className="text-xs px-3 h-6">🇺🇾 Uruguai</TabsTrigger>
                 <TabsTrigger value="argentina" className="text-xs px-3 h-6">🇦🇷 Argentina</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Tabs value={nichoFilter} onValueChange={(v) => setNichoFilter(v as any)}>
+              <TabsList className="h-8">
+                <TabsTrigger value="all" className="text-xs px-3 h-6">Todos</TabsTrigger>
+                <TabsTrigger value="adulto" className="text-xs px-3 h-6">Adulto</TabsTrigger>
+                <TabsTrigger value="prosta" className="text-xs px-3 h-6">Prósta</TabsTrigger>
               </TabsList>
             </Tabs>
             <button
