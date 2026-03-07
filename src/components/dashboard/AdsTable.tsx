@@ -37,6 +37,7 @@ interface AdsTableProps {
   salesData?: SaleEntry[];
   prevAds?: any[];
   prevSalesData?: SaleEntry[];
+  isAdmin?: boolean;
 }
 
 const fmt = (n: number | null | undefined) => {
@@ -44,7 +45,7 @@ const fmt = (n: number | null | undefined) => {
   return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
-const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: AdsTableProps) => {
+const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdmin = false }: AdsTableProps) => {
   const [adVideos, setAdVideos] = useState<Record<string, AdVideo>>({});
   const [uploading, setUploading] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
@@ -521,10 +522,10 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
                       </div>
                     </td>
                     {/* Lucro */}
-                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCompareCell current={lucro70} prev={prev?.lucro70} /></td>
-                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCompareCell current={lucro60} prev={prev?.lucro60} /></td>
-                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCompareCell current={lucro50} prev={prev?.lucro50} /></td>
-                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01] border-r border-border/[0.06]`}><ProfitCompareCell current={lucro40} prev={prev?.lucro40} /></td>
+                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}>{isAdmin ? <ProfitCompareCell current={lucro70} prev={prev?.lucro70} /> : <span className="text-muted-foreground">••••••</span>}</td>
+                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}>{isAdmin ? <ProfitCompareCell current={lucro60} prev={prev?.lucro60} /> : <span className="text-muted-foreground">••••••</span>}</td>
+                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}>{isAdmin ? <ProfitCompareCell current={lucro50} prev={prev?.lucro50} /> : <span className="text-muted-foreground">••••••</span>}</td>
+                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01] border-r border-border/[0.06]`}>{isAdmin ? <ProfitCompareCell current={lucro40} prev={prev?.lucro40} /> : <span className="text-muted-foreground">••••••</span>}</td>
                     {/* Video */}
                     <td className="px-2 py-3.5">
                       <div className="flex items-center justify-center gap-1">
@@ -647,10 +648,10 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
                       <span className={`${tRoas >= 1 ? "text-profit" : "text-loss"}`}>{fmt(tRoas)}x</span>
                       <RoiIndicator value={tRoas} />
                     </td>
-                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCell value={tLucro70} /></td>
-                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCell value={tLucro60} /></td>
-                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCell value={tLucro50} /></td>
-                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01] border-r border-border/[0.06]`}><ProfitCell value={tLucro40} /></td>
+                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}>{isAdmin ? <ProfitCell value={tLucro70} /> : <span className="text-muted-foreground">••••••</span>}</td>
+                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}>{isAdmin ? <ProfitCell value={tLucro60} /> : <span className="text-muted-foreground">••••••</span>}</td>
+                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}>{isAdmin ? <ProfitCell value={tLucro50} /> : <span className="text-muted-foreground">••••••</span>}</td>
+                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01] border-r border-border/[0.06]`}>{isAdmin ? <ProfitCell value={tLucro40} /> : <span className="text-muted-foreground">••••••</span>}</td>
                     <td className="px-2 py-3.5" />
                   </tr>
                 );
