@@ -44,6 +44,7 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
   const [uploading, setUploading] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [countryFilter, setCountryFilter] = useState<CountryFilter>("all");
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
