@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { DollarSign, Users, Target, BarChart3, Percent, TrendingUp, Receipt, Wallet, Activity, RefreshCw, Eye, EyeOff, Clock } from "lucide-react";
+import { DollarSign, Users, Target, BarChart3, Percent, TrendingUp, Receipt, Wallet, Activity, RefreshCw, Eye, EyeOff, Clock, Shield, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, subDays, differenceInDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
@@ -100,6 +102,8 @@ const SkeletonCard = () => (
 );
 
 const Index = () => {
+  const { isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
   const [range, setRange] = useState("today");
   const [customRange, setCustomRange] = useState<{ from: Date; to: Date } | undefined>();
   const [data, setData] = useState<any[]>([]);
@@ -397,6 +401,22 @@ const Index = () => {
               {hideValues ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
             <DateFilter selected={range} onSelect={setRange} customRange={customRange} onCustomRange={setCustomRange} />
+            {isAdmin && (
+              <button
+                onClick={() => navigate("/admin")}
+                className="p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                title="Gerenciar Usuários"
+              >
+                <Shield className="h-4 w-4" />
+              </button>
+            )}
+            <button
+              onClick={signOut}
+              className="p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              title="Sair"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </header>
