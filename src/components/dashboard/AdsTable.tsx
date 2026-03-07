@@ -166,7 +166,7 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
                 const adName = ad.ad_name || ad.name || "";
                 const matchedSales = salesData.filter(s => {
                   if (!s.creative || !adName) return false;
-                  const c = s.creative.toLowerCase().trim();
+                  const c = s.creative.toLowerCase().trim().replace(/ ar$/, "");
                   const a = adName.toLowerCase().trim();
                   if (!c || !a) return false;
                   return a === c;
