@@ -235,15 +235,32 @@ const Index = () => {
     return result;
   }, [prevData, countryFilter, nichoFilter]);
 
+  const filteredPrevAdNames = useMemo(() => {
+    return new Set(filteredPrevData.map(ad => (ad.ad_name || ad.name || "").toLowerCase().trim()).filter(Boolean));
+  }, [filteredPrevData]);
+
   const filteredPrevSalesData = useMemo(() => {
-    if (countryFilter === "all") return prevSalesData;
-    return prevSalesData.filter(s => {
-      const country = (s.country || "").toLowerCase();
-      const creative = (s.creative || "").toLowerCase().trim();
-      const isAR = country.includes("argentin") || creative.endsWith(" ar");
-      return countryFilter === "argentina" ? isAR : !isAR;
-    });
-  }, [prevSalesData, countryFilter]);
+    let result = prevSalesData;
+    if (countryFilter !== "all") {
+      result = result.filter(s => {
+        const country = (s.country || "").toLowerCase();
+        const creative = (s.creative || "").toLowerCase().trim();
+        const isAR = country.includes("argentin") || creative.endsWith(" ar");
+        return countryFilter === "argentina" ? isAR : !isAR;
+      });
+    }
+    if (nichoFilter !== "all") {
+      result = result.filter(s => {
+        const creative = (s.creative || "").toLowerCase().trim();
+        if (!creative) return false;
+        if (filteredPrevAdNames.has(creative)) return true;
+        const stripped = creative.replace(/ ar$/, "");
+        if (stripped !== creative && filteredPrevAdNames.has(stripped)) return true;
+        return false;
+      });
+    }
+    return result;
+  }, [prevSalesData, countryFilter, nichoFilter, filteredPrevAdNames]);
 
   const deduplicatedAds = useMemo(() => {
     const map = new Map<string, any>();
