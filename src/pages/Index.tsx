@@ -199,15 +199,34 @@ const Index = () => {
     return result;
   }, [data, countryFilter, nichoFilter]);
 
+  // Get ad names from filtered data to filter sales by nicho
+  const filteredAdNames = useMemo(() => {
+    return new Set(filteredData.map(ad => (ad.ad_name || ad.name || "").toLowerCase().trim()).filter(Boolean));
+  }, [filteredData]);
+
   const filteredSalesData = useMemo(() => {
-    if (countryFilter === "all") return salesData;
-    return salesData.filter(s => {
-      const country = (s.country || "").toLowerCase();
-      const creative = (s.creative || "").toLowerCase().trim();
-      const isAR = country.includes("argentin") || creative.endsWith(" ar");
-      return countryFilter === "argentina" ? isAR : !isAR;
-    });
-  }, [salesData, countryFilter]);
+    let result = salesData;
+    if (countryFilter !== "all") {
+      result = result.filter(s => {
+        const country = (s.country || "").toLowerCase();
+        const creative = (s.creative || "").toLowerCase().trim();
+        const isAR = country.includes("argentin") || creative.endsWith(" ar");
+        return countryFilter === "argentina" ? isAR : !isAR;
+      });
+    }
+    if (nichoFilter !== "all") {
+      result = result.filter(s => {
+        const creative = (s.creative || "").toLowerCase().trim();
+        if (!creative) return false;
+        // Match sale to filtered ads by creative name
+        if (filteredAdNames.has(creative)) return true;
+        const stripped = creative.replace(/ ar$/, "");
+        if (stripped !== creative && filteredAdNames.has(stripped)) return true;
+        return false;
+      });
+    }
+    return result;
+  }, [salesData, countryFilter, nichoFilter, filteredAdNames]);
 
   const filteredPrevData = useMemo(() => {
     let result = prevData;
