@@ -143,7 +143,7 @@ serve(async (req) => {
         row.actions,
         "onsite_conversion.total_messaging_connection"
       );
-      const videoPlays = getFirstActionValue(row.video_play_actions);
+      const video3s = getFirstActionValue(row.video_3s_watched_actions);
       const videoP95 = getFirstActionValue(row.video_p95_watched_actions);
 
       return {
@@ -159,9 +159,9 @@ serve(async (req) => {
         cpc: clicks > 0 ? spend / clicks : 0,
         leads,
         costPerLead: leads > 0 ? spend / leads : null,
-        videoPlays,
+        video3s,
         videoP95,
-        hookRate: impressions > 0 ? (videoPlays / impressions) * 100 : 0,
+        hookRate: impressions > 0 ? (video3s / impressions) * 100 : 0,
         bodyRate: impressions > 0 ? (videoP95 / impressions) * 100 : 0,
       };
     });
