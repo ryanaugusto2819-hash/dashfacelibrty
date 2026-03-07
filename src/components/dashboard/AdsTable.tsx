@@ -37,6 +37,7 @@ interface AdsTableProps {
   salesData?: SaleEntry[];
   prevAds?: any[];
   prevSalesData?: SaleEntry[];
+  isAdmin?: boolean;
 }
 
 const fmt = (n: number | null | undefined) => {
