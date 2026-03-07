@@ -176,10 +176,19 @@ const Index = () => {
     fetchData();
   }, [range, customRange]);
 
-  const isAdCountry = (adName: string, country: "uruguay" | "argentina") => {
-    const name = (adName || "").toLowerCase().trim();
-    if (country === "argentina") return name.endsWith(" ar");
-    return !name.endsWith(" ar");
+  const isAdCountry = (ad: any, country: "uruguay" | "argentina") => {
+    const campaignName = (ad.campaign_name || "").toLowerCase().trim();
+    const isAR = campaignName.includes(" ar") || campaignName.includes("_ar") || campaignName.endsWith("ar");
+    const isUY = campaignName.includes(" uy") || campaignName.includes("_uy") || campaignName.endsWith("uy");
+    // If campaign has AR → argentina; if has UY → uruguay; fallback to ad name suffix
+    if (country === "argentina") {
+      if (isAR) return true;
+      if (isUY) return false;
+      return (ad.ad_name || "").toLowerCase().trim().endsWith(" ar");
+    }
+    if (isUY) return true;
+    if (isAR) return false;
+    return !(ad.ad_name || "").toLowerCase().trim().endsWith(" ar");
   };
 
   const filteredData = useMemo(() => {
