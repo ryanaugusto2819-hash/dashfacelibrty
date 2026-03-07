@@ -169,6 +169,12 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
     return sum + raw / (isAR ? 266 : 7.49);
   }, 0);
 
+  const filteredRows = useMemo(() => {
+    if (!searchQuery.trim()) return rows;
+    const q = searchQuery.toLowerCase().trim();
+    return rows.filter(r => r.adName.toLowerCase().includes(q));
+  }, [rows, searchQuery]);
+
   const RoiIndicator = ({ value }: { value: number }) => {
     if (value > 50) return <TrendingUp className="h-3.5 w-3.5 text-profit inline ml-1" />;
     if (value < 0) return <TrendingDown className="h-3.5 w-3.5 text-loss inline ml-1" />;
