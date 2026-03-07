@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Video, Upload, Trash2, Play, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Video, Upload, Trash2, Play, TrendingUp, TrendingDown, Minus, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -40,6 +41,7 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
   const [adVideos, setAdVideos] = useState<Record<string, AdVideo>>({});
   const [uploading, setUploading] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
@@ -167,6 +169,12 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
     return sum + raw / (isAR ? 266 : 7.49);
   }, 0);
 
+  const filteredRows = useMemo(() => {
+    if (!searchQuery.trim()) return rows;
+    const q = searchQuery.toLowerCase().trim();
+    return rows.filter(r => r.adName.toLowerCase().includes(q));
+  }, [rows, searchQuery]);
+
   const RoiIndicator = ({ value }: { value: number }) => {
     if (value > 50) return <TrendingUp className="h-3.5 w-3.5 text-profit inline ml-1" />;
     if (value < 0) return <TrendingDown className="h-3.5 w-3.5 text-loss inline ml-1" />;
@@ -183,9 +191,20 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
     <>
       <div className="glass-card overflow-hidden">
         {/* Header */}
-        <div className="p-6 border-b border-border/30">
-          <h2 className="text-lg font-display font-semibold">Métricas por Anúncio</h2>
-          <p className="text-[11px] text-muted-foreground mt-1 tracking-wide">Performance individual de cada criativo</p>
+        <div className="p-6 border-b border-border/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-display font-semibold">Métricas por Anúncio</h2>
+            <p className="text-[11px] text-muted-foreground mt-1 tracking-wide">Performance individual de cada criativo</p>
+          </div>
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar anúncio..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-9 bg-secondary/50 border-border/30 text-sm"
+            />
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -241,7 +260,7 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, i) => {
+              {filteredRows.map((row, i) => {
                 const { ad, adName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 } = row;
                 const video = adVideos[adName];
                 const isActive = ad.status === "active";
