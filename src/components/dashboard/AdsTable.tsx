@@ -285,6 +285,37 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
     </span>
   );
 
+  // Comparison cell: shows current value + prev value below in smaller text
+  const MetricCell = ({ current, prev, prefix = "", suffix = "", invert = false, className = "" }: {
+    current: number; prev?: number; prefix?: string; suffix?: string; invert?: boolean; className?: string;
+  }) => {
+    const hasPrev = prev != null && prev !== 0;
+    return (
+      <div className={className}>
+        <div>{prefix}{fmt(current)}{suffix}</div>
+        {hasPrev && (
+          <div className="text-[10px] text-muted-foreground/60 mt-0.5">
+            {prefix}{fmt(prev)}{suffix}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const ProfitCompareCell = ({ current, prev }: { current: number; prev?: number }) => {
+    const hasPrev = prev != null && prev !== 0;
+    return (
+      <div>
+        <span className={`font-medium ${current > 0 ? "text-profit" : "text-loss"}`}>R${fmt(current)}</span>
+        {hasPrev && (
+          <div className="text-[10px] text-muted-foreground/60 mt-0.5">
+            <span className={prev > 0 ? "text-profit/50" : "text-loss/50"}>R${fmt(prev)}</span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="glass-card overflow-hidden">
