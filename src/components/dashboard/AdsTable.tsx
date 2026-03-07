@@ -472,7 +472,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
                     </td>
                     <td className={`${tc} bg-warning/[0.01]`}>
                       <div>
-                        <span className={(ad.bodyRate ?? 0) >= 30 ? "text-profit" : (ad.bodyRate ?? 0) >= 20 ? "text-warning" : "text-loss"}>
+                        <span className={(ad.bodyRate ?? 0) >= 3.5 ? "text-profit" : (ad.bodyRate ?? 0) >= 2 ? "text-warning" : "text-loss"}>
                           {fmt(ad.bodyRate)}%
                         </span>
                         {prev && (prev.ad.bodyRate ?? 0) > 0 && (
