@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { DollarSign, Users, Target, BarChart3, Percent, TrendingUp, Receipt, Wallet, Activity, RefreshCw, Eye, EyeOff, Clock } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, subDays, differenceInDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import KPICard from "@/components/dashboard/KPICard";
@@ -109,6 +110,7 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   const [hideValues, setHideValues] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "argentina">("all");
 
   const fetchData = async () => {
     try {
@@ -174,9 +176,45 @@ const Index = () => {
     fetchData();
   }, [range, customRange]);
 
+  const isAdCountry = (adName: string, country: "uruguay" | "argentina") => {
+    const name = (adName || "").toLowerCase().trim();
+    if (country === "argentina") return name.endsWith(" ar");
+    return !name.endsWith(" ar");
+  };
+
+  const filteredData = useMemo(() => {
+    if (countryFilter === "all") return data;
+    return data.filter(ad => isAdCountry(ad.ad_name || ad.name || "", countryFilter));
+  }, [data, countryFilter]);
+
+  const filteredSalesData = useMemo(() => {
+    if (countryFilter === "all") return salesData;
+    return salesData.filter(s => {
+      const country = (s.country || "").toLowerCase();
+      const creative = (s.creative || "").toLowerCase().trim();
+      const isAR = country.includes("argentin") || creative.endsWith(" ar");
+      return countryFilter === "argentina" ? isAR : !isAR;
+    });
+  }, [salesData, countryFilter]);
+
+  const filteredPrevData = useMemo(() => {
+    if (countryFilter === "all") return prevData;
+    return prevData.filter(ad => isAdCountry(ad.ad_name || ad.name || "", countryFilter));
+  }, [prevData, countryFilter]);
+
+  const filteredPrevSalesData = useMemo(() => {
+    if (countryFilter === "all") return prevSalesData;
+    return prevSalesData.filter(s => {
+      const country = (s.country || "").toLowerCase();
+      const creative = (s.creative || "").toLowerCase().trim();
+      const isAR = country.includes("argentin") || creative.endsWith(" ar");
+      return countryFilter === "argentina" ? isAR : !isAR;
+    });
+  }, [prevSalesData, countryFilter]);
+
   const deduplicatedAds = useMemo(() => {
     const map = new Map<string, any>();
-    data.forEach((ad) => {
+    filteredData.forEach((ad) => {
       const name = (ad.ad_name || ad.name || "").toLowerCase().trim();
       if (!name) return;
       const existing = map.get(name);
@@ -186,14 +224,11 @@ const Index = () => {
         existing.impressions = (existing.impressions || 0) + Number(ad.impressions || 0);
         existing.clicks = (existing.clicks || 0) + Number(ad.clicks || 0);
         existing.reach = (existing.reach || 0) + Number(ad.reach || 0);
-        // Keep active status if any is active
         if (ad.status === "active") existing.status = "active";
-        // Recalculate derived metrics
         existing.cpm = existing.impressions > 0 ? (existing.spend / existing.impressions) * 1000 : 0;
         existing.ctr = existing.impressions > 0 ? (existing.clicks / existing.impressions) * 100 : 0;
         existing.costPerLead = existing.leads > 0 ? existing.spend / existing.leads : 0;
         existing.cpl = existing.costPerLead;
-        // Weighted average for rates
         const totalImpressions = existing.impressions;
         if (ad.hookRate != null) {
           existing._hookWeighted = (existing._hookWeighted || 0) + (ad.hookRate || 0) * Number(ad.impressions || 0);
@@ -208,10 +243,10 @@ const Index = () => {
       }
     });
     return Array.from(map.values());
-  }, [data]);
+  }, [filteredData]);
 
-  const kpi = useMemo(() => calcKpis(data, salesData), [data, salesData]);
-  const prevKpi = useMemo(() => calcKpis(prevData, prevSalesData), [prevData, prevSalesData]);
+  const kpi = useMemo(() => calcKpis(filteredData, filteredSalesData), [filteredData, filteredSalesData]);
+  const prevKpi = useMemo(() => calcKpis(filteredPrevData, filteredPrevSalesData), [filteredPrevData, filteredPrevSalesData]);
 
   // Metrics where lower is better (invert trend colors)
   const spentTrend = calcTrend(kpi.totalSpent, prevKpi.totalSpent, true);
@@ -242,13 +277,20 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {lastUpdate && (
               <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                 <Clock className="h-3 w-3" />
                 Atualizado às {lastUpdate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
               </span>
             )}
+            <Tabs value={countryFilter} onValueChange={(v) => setCountryFilter(v as any)}>
+              <TabsList className="h-8">
+                <TabsTrigger value="all" className="text-xs px-3 h-6">Todos</TabsTrigger>
+                <TabsTrigger value="uruguay" className="text-xs px-3 h-6">🇺🇾 Uruguai</TabsTrigger>
+                <TabsTrigger value="argentina" className="text-xs px-3 h-6">🇦🇷 Argentina</TabsTrigger>
+              </TabsList>
+            </Tabs>
             <button
               onClick={fetchData}
               disabled={loading}
@@ -366,7 +408,7 @@ const Index = () => {
                 Evolução
               </h2>
             </div>
-            <SpendChart data={data} range={range} />
+            <SpendChart data={filteredData} range={range} />
           </section>
         )}
 
@@ -379,7 +421,7 @@ const Index = () => {
                 Detalhamento
               </h2>
             </div>
-            <AdsTable ads={deduplicatedAds} salesData={salesData} />
+            <AdsTable ads={deduplicatedAds} salesData={filteredSalesData} />
           </section>
         )}
       </main>
