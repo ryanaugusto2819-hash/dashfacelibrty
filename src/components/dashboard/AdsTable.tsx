@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Video, Upload, Trash2, Play, TrendingUp, TrendingDown, Minus, Search } from "lucide-react";
+import { Video, Upload, Trash2, Play, TrendingUp, TrendingDown, Minus, Search, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -29,6 +29,9 @@ interface AdVideo {
 
 type CountryFilter = "all" | "uruguay" | "argentina";
 
+type SortKey = "adName" | "spend" | "cpa" | "cpl" | "leads" | "sales" | "convRate" | "avgTicket" | "hookRate" | "bodyRate" | "ctr" | "cpm" | "revenue" | "roi" | "lucro70" | "lucro60" | "lucro50" | "lucro40";
+type SortDir = "asc" | "desc";
+
 interface AdsTableProps {
   ads: any[];
   salesData?: SaleEntry[];
@@ -45,6 +48,8 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [countryFilter, setCountryFilter] = useState<CountryFilter>("all");
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
@@ -172,6 +177,15 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
     return sum + raw / (isAR ? 266 : 7.49);
   }, 0);
 
+  const toggleSort = useCallback((key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => d === "desc" ? "asc" : "desc");
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+  }, [sortKey]);
+
   const filteredRows = useMemo(() => {
     let result = rows;
     if (countryFilter !== "all") {
@@ -187,8 +201,36 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(r => r.adName.toLowerCase().includes(q));
     }
+    if (sortKey) {
+      result = [...result].sort((a, b) => {
+        let aVal: number | string;
+        let bVal: number | string;
+        if (sortKey === "adName") {
+          aVal = a.adName.toLowerCase();
+          bVal = b.adName.toLowerCase();
+        } else if (sortKey === "hookRate" || sortKey === "bodyRate" || sortKey === "ctr" || sortKey === "cpm") {
+          aVal = a.ad[sortKey] ?? 0;
+          bVal = b.ad[sortKey] ?? 0;
+        } else {
+          aVal = (a as any)[sortKey] ?? 0;
+          bVal = (b as any)[sortKey] ?? 0;
+        }
+        if (aVal < bVal) return sortDir === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortDir === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
     return result;
-  }, [rows, searchQuery, countryFilter]);
+  }, [rows, searchQuery, countryFilter, sortKey, sortDir]);
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown className="h-3 w-3 opacity-30 ml-1 inline" />;
+    return sortDir === "desc"
+      ? <ArrowDown className="h-3 w-3 text-primary ml-1 inline" />
+      : <ArrowUp className="h-3 w-3 text-primary ml-1 inline" />;
+  };
+
+  const thBase = "text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap cursor-pointer select-none hover:text-foreground transition-colors";
 
   const RoiIndicator = ({ value }: { value: number }) => {
     if (value > 50) return <TrendingUp className="h-3.5 w-3.5 text-profit inline ml-1" />;
@@ -270,30 +312,30 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
                 <th className="bg-secondary/10" />
               </tr>
               <tr className="border-b border-border/20 bg-secondary/20">
-                <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-4 py-3 min-w-[180px] sticky left-0 bg-secondary/20 z-10">Anúncio</th>
+                <th onClick={() => toggleSort("adName")} className={`text-left ${thBase} min-w-[180px] sticky left-0 bg-secondary/20 z-10`}>Anúncio <SortIcon col="adName" /></th>
                 <th className="text-center text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-2 py-3">Status</th>
                 {/* Custos */}
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-primary/[0.02]">Gasto</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-primary/[0.02]">CPA</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-primary/[0.02] border-r border-border/10">CPL</th>
+                <th onClick={() => toggleSort("spend")} className={`text-right ${thBase} bg-primary/[0.02]`}>Gasto <SortIcon col="spend" /></th>
+                <th onClick={() => toggleSort("cpa")} className={`text-right ${thBase} bg-primary/[0.02]`}>CPA <SortIcon col="cpa" /></th>
+                <th onClick={() => toggleSort("cpl")} className={`text-right ${thBase} bg-primary/[0.02] border-r border-border/10`}>CPL <SortIcon col="cpl" /></th>
                 {/* Conversão */}
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-info/[0.02]">Leads</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-info/[0.02]">Vendas</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-info/[0.02]">Tx Conv.</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-info/[0.02] border-r border-border/10">Ticket</th>
+                <th onClick={() => toggleSort("leads")} className={`text-right ${thBase} bg-info/[0.02]`}>Leads <SortIcon col="leads" /></th>
+                <th onClick={() => toggleSort("sales")} className={`text-right ${thBase} bg-info/[0.02]`}>Vendas <SortIcon col="sales" /></th>
+                <th onClick={() => toggleSort("convRate")} className={`text-right ${thBase} bg-info/[0.02]`}>Tx Conv. <SortIcon col="convRate" /></th>
+                <th onClick={() => toggleSort("avgTicket")} className={`text-right ${thBase} bg-info/[0.02] border-r border-border/10`}>Ticket <SortIcon col="avgTicket" /></th>
                 {/* Engajamento */}
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-warning/[0.02]">Hook</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-warning/[0.02]">Body</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-warning/[0.02]">CTR</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-warning/[0.02] border-r border-border/10">CPM</th>
+                <th onClick={() => toggleSort("hookRate")} className={`text-right ${thBase} bg-warning/[0.02]`}>Hook <SortIcon col="hookRate" /></th>
+                <th onClick={() => toggleSort("bodyRate")} className={`text-right ${thBase} bg-warning/[0.02]`}>Body <SortIcon col="bodyRate" /></th>
+                <th onClick={() => toggleSort("ctr")} className={`text-right ${thBase} bg-warning/[0.02]`}>CTR <SortIcon col="ctr" /></th>
+                <th onClick={() => toggleSort("cpm")} className={`text-right ${thBase} bg-warning/[0.02] border-r border-border/10`}>CPM <SortIcon col="cpm" /></th>
                 {/* Receita */}
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-success/[0.02]">Faturamento</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-success/[0.02] border-r border-border/10">ROI</th>
+                <th onClick={() => toggleSort("revenue")} className={`text-right ${thBase} bg-success/[0.02]`}>Faturamento <SortIcon col="revenue" /></th>
+                <th onClick={() => toggleSort("roi")} className={`text-right ${thBase} bg-success/[0.02] border-r border-border/10`}>ROI <SortIcon col="roi" /></th>
                 {/* Lucro */}
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-[hsl(280,65%,60%)]/[0.02]">70%</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-[hsl(280,65%,60%)]/[0.02]">60%</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-[hsl(280,65%,60%)]/[0.02]">50%</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-[hsl(280,65%,60%)]/[0.02] border-r border-border/10">40%</th>
+                <th onClick={() => toggleSort("lucro70")} className={`text-right ${thBase} bg-[hsl(280,65%,60%)]/[0.02]`}>70% <SortIcon col="lucro70" /></th>
+                <th onClick={() => toggleSort("lucro60")} className={`text-right ${thBase} bg-[hsl(280,65%,60%)]/[0.02]`}>60% <SortIcon col="lucro60" /></th>
+                <th onClick={() => toggleSort("lucro50")} className={`text-right ${thBase} bg-[hsl(280,65%,60%)]/[0.02]`}>50% <SortIcon col="lucro50" /></th>
+                <th onClick={() => toggleSort("lucro40")} className={`text-right ${thBase} bg-[hsl(280,65%,60%)]/[0.02] border-r border-border/10`}>40% <SortIcon col="lucro40" /></th>
                 <th className="text-center text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-2 py-3">Vídeo</th>
               </tr>
             </thead>
