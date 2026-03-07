@@ -486,12 +486,12 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
                     <td className={`${tc} bg-success/[0.01] font-semibold`}><MetricCell current={revenue} prev={prev?.revenue} prefix="R$" /></td>
                     <td className={`${tc} bg-success/[0.01] border-r border-border/[0.06]`}>
                       <div>
-                        <span className={`font-semibold ${roi > 0 ? "text-profit" : "text-loss"}`}>
-                          {fmt(roi)}%
+                        <span className={`font-semibold ${roi >= 1 ? "text-profit" : "text-loss"}`}>
+                          {fmt(roi)}x
                         </span>
                         <RoiIndicator value={roi} />
                         {prev && prev.roi !== 0 && (
-                          <div className="text-[10px] text-muted-foreground/60 mt-0.5">{fmt(prev.roi)}%</div>
+                          <div className="text-[10px] text-muted-foreground/60 mt-0.5">{fmt(prev.roi)}x</div>
                         )}
                       </div>
                     </td>
