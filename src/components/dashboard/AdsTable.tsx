@@ -416,6 +416,9 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
                 const { ad, adName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 } = row;
                 const video = adVideos[adName];
                 const isActive = ad.status === "active";
+                const prev = prevRowsMap.get(adName.toLowerCase().trim());
+
+                const tc = "text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap";
 
                 return (
                   <tr
@@ -439,44 +442,64 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
                       </Badge>
                     </td>
                     {/* Custos */}
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-primary/[0.01] font-medium">R${fmt(spend)}</td>
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-primary/[0.01]">R${fmt(cpa)}</td>
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-primary/[0.01] border-r border-border/[0.06]">R${fmt(cpl)}</td>
+                    <td className={`${tc} bg-primary/[0.01] font-medium`}><MetricCell current={spend} prev={prev?.spend} prefix="R$" /></td>
+                    <td className={`${tc} bg-primary/[0.01]`}><MetricCell current={cpa} prev={prev?.cpa} prefix="R$" /></td>
+                    <td className={`${tc} bg-primary/[0.01] border-r border-border/[0.06]`}><MetricCell current={cpl} prev={prev?.cpl} prefix="R$" /></td>
                     {/* Conversão */}
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-info/[0.01]">{leads.toLocaleString("pt-BR")}</td>
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-info/[0.01] font-medium">{sales.toLocaleString("pt-BR")}</td>
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-info/[0.01]">
-                      <span className={convRate >= 10 ? "text-profit" : convRate >= 5 ? "text-warning" : "text-muted-foreground"}>
-                        {fmt(convRate)}%
-                      </span>
+                    <td className={`${tc} bg-info/[0.01]`}><MetricCell current={leads} prev={prev?.leads} /></td>
+                    <td className={`${tc} bg-info/[0.01] font-medium`}><MetricCell current={sales} prev={prev?.sales} /></td>
+                    <td className={`${tc} bg-info/[0.01]`}>
+                      <div>
+                        <span className={convRate >= 10 ? "text-profit" : convRate >= 5 ? "text-warning" : "text-muted-foreground"}>
+                          {fmt(convRate)}%
+                        </span>
+                        {prev && prev.convRate > 0 && (
+                          <div className="text-[10px] text-muted-foreground/60 mt-0.5">{fmt(prev.convRate)}%</div>
+                        )}
+                      </div>
                     </td>
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-info/[0.01] border-r border-border/[0.06]">R${fmt(avgTicket)}</td>
+                    <td className={`${tc} bg-info/[0.01] border-r border-border/[0.06]`}><MetricCell current={avgTicket} prev={prev?.avgTicket} prefix="R$" /></td>
                     {/* Engajamento */}
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-warning/[0.01]">
-                      <span className={(ad.hookRate ?? 0) >= 40 ? "text-profit" : (ad.hookRate ?? 0) >= 30 ? "text-warning" : "text-loss"}>
-                        {fmt(ad.hookRate)}%
-                      </span>
+                    <td className={`${tc} bg-warning/[0.01]`}>
+                      <div>
+                        <span className={(ad.hookRate ?? 0) >= 40 ? "text-profit" : (ad.hookRate ?? 0) >= 30 ? "text-warning" : "text-loss"}>
+                          {fmt(ad.hookRate)}%
+                        </span>
+                        {prev && (prev.ad.hookRate ?? 0) > 0 && (
+                          <div className="text-[10px] text-muted-foreground/60 mt-0.5">{fmt(prev.ad.hookRate)}%</div>
+                        )}
+                      </div>
                     </td>
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-warning/[0.01]">
-                      <span className={(ad.bodyRate ?? 0) >= 30 ? "text-profit" : (ad.bodyRate ?? 0) >= 20 ? "text-warning" : "text-loss"}>
-                        {fmt(ad.bodyRate)}%
-                      </span>
+                    <td className={`${tc} bg-warning/[0.01]`}>
+                      <div>
+                        <span className={(ad.bodyRate ?? 0) >= 30 ? "text-profit" : (ad.bodyRate ?? 0) >= 20 ? "text-warning" : "text-loss"}>
+                          {fmt(ad.bodyRate)}%
+                        </span>
+                        {prev && (prev.ad.bodyRate ?? 0) > 0 && (
+                          <div className="text-[10px] text-muted-foreground/60 mt-0.5">{fmt(prev.ad.bodyRate)}%</div>
+                        )}
+                      </div>
                     </td>
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-warning/[0.01]">{fmt(ad.ctr)}%</td>
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-warning/[0.01] border-r border-border/[0.06]">R${fmt(ad.cpm)}</td>
+                    <td className={`${tc} bg-warning/[0.01]`}><MetricCell current={ad.ctr ?? 0} prev={prev?.ad.ctr} suffix="%" /></td>
+                    <td className={`${tc} bg-warning/[0.01] border-r border-border/[0.06]`}><MetricCell current={ad.cpm ?? 0} prev={prev?.ad.cpm} prefix="R$" /></td>
                     {/* Receita */}
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-success/[0.01] font-semibold">R${fmt(revenue)}</td>
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-success/[0.01] border-r border-border/[0.06]">
-                      <span className={`font-semibold ${roi > 0 ? "text-profit" : "text-loss"}`}>
-                        {fmt(roi)}%
-                      </span>
-                      <RoiIndicator value={roi} />
+                    <td className={`${tc} bg-success/[0.01] font-semibold`}><MetricCell current={revenue} prev={prev?.revenue} prefix="R$" /></td>
+                    <td className={`${tc} bg-success/[0.01] border-r border-border/[0.06]`}>
+                      <div>
+                        <span className={`font-semibold ${roi > 0 ? "text-profit" : "text-loss"}`}>
+                          {fmt(roi)}%
+                        </span>
+                        <RoiIndicator value={roi} />
+                        {prev && prev.roi !== 0 && (
+                          <div className="text-[10px] text-muted-foreground/60 mt-0.5">{fmt(prev.roi)}%</div>
+                        )}
+                      </div>
                     </td>
                     {/* Lucro */}
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-[hsl(280,65%,60%)]/[0.01]"><ProfitCell value={lucro70} /></td>
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-[hsl(280,65%,60%)]/[0.01]"><ProfitCell value={lucro60} /></td>
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-[hsl(280,65%,60%)]/[0.01]"><ProfitCell value={lucro50} /></td>
-                    <td className="text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap bg-[hsl(280,65%,60%)]/[0.01] border-r border-border/[0.06]"><ProfitCell value={lucro40} /></td>
+                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCompareCell current={lucro70} prev={prev?.lucro70} /></td>
+                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCompareCell current={lucro60} prev={prev?.lucro60} /></td>
+                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCompareCell current={lucro50} prev={prev?.lucro50} /></td>
+                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01] border-r border-border/[0.06]`}><ProfitCompareCell current={lucro40} prev={prev?.lucro40} /></td>
                     {/* Video */}
                     <td className="px-2 py-3.5">
                       <div className="flex items-center justify-center gap-1">
