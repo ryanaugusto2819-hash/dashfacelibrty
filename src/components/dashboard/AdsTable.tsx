@@ -522,10 +522,10 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                       </div>
                     </td>
                     {/* Lucro */}
-                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCompareCell current={lucro70} prev={prev?.lucro70} /></td>
-                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCompareCell current={lucro60} prev={prev?.lucro60} /></td>
-                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCompareCell current={lucro50} prev={prev?.lucro50} /></td>
-                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01] border-r border-border/[0.06]`}><ProfitCompareCell current={lucro40} prev={prev?.lucro40} /></td>
+                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}>{isAdmin ? <ProfitCompareCell current={lucro70} prev={prev?.lucro70} /> : <span className="text-muted-foreground">••••••</span>}</td>
+                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}>{isAdmin ? <ProfitCompareCell current={lucro60} prev={prev?.lucro60} /> : <span className="text-muted-foreground">••••••</span>}</td>
+                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01]`}>{isAdmin ? <ProfitCompareCell current={lucro50} prev={prev?.lucro50} /> : <span className="text-muted-foreground">••••••</span>}</td>
+                    <td className={`${tc} bg-[hsl(280,65%,60%)]/[0.01] border-r border-border/[0.06]`}>{isAdmin ? <ProfitCompareCell current={lucro40} prev={prev?.lucro40} /> : <span className="text-muted-foreground">••••••</span>}</td>
                     {/* Video */}
                     <td className="px-2 py-3.5">
                       <div className="flex items-center justify-center gap-1">
