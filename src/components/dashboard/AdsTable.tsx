@@ -173,10 +173,22 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
   }, 0);
 
   const filteredRows = useMemo(() => {
-    if (!searchQuery.trim()) return rows;
-    const q = searchQuery.toLowerCase().trim();
-    return rows.filter(r => r.adName.toLowerCase().includes(q));
-  }, [rows, searchQuery]);
+    let result = rows;
+    if (countryFilter !== "all") {
+      result = result.filter(r => {
+        const campaign = (r.ad.campaign_name || "").toUpperCase();
+        const isAR = campaign.includes("(AR-") || campaign.includes("(AR ");
+        const isUY = campaign.includes("(UY-") || campaign.includes("(UY ");
+        if (countryFilter === "argentina") return isAR;
+        return isUY || !isAR;
+      });
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(r => r.adName.toLowerCase().includes(q));
+    }
+    return result;
+  }, [rows, searchQuery, countryFilter]);
 
   const RoiIndicator = ({ value }: { value: number }) => {
     if (value > 50) return <TrendingUp className="h-3.5 w-3.5 text-profit inline ml-1" />;
