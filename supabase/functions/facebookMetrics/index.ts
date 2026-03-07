@@ -25,6 +25,7 @@ interface ProcessedMetric {
   date: string;
   ad_id: string;
   ad_name: string;
+  campaign_name: string;
   spend: number;
   impressions: number;
   clicks: number;
