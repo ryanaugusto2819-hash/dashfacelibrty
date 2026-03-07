@@ -248,6 +248,39 @@ const Index = () => {
     return Array.from(map.values());
   }, [filteredData]);
 
+  const deduplicatedPrevAds = useMemo(() => {
+    const map = new Map<string, any>();
+    filteredPrevData.forEach((ad) => {
+      const name = (ad.ad_name || ad.name || "").toLowerCase().trim();
+      if (!name) return;
+      const existing = map.get(name);
+      if (existing) {
+        existing.spend = (existing.spend || 0) + Number(ad.spend || 0);
+        existing.leads = (existing.leads || 0) + Number(ad.leads || 0);
+        existing.impressions = (existing.impressions || 0) + Number(ad.impressions || 0);
+        existing.clicks = (existing.clicks || 0) + Number(ad.clicks || 0);
+        existing.reach = (existing.reach || 0) + Number(ad.reach || 0);
+        if (ad.status === "active") existing.status = "active";
+        existing.cpm = existing.impressions > 0 ? (existing.spend / existing.impressions) * 1000 : 0;
+        existing.ctr = existing.impressions > 0 ? (existing.clicks / existing.impressions) * 100 : 0;
+        existing.costPerLead = existing.leads > 0 ? existing.spend / existing.leads : 0;
+        existing.cpl = existing.costPerLead;
+        const totalImpressions = existing.impressions;
+        if (ad.hookRate != null) {
+          existing._hookWeighted = (existing._hookWeighted || 0) + (ad.hookRate || 0) * Number(ad.impressions || 0);
+          existing.hookRate = totalImpressions > 0 ? existing._hookWeighted / totalImpressions : 0;
+        }
+        if (ad.bodyRate != null) {
+          existing._bodyWeighted = (existing._bodyWeighted || 0) + (ad.bodyRate || 0) * Number(ad.impressions || 0);
+          existing.bodyRate = totalImpressions > 0 ? existing._bodyWeighted / totalImpressions : 0;
+        }
+      } else {
+        map.set(name, { ...ad, _hookWeighted: (ad.hookRate || 0) * Number(ad.impressions || 0), _bodyWeighted: (ad.bodyRate || 0) * Number(ad.impressions || 0) });
+      }
+    });
+    return Array.from(map.values());
+  }, [filteredPrevData]);
+
   const kpi = useMemo(() => calcKpis(filteredData, filteredSalesData), [filteredData, filteredSalesData]);
   const prevKpi = useMemo(() => calcKpis(filteredPrevData, filteredPrevSalesData), [filteredPrevData, filteredPrevSalesData]);
 
@@ -424,7 +457,7 @@ const Index = () => {
                 Detalhamento
               </h2>
             </div>
-            <AdsTable ads={deduplicatedAds} salesData={filteredSalesData} />
+            <AdsTable ads={deduplicatedAds} salesData={filteredSalesData} prevAds={deduplicatedPrevAds} prevSalesData={filteredPrevSalesData} />
           </section>
         )}
       </main>
