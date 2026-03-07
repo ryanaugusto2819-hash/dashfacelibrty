@@ -310,6 +310,14 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
     );
   };
 
+  if (isEmpty) {
+    return (
+      <div className="glass-card p-8 text-center text-muted-foreground text-sm">
+        Nenhum anúncio encontrado no período selecionado.
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="glass-card overflow-hidden">
