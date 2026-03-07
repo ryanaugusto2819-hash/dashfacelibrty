@@ -191,9 +191,20 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
     <>
       <div className="glass-card overflow-hidden">
         {/* Header */}
-        <div className="p-6 border-b border-border/30">
-          <h2 className="text-lg font-display font-semibold">Métricas por Anúncio</h2>
-          <p className="text-[11px] text-muted-foreground mt-1 tracking-wide">Performance individual de cada criativo</p>
+        <div className="p-6 border-b border-border/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-display font-semibold">Métricas por Anúncio</h2>
+            <p className="text-[11px] text-muted-foreground mt-1 tracking-wide">Performance individual de cada criativo</p>
+          </div>
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar anúncio..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-9 bg-secondary/50 border-border/30 text-sm"
+            />
+          </div>
         </div>
 
         <div className="overflow-x-auto">
