@@ -193,7 +193,7 @@ const Index = () => {
 
   const filteredData = useMemo(() => {
     if (countryFilter === "all") return data;
-    return data.filter(ad => isAdCountry(ad.ad_name || ad.name || "", countryFilter));
+    return data.filter(ad => isAdCountry(ad, countryFilter));
   }, [data, countryFilter]);
 
   const filteredSalesData = useMemo(() => {
