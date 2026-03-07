@@ -176,9 +176,45 @@ const Index = () => {
     fetchData();
   }, [range, customRange]);
 
+  const isAdCountry = (adName: string, country: "uruguay" | "argentina") => {
+    const name = (adName || "").toLowerCase().trim();
+    if (country === "argentina") return name.endsWith(" ar");
+    return !name.endsWith(" ar");
+  };
+
+  const filteredData = useMemo(() => {
+    if (countryFilter === "all") return data;
+    return data.filter(ad => isAdCountry(ad.ad_name || ad.name || "", countryFilter));
+  }, [data, countryFilter]);
+
+  const filteredSalesData = useMemo(() => {
+    if (countryFilter === "all") return salesData;
+    return salesData.filter(s => {
+      const country = (s.country || "").toLowerCase();
+      const creative = (s.creative || "").toLowerCase().trim();
+      const isAR = country.includes("argentin") || creative.endsWith(" ar");
+      return countryFilter === "argentina" ? isAR : !isAR;
+    });
+  }, [salesData, countryFilter]);
+
+  const filteredPrevData = useMemo(() => {
+    if (countryFilter === "all") return prevData;
+    return prevData.filter(ad => isAdCountry(ad.ad_name || ad.name || "", countryFilter));
+  }, [prevData, countryFilter]);
+
+  const filteredPrevSalesData = useMemo(() => {
+    if (countryFilter === "all") return prevSalesData;
+    return prevSalesData.filter(s => {
+      const country = (s.country || "").toLowerCase();
+      const creative = (s.creative || "").toLowerCase().trim();
+      const isAR = country.includes("argentin") || creative.endsWith(" ar");
+      return countryFilter === "argentina" ? isAR : !isAR;
+    });
+  }, [prevSalesData, countryFilter]);
+
   const deduplicatedAds = useMemo(() => {
     const map = new Map<string, any>();
-    data.forEach((ad) => {
+    filteredData.forEach((ad) => {
       const name = (ad.ad_name || ad.name || "").toLowerCase().trim();
       if (!name) return;
       const existing = map.get(name);
@@ -188,14 +224,11 @@ const Index = () => {
         existing.impressions = (existing.impressions || 0) + Number(ad.impressions || 0);
         existing.clicks = (existing.clicks || 0) + Number(ad.clicks || 0);
         existing.reach = (existing.reach || 0) + Number(ad.reach || 0);
-        // Keep active status if any is active
         if (ad.status === "active") existing.status = "active";
-        // Recalculate derived metrics
         existing.cpm = existing.impressions > 0 ? (existing.spend / existing.impressions) * 1000 : 0;
         existing.ctr = existing.impressions > 0 ? (existing.clicks / existing.impressions) * 100 : 0;
         existing.costPerLead = existing.leads > 0 ? existing.spend / existing.leads : 0;
         existing.cpl = existing.costPerLead;
-        // Weighted average for rates
         const totalImpressions = existing.impressions;
         if (ad.hookRate != null) {
           existing._hookWeighted = (existing._hookWeighted || 0) + (ad.hookRate || 0) * Number(ad.impressions || 0);
@@ -210,10 +243,10 @@ const Index = () => {
       }
     });
     return Array.from(map.values());
-  }, [data]);
+  }, [filteredData]);
 
-  const kpi = useMemo(() => calcKpis(data, salesData), [data, salesData]);
-  const prevKpi = useMemo(() => calcKpis(prevData, prevSalesData), [prevData, prevSalesData]);
+  const kpi = useMemo(() => calcKpis(filteredData, filteredSalesData), [filteredData, filteredSalesData]);
+  const prevKpi = useMemo(() => calcKpis(filteredPrevData, filteredPrevSalesData), [filteredPrevData, filteredPrevSalesData]);
 
   // Metrics where lower is better (invert trend colors)
   const spentTrend = calcTrend(kpi.totalSpent, prevKpi.totalSpent, true);
