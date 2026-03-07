@@ -151,7 +151,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
     const cpa = ad.cpa ?? (sales > 0 ? spend / sales : 0);
     const convRate = leads > 0 ? (sales / leads) * 100 : 0;
     const avgTicket = sales > 0 ? revenue / sales : 0;
-    const roi = spend > 0 ? ((revenue - spend) / spend) * 100 : 0;
+    const roi = spend > 0 ? revenue / spend : 0;
     const lucro70 = revenue * 0.7 - spend;
     const lucro60 = revenue * 0.6 - spend;
     const lucro50 = revenue * 0.5 - spend;
