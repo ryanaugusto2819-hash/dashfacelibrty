@@ -35,7 +35,7 @@ interface ProcessedMetric {
   cpc: number;
   leads: number;
   costPerLead: number | null;
-  videoPlays: number;
+  video3s: number;
   videoP95: number;
   hookRate: number;
   bodyRate: number;
