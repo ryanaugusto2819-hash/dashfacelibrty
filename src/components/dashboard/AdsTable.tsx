@@ -27,6 +27,8 @@ interface AdVideo {
   file_name: string | null;
 }
 
+type CountryFilter = "all" | "uruguay" | "argentina";
+
 interface AdsTableProps {
   ads: any[];
   salesData?: SaleEntry[];
@@ -42,6 +44,7 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
   const [uploading, setUploading] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [countryFilter, setCountryFilter] = useState<CountryFilter>("all");
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
@@ -170,10 +173,22 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
   }, 0);
 
   const filteredRows = useMemo(() => {
-    if (!searchQuery.trim()) return rows;
-    const q = searchQuery.toLowerCase().trim();
-    return rows.filter(r => r.adName.toLowerCase().includes(q));
-  }, [rows, searchQuery]);
+    let result = rows;
+    if (countryFilter !== "all") {
+      result = result.filter(r => {
+        const campaign = (r.ad.campaign_name || "").toUpperCase();
+        const isAR = campaign.includes("(AR-") || campaign.includes("(AR ");
+        const isUY = campaign.includes("(UY-") || campaign.includes("(UY ");
+        if (countryFilter === "argentina") return isAR;
+        return isUY || !isAR;
+      });
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(r => r.adName.toLowerCase().includes(q));
+    }
+    return result;
+  }, [rows, searchQuery, countryFilter]);
 
   const RoiIndicator = ({ value }: { value: number }) => {
     if (value > 50) return <TrendingUp className="h-3.5 w-3.5 text-profit inline ml-1" />;
@@ -196,14 +211,37 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
             <h2 className="text-lg font-display font-semibold">Métricas por Anúncio</h2>
             <p className="text-[11px] text-muted-foreground mt-1 tracking-wide">Performance individual de cada criativo</p>
           </div>
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar anúncio..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9 bg-secondary/50 border-border/30 text-sm"
-            />
+          <div className="flex items-center gap-2">
+            {/* Country filter */}
+            <div className="flex items-center bg-secondary/50 rounded-lg p-0.5 border border-border/30">
+              {([
+                { value: "all" as CountryFilter, label: "Todos" },
+                { value: "uruguay" as CountryFilter, label: "🇺🇾" },
+                { value: "argentina" as CountryFilter, label: "🇦🇷" },
+              ]).map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setCountryFilter(opt.value)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    countryFilter === opt.value
+                      ? "bg-primary/20 text-primary shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            {/* Search */}
+            <div className="relative w-full sm:w-56">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar anúncio..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9 bg-secondary/50 border-border/30 text-sm"
+              />
+            </div>
           </div>
         </div>
 
