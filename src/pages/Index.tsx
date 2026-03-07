@@ -277,13 +277,20 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {lastUpdate && (
               <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                 <Clock className="h-3 w-3" />
                 Atualizado às {lastUpdate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
               </span>
             )}
+            <Tabs value={countryFilter} onValueChange={(v) => setCountryFilter(v as any)}>
+              <TabsList className="h-8">
+                <TabsTrigger value="all" className="text-xs px-3 h-6">Todos</TabsTrigger>
+                <TabsTrigger value="uruguay" className="text-xs px-3 h-6">🇺🇾 Uruguai</TabsTrigger>
+                <TabsTrigger value="argentina" className="text-xs px-3 h-6">🇦🇷 Argentina</TabsTrigger>
+              </TabsList>
+            </Tabs>
             <button
               onClick={fetchData}
               disabled={loading}
