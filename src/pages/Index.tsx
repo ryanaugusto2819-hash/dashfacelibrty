@@ -177,18 +177,12 @@ const Index = () => {
   }, [range, customRange]);
 
   const isAdCountry = (ad: any, country: "uruguay" | "argentina") => {
-    const campaignName = (ad.campaign_name || "").toLowerCase().trim();
-    const isAR = campaignName.includes(" ar") || campaignName.includes("_ar") || campaignName.endsWith("ar");
-    const isUY = campaignName.includes(" uy") || campaignName.includes("_uy") || campaignName.endsWith("uy");
-    // If campaign has AR → argentina; if has UY → uruguay; fallback to ad name suffix
-    if (country === "argentina") {
-      if (isAR) return true;
-      if (isUY) return false;
-      return (ad.ad_name || "").toLowerCase().trim().endsWith(" ar");
-    }
-    if (isUY) return true;
-    if (isAR) return false;
-    return !(ad.ad_name || "").toLowerCase().trim().endsWith(" ar");
+    const campaignName = (ad.campaign_name || "").toUpperCase();
+    // Check for (AR-...) or (UY-...) pattern in campaign name
+    const isAR = campaignName.includes("(AR-") || campaignName.includes("(AR ");
+    const isUY = campaignName.includes("(UY-") || campaignName.includes("(UY ");
+    if (country === "argentina") return isAR;
+    return isUY || !isAR; // Default to UY if neither pattern found
   };
 
   const filteredData = useMemo(() => {
