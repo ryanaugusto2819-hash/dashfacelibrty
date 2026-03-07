@@ -490,23 +490,20 @@ const Index = () => {
                   trend={ticketTrend.trend} trendUp={ticketTrend.trendUp} trendNeutral={ticketTrend.trendNeutral}
                   previousValue={`R$ ${fmt(prevKpi.averageTicket)}`} hidden={hideValues} />
               </div>
-              <div className="animate-fade-in-up relative" style={{ animationDelay: "400ms" }}>
-                {!isAdmin && <div className="absolute inset-0 z-10 backdrop-blur-xl bg-background/70 rounded-xl flex items-center justify-center"><span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">🔒 Admin</span></div>}
+              <div className="animate-fade-in-up" style={{ animationDelay: "400ms" }}>
                 <KPICard title="Lucro 70%" value={`R$ ${fmt(kpi.lucro70)}`} icon={Wallet} variant="green"
                   trend={lucro70Trend.trend} trendUp={lucro70Trend.trendUp} trendNeutral={lucro70Trend.trendNeutral}
-                  previousValue={`R$ ${fmt(prevKpi.lucro70)}`} hidden={hideValues} />
+                  previousValue={`R$ ${fmt(prevKpi.lucro70)}`} hidden={hideValues || !isAdmin} />
               </div>
-              <div className="animate-fade-in-up relative" style={{ animationDelay: "450ms" }}>
-                {!isAdmin && <div className="absolute inset-0 z-10 backdrop-blur-xl bg-background/70 rounded-xl flex items-center justify-center"><span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">🔒 Admin</span></div>}
+              <div className="animate-fade-in-up" style={{ animationDelay: "450ms" }}>
                 <KPICard title="Lucro 60%" value={`R$ ${fmt(kpi.lucro60)}`} icon={Wallet} variant="green"
                   trend={lucro60Trend.trend} trendUp={lucro60Trend.trendUp} trendNeutral={lucro60Trend.trendNeutral}
-                  previousValue={`R$ ${fmt(prevKpi.lucro60)}`} hidden={hideValues} />
+                  previousValue={`R$ ${fmt(prevKpi.lucro60)}`} hidden={hideValues || !isAdmin} />
               </div>
-              <div className="animate-fade-in-up relative" style={{ animationDelay: "500ms" }}>
-                {!isAdmin && <div className="absolute inset-0 z-10 backdrop-blur-xl bg-background/70 rounded-xl flex items-center justify-center"><span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">🔒 Admin</span></div>}
+              <div className="animate-fade-in-up" style={{ animationDelay: "500ms" }}>
                 <KPICard title="Lucro 50%" value={`R$ ${fmt(kpi.lucro50)}`} icon={Wallet} variant="orange"
                   trend={lucro50Trend.trend} trendUp={lucro50Trend.trendUp} trendNeutral={lucro50Trend.trendNeutral}
-                  previousValue={`R$ ${fmt(prevKpi.lucro50)}`} hidden={hideValues} />
+                  previousValue={`R$ ${fmt(prevKpi.lucro50)}`} hidden={hideValues || !isAdmin} />
               </div>
             </div>
           )}
