@@ -100,6 +100,7 @@ serve(async (req) => {
       "video_p95_watched_actions",
       "ad_id",
       "ad_name",
+      "campaign_name",
     ].join(",");
 
     const timeRange = JSON.stringify({ since: from, until: to });
