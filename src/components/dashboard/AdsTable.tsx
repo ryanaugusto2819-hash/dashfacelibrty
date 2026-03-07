@@ -445,7 +445,16 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
                     </td>
                     {/* Custos */}
                     <td className={`${tc} bg-primary/[0.01] font-medium`}><MetricCell current={spend} prev={prev?.spend} prefix="R$" /></td>
-                    <td className={`${tc} bg-primary/[0.01]`}><MetricCell current={cpa} prev={prev?.cpa} prefix="R$" /></td>
+                    <td className={`${tc} bg-primary/[0.01]`}>
+                      <div>
+                        <span className={cpa >= 5 && cpa <= 100 ? "text-profit" : cpa <= 150 ? "text-warning" : "text-loss"}>
+                          R${fmt(cpa)}
+                        </span>
+                        {prev && prev.cpa > 0 && (
+                          <div className="text-[10px] text-muted-foreground/60 mt-0.5">R${fmt(prev.cpa)}</div>
+                        )}
+                      </div>
+                    </td>
                     <td className={`${tc} bg-primary/[0.01] border-r border-border/[0.06]`}><MetricCell current={cpl} prev={prev?.cpl} prefix="R$" /></td>
                     {/* Conversão */}
                     <td className={`${tc} bg-info/[0.01]`}><MetricCell current={leads} prev={prev?.leads} /></td>
