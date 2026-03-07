@@ -44,7 +44,7 @@ const fmt = (n: number | null | undefined) => {
   return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
-const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
+const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: AdsTableProps) => {
   const [adVideos, setAdVideos] = useState<Record<string, AdVideo>>({});
   const [uploading, setUploading] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
