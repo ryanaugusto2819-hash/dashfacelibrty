@@ -566,6 +566,72 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
                   <td className="px-2 py-3.5" />
                 </tr>
               )}
+
+              {/* TOTAL row */}
+              {(() => {
+                const tSpend = filteredRows.reduce((s, r) => s + r.spend, 0);
+                const tLeads = filteredRows.reduce((s, r) => s + r.leads, 0);
+                const tSales = filteredRows.reduce((s, r) => s + r.sales, 0) + uSales;
+                const tRevenue = filteredRows.reduce((s, r) => s + r.revenue, 0) + uRevenue;
+                const tCpa = tSales > 0 ? tSpend / tSales : 0;
+                const tCpl = tLeads > 0 ? tSpend / tLeads : 0;
+                const tConvRate = tLeads > 0 ? (tSales / tLeads) * 100 : 0;
+                const tAvgTicket = tSales > 0 ? tRevenue / tSales : 0;
+                const tRoas = tSpend > 0 ? tRevenue / tSpend : 0;
+                const tLucro70 = tRevenue * 0.7 - tSpend;
+                const tLucro60 = tRevenue * 0.6 - tSpend;
+                const tLucro50 = tRevenue * 0.5 - tSpend;
+                const tLucro40 = tRevenue * 0.4 - tSpend;
+                const tImpressions = filteredRows.reduce((s, r) => s + (r.ad.impressions || 0), 0);
+                const tClicks = filteredRows.reduce((s, r) => s + (r.ad.clicks || 0), 0);
+                const tCtr = tImpressions > 0 ? (tClicks / tImpressions) * 100 : 0;
+                const tCpm = tImpressions > 0 ? (tSpend / tImpressions) * 1000 : 0;
+                const tHookWeighted = filteredRows.reduce((s, r) => s + (r.ad.hookRate || 0) * (r.ad.impressions || 0), 0);
+                const tBodyWeighted = filteredRows.reduce((s, r) => s + (r.ad.bodyRate || 0) * (r.ad.impressions || 0), 0);
+                const tHookRate = tImpressions > 0 ? tHookWeighted / tImpressions : 0;
+                const tBodyRate = tImpressions > 0 ? tBodyWeighted / tImpressions : 0;
+
+                const ttc = "text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap font-semibold";
+
+                return (
+                  <tr className="border-t-2 border-primary/30 bg-primary/[0.05]">
+                    <td className="px-4 py-3.5 font-bold text-sm whitespace-nowrap sticky left-0 bg-primary/[0.05] z-10">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-primary" />
+                        TOTAL
+                      </div>
+                    </td>
+                    <td className="px-2 py-3.5 text-center"><Badge className="bg-primary/15 text-primary border-primary/20 border text-[10px] px-2 py-0.5">{filteredRows.length}</Badge></td>
+                    <td className={`${ttc} bg-primary/[0.02]`}>R${fmt(tSpend)}</td>
+                    <td className={`${ttc} bg-primary/[0.02]`}>R${fmt(tCpa)}</td>
+                    <td className={`${ttc} bg-primary/[0.02] border-r border-border/[0.06]`}>R${fmt(tCpl)}</td>
+                    <td className={`${ttc} bg-info/[0.02]`}>{tLeads.toLocaleString("pt-BR")}</td>
+                    <td className={`${ttc} bg-info/[0.02]`}>{tSales.toLocaleString("pt-BR")}</td>
+                    <td className={`${ttc} bg-info/[0.02]`}>
+                      <span className={tConvRate >= 10 ? "text-profit" : tConvRate >= 5 ? "text-warning" : "text-muted-foreground"}>{fmt(tConvRate)}%</span>
+                    </td>
+                    <td className={`${ttc} bg-info/[0.02] border-r border-border/[0.06]`}>R${fmt(tAvgTicket)}</td>
+                    <td className={`${ttc} bg-warning/[0.02]`}>
+                      <span className={tHookRate >= 60 ? "text-profit" : tHookRate >= 50 ? "text-warning" : "text-loss"}>{fmt(tHookRate)}%</span>
+                    </td>
+                    <td className={`${ttc} bg-warning/[0.02]`}>
+                      <span className={tBodyRate >= 3.5 ? "text-profit" : tBodyRate >= 2 ? "text-warning" : "text-loss"}>{fmt(tBodyRate)}%</span>
+                    </td>
+                    <td className={`${ttc} bg-warning/[0.02]`}>{fmt(tCtr)}%</td>
+                    <td className={`${ttc} bg-warning/[0.02] border-r border-border/[0.06]`}>R${fmt(tCpm)}</td>
+                    <td className={`${ttc} bg-success/[0.02]`}>R${fmt(tRevenue)}</td>
+                    <td className={`${ttc} bg-success/[0.02] border-r border-border/[0.06]`}>
+                      <span className={`${tRoas >= 1 ? "text-profit" : "text-loss"}`}>{fmt(tRoas)}x</span>
+                      <RoiIndicator value={tRoas} />
+                    </td>
+                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCell value={tLucro70} /></td>
+                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCell value={tLucro60} /></td>
+                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCell value={tLucro50} /></td>
+                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01] border-r border-border/[0.06]`}><ProfitCell value={tLucro40} /></td>
+                    <td className="px-2 py-3.5" />
+                  </tr>
+                );
+              })()}
             </tbody>
           </table>
         </div>
