@@ -126,26 +126,30 @@ serve(async (req) => {
     // Columns: G=valor(6), L=data_criacao(11), S=Criativo(18)
     const data: SheetSale[] = rows.slice(1).map((row) => {
       const creative = row[18] || "";
-      // Determine country: check BOTH 'pais' column AND creative suffix
+      const revenue = parseFloat(row[6]) || 0;
       let country = "uruguay";
       const creativeLower = creative.toLowerCase().trim();
       
-      // Check creative suffix first (most reliable signal)
+      // Check creative suffix
       if (creativeLower.endsWith(" ar")) {
         country = "argentina";
       }
-      // Also check pais column if available
+      // Check pais column if available
       if (paisIdx >= 0 && row[paisIdx]) {
         const paisVal = row[paisIdx].toLowerCase().trim();
         if (paisVal.includes("argentin")) {
           country = "argentina";
         }
       }
+      // Heuristic: UYU sales are typically 7000-15000. Values >= 20000 are almost certainly ARS.
+      if (country === "uruguay" && revenue >= 20000) {
+        country = "argentina";
+      }
       return {
         date: row[11] || "",
         creative,
         sales: 1,
-        revenue: parseFloat(row[6]) || 0,
+        revenue,
         country,
       };
     });
