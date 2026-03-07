@@ -193,9 +193,11 @@ const Index = () => {
   };
 
   const filteredData = useMemo(() => {
-    if (countryFilter === "all") return data;
-    return data.filter(ad => isAdCountry(ad, countryFilter));
-  }, [data, countryFilter]);
+    let result = data;
+    if (countryFilter !== "all") result = result.filter(ad => isAdCountry(ad, countryFilter));
+    if (nichoFilter !== "all") result = result.filter(ad => isAdNicho(ad, nichoFilter));
+    return result;
+  }, [data, countryFilter, nichoFilter]);
 
   const filteredSalesData = useMemo(() => {
     if (countryFilter === "all") return salesData;
