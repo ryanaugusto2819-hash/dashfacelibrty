@@ -210,9 +210,11 @@ const Index = () => {
   }, [salesData, countryFilter]);
 
   const filteredPrevData = useMemo(() => {
-    if (countryFilter === "all") return prevData;
-    return prevData.filter(ad => isAdCountry(ad, countryFilter));
-  }, [prevData, countryFilter]);
+    let result = prevData;
+    if (countryFilter !== "all") result = result.filter(ad => isAdCountry(ad, countryFilter));
+    if (nichoFilter !== "all") result = result.filter(ad => isAdNicho(ad, nichoFilter));
+    return result;
+  }, [prevData, countryFilter, nichoFilter]);
 
   const filteredPrevSalesData = useMemo(() => {
     if (countryFilter === "all") return prevSalesData;
