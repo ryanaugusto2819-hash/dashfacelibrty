@@ -648,10 +648,10 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                       <span className={`${tRoas >= 1 ? "text-profit" : "text-loss"}`}>{fmt(tRoas)}x</span>
                       <RoiIndicator value={tRoas} />
                     </td>
-                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCell value={tLucro70} /></td>
-                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCell value={tLucro60} /></td>
-                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}><ProfitCell value={tLucro50} /></td>
-                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01] border-r border-border/[0.06]`}><ProfitCell value={tLucro40} /></td>
+                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}>{isAdmin ? <ProfitCell value={tLucro70} /> : <span className="text-muted-foreground">••••••</span>}</td>
+                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}>{isAdmin ? <ProfitCell value={tLucro60} /> : <span className="text-muted-foreground">••••••</span>}</td>
+                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01]`}>{isAdmin ? <ProfitCell value={tLucro50} /> : <span className="text-muted-foreground">••••••</span>}</td>
+                    <td className={`${ttc} bg-[hsl(280,65%,60%)]/[0.01] border-r border-border/[0.06]`}>{isAdmin ? <ProfitCell value={tLucro40} /> : <span className="text-muted-foreground">••••••</span>}</td>
                     <td className="px-2 py-3.5" />
                   </tr>
                 );
