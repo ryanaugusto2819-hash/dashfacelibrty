@@ -457,7 +457,7 @@ const Index = () => {
                 Detalhamento
               </h2>
             </div>
-            <AdsTable ads={deduplicatedAds} salesData={filteredSalesData} />
+            <AdsTable ads={deduplicatedAds} salesData={filteredSalesData} prevAds={deduplicatedPrevAds} prevSalesData={filteredPrevSalesData} />
           </section>
         )}
       </main>
