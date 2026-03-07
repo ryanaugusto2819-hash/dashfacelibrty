@@ -177,6 +177,15 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
     return sum + raw / (isAR ? 266 : 7.49);
   }, 0);
 
+  const toggleSort = useCallback((key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => d === "desc" ? "asc" : "desc");
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+  }, [sortKey]);
+
   const filteredRows = useMemo(() => {
     let result = rows;
     if (countryFilter !== "all") {
@@ -192,8 +201,36 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
       const q = searchQuery.toLowerCase().trim();
       result = result.filter(r => r.adName.toLowerCase().includes(q));
     }
+    if (sortKey) {
+      result = [...result].sort((a, b) => {
+        let aVal: number | string;
+        let bVal: number | string;
+        if (sortKey === "adName") {
+          aVal = a.adName.toLowerCase();
+          bVal = b.adName.toLowerCase();
+        } else if (sortKey === "hookRate" || sortKey === "bodyRate" || sortKey === "ctr" || sortKey === "cpm") {
+          aVal = a.ad[sortKey] ?? 0;
+          bVal = b.ad[sortKey] ?? 0;
+        } else {
+          aVal = (a as any)[sortKey] ?? 0;
+          bVal = (b as any)[sortKey] ?? 0;
+        }
+        if (aVal < bVal) return sortDir === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortDir === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
     return result;
-  }, [rows, searchQuery, countryFilter]);
+  }, [rows, searchQuery, countryFilter, sortKey, sortDir]);
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown className="h-3 w-3 opacity-30 ml-1 inline" />;
+    return sortDir === "desc"
+      ? <ArrowDown className="h-3 w-3 text-primary ml-1 inline" />
+      : <ArrowUp className="h-3 w-3 text-primary ml-1 inline" />;
+  };
+
+  const thBase = "text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap cursor-pointer select-none hover:text-foreground transition-colors";
 
   const RoiIndicator = ({ value }: { value: number }) => {
     if (value > 50) return <TrendingUp className="h-3.5 w-3.5 text-profit inline ml-1" />;
