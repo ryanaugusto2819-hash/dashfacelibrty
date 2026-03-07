@@ -421,7 +421,7 @@ const Index = () => {
                 Detalhamento
               </h2>
             </div>
-            <AdsTable ads={deduplicatedAds} salesData={salesData} />
+            <AdsTable ads={deduplicatedAds} salesData={filteredSalesData} />
           </section>
         )}
       </main>
