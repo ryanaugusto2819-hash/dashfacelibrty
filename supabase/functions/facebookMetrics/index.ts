@@ -142,7 +142,7 @@ serve(async (req) => {
         row.actions,
         "onsite_conversion.total_messaging_connection"
       );
-      const video3s = getFirstActionValue(row.video_3s_watched_actions);
+      const video3s = getActionValue(row.actions, "video_view");
       const videoP95 = getFirstActionValue(row.video_p95_watched_actions);
 
       return {
