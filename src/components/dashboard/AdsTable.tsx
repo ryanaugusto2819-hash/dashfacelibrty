@@ -164,12 +164,19 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
             <TableBody>
               {ads.map((ad, i) => {
                 const adName = ad.ad_name || ad.name || "";
+                const adNameNorm = adName.toLowerCase().trim();
+                // All ad names for fallback check
+                const allAdNames = ads.map(a => (a.ad_name || a.name || "").toLowerCase().trim()).filter(Boolean);
                 const matchedSales = salesData.filter(s => {
                   if (!s.creative || !adName) return false;
-                  const c = s.creative.toLowerCase().trim().replace(/ ar$/, "");
-                  const a = adName.toLowerCase().trim();
-                  if (!c || !a) return false;
-                  return a === c;
+                  const cFull = s.creative.toLowerCase().trim();
+                  if (!cFull) return false;
+                  // Exact match first
+                  if (adNameNorm === cFull) return true;
+                  // Only strip " ar" suffix if no ad exists with the full creative name
+                  const cStripped = cFull.replace(/ ar$/, "");
+                  if (cStripped !== cFull && !allAdNames.includes(cFull) && adNameNorm === cStripped) return true;
+                  return false;
                 });
                 const spend = ad.spend ?? ad.spent ?? 0;
                 const leads = ad.leads ?? 0;
@@ -298,9 +305,14 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
                 const adNames = ads.map(ad => (ad.ad_name || ad.name || "").toLowerCase().trim()).filter(Boolean);
                 const unmatchedSales = salesData.filter(s => {
                   if (!s.creative) return true;
-                  const c = s.creative.toLowerCase().trim().replace(/ ar$/, "");
-                  if (!c || c === "sem criativo" || c === "não identificado" || c === "sem crtiativo" || c === "criativo não identificado") return true;
-                  return !adNames.includes(c);
+                  const cFull = s.creative.toLowerCase().trim();
+                  if (!cFull || cFull === "sem criativo" || cFull === "não identificado" || cFull === "sem crtiativo" || cFull === "criativo não identificado") return true;
+                  // Exact match
+                  if (adNames.includes(cFull)) return false;
+                  // Stripped match (only if no ad with full name exists)
+                  const cStripped = cFull.replace(/ ar$/, "");
+                  if (cStripped !== cFull && !adNames.includes(cFull) && adNames.includes(cStripped)) return false;
+                  return true;
                 });
                 const uSales = unmatchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);
                 const uRevenue = unmatchedSales.reduce((sum, s) => {
