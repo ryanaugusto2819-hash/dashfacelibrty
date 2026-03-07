@@ -164,12 +164,19 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
             <TableBody>
               {ads.map((ad, i) => {
                 const adName = ad.ad_name || ad.name || "";
+                const adNameNorm = adName.toLowerCase().trim();
+                // All ad names for fallback check
+                const allAdNames = ads.map(a => (a.ad_name || a.name || "").toLowerCase().trim()).filter(Boolean);
                 const matchedSales = salesData.filter(s => {
                   if (!s.creative || !adName) return false;
-                  const c = s.creative.toLowerCase().trim().replace(/ ar$/, "");
-                  const a = adName.toLowerCase().trim();
-                  if (!c || !a) return false;
-                  return a === c;
+                  const cFull = s.creative.toLowerCase().trim();
+                  if (!cFull) return false;
+                  // Exact match first
+                  if (adNameNorm === cFull) return true;
+                  // Only strip " ar" suffix if no ad exists with the full creative name
+                  const cStripped = cFull.replace(/ ar$/, "");
+                  if (cStripped !== cFull && !allAdNames.includes(cFull) && adNameNorm === cStripped) return true;
+                  return false;
                 });
                 const spend = ad.spend ?? ad.spent ?? 0;
                 const leads = ad.leads ?? 0;
