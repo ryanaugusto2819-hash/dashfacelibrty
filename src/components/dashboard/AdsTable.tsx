@@ -312,30 +312,30 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
                 <th className="bg-secondary/10" />
               </tr>
               <tr className="border-b border-border/20 bg-secondary/20">
-                <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-4 py-3 min-w-[180px] sticky left-0 bg-secondary/20 z-10">Anúncio</th>
+                <th onClick={() => toggleSort("adName")} className={`text-left ${thBase} min-w-[180px] sticky left-0 bg-secondary/20 z-10`}>Anúncio <SortIcon col="adName" /></th>
                 <th className="text-center text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-2 py-3">Status</th>
                 {/* Custos */}
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-primary/[0.02]">Gasto</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-primary/[0.02]">CPA</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-primary/[0.02] border-r border-border/10">CPL</th>
+                <th onClick={() => toggleSort("spend")} className={`text-right ${thBase} bg-primary/[0.02]`}>Gasto <SortIcon col="spend" /></th>
+                <th onClick={() => toggleSort("cpa")} className={`text-right ${thBase} bg-primary/[0.02]`}>CPA <SortIcon col="cpa" /></th>
+                <th onClick={() => toggleSort("cpl")} className={`text-right ${thBase} bg-primary/[0.02] border-r border-border/10`}>CPL <SortIcon col="cpl" /></th>
                 {/* Conversão */}
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-info/[0.02]">Leads</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-info/[0.02]">Vendas</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-info/[0.02]">Tx Conv.</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-info/[0.02] border-r border-border/10">Ticket</th>
+                <th onClick={() => toggleSort("leads")} className={`text-right ${thBase} bg-info/[0.02]`}>Leads <SortIcon col="leads" /></th>
+                <th onClick={() => toggleSort("sales")} className={`text-right ${thBase} bg-info/[0.02]`}>Vendas <SortIcon col="sales" /></th>
+                <th onClick={() => toggleSort("convRate")} className={`text-right ${thBase} bg-info/[0.02]`}>Tx Conv. <SortIcon col="convRate" /></th>
+                <th onClick={() => toggleSort("avgTicket")} className={`text-right ${thBase} bg-info/[0.02] border-r border-border/10`}>Ticket <SortIcon col="avgTicket" /></th>
                 {/* Engajamento */}
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-warning/[0.02]">Hook</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-warning/[0.02]">Body</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-warning/[0.02]">CTR</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-warning/[0.02] border-r border-border/10">CPM</th>
+                <th onClick={() => toggleSort("hookRate")} className={`text-right ${thBase} bg-warning/[0.02]`}>Hook <SortIcon col="hookRate" /></th>
+                <th onClick={() => toggleSort("bodyRate")} className={`text-right ${thBase} bg-warning/[0.02]`}>Body <SortIcon col="bodyRate" /></th>
+                <th onClick={() => toggleSort("ctr")} className={`text-right ${thBase} bg-warning/[0.02]`}>CTR <SortIcon col="ctr" /></th>
+                <th onClick={() => toggleSort("cpm")} className={`text-right ${thBase} bg-warning/[0.02] border-r border-border/10`}>CPM <SortIcon col="cpm" /></th>
                 {/* Receita */}
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-success/[0.02]">Faturamento</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-success/[0.02] border-r border-border/10">ROI</th>
+                <th onClick={() => toggleSort("revenue")} className={`text-right ${thBase} bg-success/[0.02]`}>Faturamento <SortIcon col="revenue" /></th>
+                <th onClick={() => toggleSort("roi")} className={`text-right ${thBase} bg-success/[0.02] border-r border-border/10`}>ROI <SortIcon col="roi" /></th>
                 {/* Lucro */}
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-[hsl(280,65%,60%)]/[0.02]">70%</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-[hsl(280,65%,60%)]/[0.02]">60%</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-[hsl(280,65%,60%)]/[0.02]">50%</th>
-                <th className="text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap bg-[hsl(280,65%,60%)]/[0.02] border-r border-border/10">40%</th>
+                <th onClick={() => toggleSort("lucro70")} className={`text-right ${thBase} bg-[hsl(280,65%,60%)]/[0.02]`}>70% <SortIcon col="lucro70" /></th>
+                <th onClick={() => toggleSort("lucro60")} className={`text-right ${thBase} bg-[hsl(280,65%,60%)]/[0.02]`}>60% <SortIcon col="lucro60" /></th>
+                <th onClick={() => toggleSort("lucro50")} className={`text-right ${thBase} bg-[hsl(280,65%,60%)]/[0.02]`}>50% <SortIcon col="lucro50" /></th>
+                <th onClick={() => toggleSort("lucro40")} className={`text-right ${thBase} bg-[hsl(280,65%,60%)]/[0.02] border-r border-border/10`}>40% <SortIcon col="lucro40" /></th>
                 <th className="text-center text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-2 py-3">Vídeo</th>
               </tr>
             </thead>
