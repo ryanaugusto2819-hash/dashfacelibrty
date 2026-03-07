@@ -29,6 +29,9 @@ interface AdVideo {
 
 type CountryFilter = "all" | "uruguay" | "argentina";
 
+type SortKey = "adName" | "spend" | "cpa" | "cpl" | "leads" | "sales" | "convRate" | "avgTicket" | "hookRate" | "bodyRate" | "ctr" | "cpm" | "revenue" | "roi" | "lucro70" | "lucro60" | "lucro50" | "lucro40";
+type SortDir = "asc" | "desc";
+
 interface AdsTableProps {
   ads: any[];
   salesData?: SaleEntry[];
