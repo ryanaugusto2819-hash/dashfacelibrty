@@ -16,7 +16,6 @@ interface MetaInsight {
   cpc: string;
   actions?: { action_type: string; value: string }[];
   video_play_actions?: { action_type: string; value: string }[];
-  video_3s_watched_actions?: { action_type: string; value: string }[];
   video_p95_watched_actions?: { action_type: string; value: string }[];
   ad_id: string;
   ad_name: string;
@@ -97,7 +96,7 @@ serve(async (req) => {
       "cpm",
       "cpc",
       "actions",
-      "video_3s_watched_actions",
+      "video_play_actions",
       "video_p95_watched_actions",
       "ad_id",
       "ad_name",
@@ -143,7 +142,7 @@ serve(async (req) => {
         row.actions,
         "onsite_conversion.total_messaging_connection"
       );
-      const video3s = getFirstActionValue(row.video_3s_watched_actions);
+      const video3s = getActionValue(row.actions, "video_view");
       const videoP95 = getFirstActionValue(row.video_p95_watched_actions);
 
       return {
