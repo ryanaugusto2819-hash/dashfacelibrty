@@ -211,14 +211,37 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
             <h2 className="text-lg font-display font-semibold">Métricas por Anúncio</h2>
             <p className="text-[11px] text-muted-foreground mt-1 tracking-wide">Performance individual de cada criativo</p>
           </div>
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar anúncio..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9 bg-secondary/50 border-border/30 text-sm"
-            />
+          <div className="flex items-center gap-2">
+            {/* Country filter */}
+            <div className="flex items-center bg-secondary/50 rounded-lg p-0.5 border border-border/30">
+              {([
+                { value: "all" as CountryFilter, label: "Todos" },
+                { value: "uruguay" as CountryFilter, label: "🇺🇾" },
+                { value: "argentina" as CountryFilter, label: "🇦🇷" },
+              ]).map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setCountryFilter(opt.value)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                    countryFilter === opt.value
+                      ? "bg-primary/20 text-primary shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            {/* Search */}
+            <div className="relative w-full sm:w-56">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar anúncio..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9 bg-secondary/50 border-border/30 text-sm"
+              />
+            </div>
           </div>
         </div>
 
