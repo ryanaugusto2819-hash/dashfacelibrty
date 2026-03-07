@@ -35,6 +35,8 @@ type SortDir = "asc" | "desc";
 interface AdsTableProps {
   ads: any[];
   salesData?: SaleEntry[];
+  prevAds?: any[];
+  prevSalesData?: SaleEntry[];
 }
 
 const fmt = (n: number | null | undefined) => {
