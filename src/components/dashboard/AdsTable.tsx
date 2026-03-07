@@ -402,7 +402,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
                 <th onClick={() => toggleSort("cpm")} className={`text-right ${thBase} bg-warning/[0.02] border-r border-border/10`}>CPM <SortIcon col="cpm" /></th>
                 {/* Receita */}
                 <th onClick={() => toggleSort("revenue")} className={`text-right ${thBase} bg-success/[0.02]`}>Faturamento <SortIcon col="revenue" /></th>
-                <th onClick={() => toggleSort("roi")} className={`text-right ${thBase} bg-success/[0.02] border-r border-border/10`}>ROI <SortIcon col="roi" /></th>
+                <th onClick={() => toggleSort("roi")} className={`text-right ${thBase} bg-success/[0.02] border-r border-border/10`}>ROAS <SortIcon col="roi" /></th>
                 {/* Lucro */}
                 <th onClick={() => toggleSort("lucro70")} className={`text-right ${thBase} bg-[hsl(280,65%,60%)]/[0.02]`}>70% <SortIcon col="lucro70" /></th>
                 <th onClick={() => toggleSort("lucro60")} className={`text-right ${thBase} bg-[hsl(280,65%,60%)]/[0.02]`}>60% <SortIcon col="lucro60" /></th>
