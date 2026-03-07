@@ -166,7 +166,7 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
                 const adName = ad.ad_name || ad.name || "";
                 const matchedSales = salesData.filter(s => {
                   if (!s.creative || !adName) return false;
-                  const c = s.creative.toLowerCase().trim();
+                  const c = s.creative.toLowerCase().trim().replace(/ ar$/, "");
                   const a = adName.toLowerCase().trim();
                   if (!c || !a) return false;
                   return a === c;
@@ -298,8 +298,8 @@ const AdsTable = ({ ads, salesData = [] }: AdsTableProps) => {
                 const adNames = ads.map(ad => (ad.ad_name || ad.name || "").toLowerCase().trim()).filter(Boolean);
                 const unmatchedSales = salesData.filter(s => {
                   if (!s.creative) return true;
-                  const c = s.creative.toLowerCase().trim();
-                  if (!c || c === "sem criativo" || c === "não identificado") return true;
+                  const c = s.creative.toLowerCase().trim().replace(/ ar$/, "");
+                  if (!c || c === "sem criativo" || c === "não identificado" || c === "sem crtiativo" || c === "criativo não identificado") return true;
                   return !adNames.includes(c);
                 });
                 const uSales = unmatchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);

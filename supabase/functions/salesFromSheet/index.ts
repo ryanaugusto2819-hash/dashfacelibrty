@@ -126,16 +126,18 @@ serve(async (req) => {
     // Columns: G=valor(6), L=data_criacao(11), S=Criativo(18)
     const data: SheetSale[] = rows.slice(1).map((row) => {
       const creative = row[18] || "";
-      // Determine country: prefer explicit 'pais' column, fallback to creative suffix
+      // Determine country: check BOTH 'pais' column AND creative suffix
       let country = "uruguay";
+      const creativeLower = creative.toLowerCase().trim();
+      
+      // Check creative suffix first (most reliable signal)
+      if (creativeLower.endsWith(" ar")) {
+        country = "argentina";
+      }
+      // Also check pais column if available
       if (paisIdx >= 0 && row[paisIdx]) {
         const paisVal = row[paisIdx].toLowerCase().trim();
         if (paisVal.includes("argentin")) {
-          country = "argentina";
-        }
-      } else {
-        // Fallback: check creative suffix
-        if (creative.toLowerCase().trim().endsWith(" ar")) {
           country = "argentina";
         }
       }
