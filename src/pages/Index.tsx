@@ -110,6 +110,7 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   const [hideValues, setHideValues] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "argentina">("all");
 
   const fetchData = async () => {
     try {
