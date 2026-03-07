@@ -274,8 +274,8 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
   const thBase = "text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 py-3 whitespace-nowrap cursor-pointer select-none hover:text-foreground transition-colors";
 
   const RoiIndicator = ({ value }: { value: number }) => {
-    if (value > 50) return <TrendingUp className="h-3.5 w-3.5 text-profit inline ml-1" />;
-    if (value < 0) return <TrendingDown className="h-3.5 w-3.5 text-loss inline ml-1" />;
+    if (value > 1.5) return <TrendingUp className="h-3.5 w-3.5 text-profit inline ml-1" />;
+    if (value < 1) return <TrendingDown className="h-3.5 w-3.5 text-loss inline ml-1" />;
     return <Minus className="h-3.5 w-3.5 text-muted-foreground inline ml-1" />;
   };
 
