@@ -95,8 +95,8 @@ serve(async (req) => {
 
     const accessToken = await getAccessToken(serviceAccountKey);
 
-    // Fetch all rows from the first sheet
-    const range = "A:T";
+    // Fetch all rows — extend range to capture potential 'pais' column
+    const range = "A:Z";
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}`;
 
     const res = await fetch(url, {
@@ -119,19 +119,32 @@ serve(async (req) => {
       });
     }
 
-    // Columns: A=pedido_id, B=nome, C=telefone, D=cedula, E=produto, F=quantidade(5), G=valor(6),
-    // H=cidade, I=departamento, J=codigo_rastreamento, K=status_pagamento, L=data_criacao(11),
-    // M=data_envio, N=data_pagamento, O=hora_pagamento, P=comprovante_url, Q=vendedor,
-    // R=ultima_atualizacao, S=Criativo(18), T=status_envios
+    // Find column indices dynamically from header row
+    const headers = rows[0].map((h) => h.toLowerCase().trim());
+    const paisIdx = headers.findIndex((h) => h === "pais" || h === "país");
+
+    // Columns: G=valor(6), L=data_criacao(11), S=Criativo(18)
     const data: SheetSale[] = rows.slice(1).map((row) => {
       const creative = row[18] || "";
-      const isArgentina = creative.toLowerCase().trim().endsWith(" ar");
+      // Determine country: prefer explicit 'pais' column, fallback to creative suffix
+      let country = "uruguay";
+      if (paisIdx >= 0 && row[paisIdx]) {
+        const paisVal = row[paisIdx].toLowerCase().trim();
+        if (paisVal.includes("argentin")) {
+          country = "argentina";
+        }
+      } else {
+        // Fallback: check creative suffix
+        if (creative.toLowerCase().trim().endsWith(" ar")) {
+          country = "argentina";
+        }
+      }
       return {
         date: row[11] || "",
         creative,
         sales: 1,
         revenue: parseFloat(row[6]) || 0,
-        country: isArgentina ? "argentina" : "uruguay",
+        country,
       };
     });
 
