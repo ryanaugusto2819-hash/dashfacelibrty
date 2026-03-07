@@ -96,7 +96,7 @@ serve(async (req) => {
       "cpm",
       "cpc",
       "actions",
-      "video_3s_watched_actions",
+      "video_play_actions",
       "video_p95_watched_actions",
       "ad_id",
       "ad_name",
