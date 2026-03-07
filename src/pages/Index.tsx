@@ -402,9 +402,9 @@ const Index = () => {
                   previousValue={`R$ ${fmt(prevKpi.totalRevenue)}`} hidden={hideValues} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "250ms" }}>
-                <KPICard title="ROI" value={`${fmt(kpi.roi)}%`} icon={Percent} variant="green"
+                <KPICard title="ROAS" value={`${fmt(kpi.roi)}x`} icon={Percent} variant="green"
                   trend={roiTrend.trend} trendUp={roiTrend.trendUp} trendNeutral={roiTrend.trendNeutral}
-                  previousValue={`${fmt(prevKpi.roi)}%`} hidden={hideValues} />
+                  previousValue={`${fmt(prevKpi.roi)}x`} hidden={hideValues} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
                 <KPICard title="Tx. Conversão" value={`${fmt(kpi.conversionRate)}%`} icon={TrendingUp} variant="cyan"
