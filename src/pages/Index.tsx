@@ -408,7 +408,7 @@ const Index = () => {
                 Evolução
               </h2>
             </div>
-            <SpendChart data={data} range={range} />
+            <SpendChart data={filteredData} range={range} />
           </section>
         )}
 
