@@ -149,6 +149,7 @@ serve(async (req) => {
         date: row.date_start,
         ad_id: row.ad_id,
         ad_name: row.ad_name,
+        campaign_name: (row as any).campaign_name || "",
         spend,
         impressions,
         clicks,
