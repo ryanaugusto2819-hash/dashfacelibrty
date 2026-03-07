@@ -208,7 +208,7 @@ const Index = () => {
 
   const filteredPrevData = useMemo(() => {
     if (countryFilter === "all") return prevData;
-    return prevData.filter(ad => isAdCountry(ad.ad_name || ad.name || "", countryFilter));
+    return prevData.filter(ad => isAdCountry(ad, countryFilter));
   }, [prevData, countryFilter]);
 
   const filteredPrevSalesData = useMemo(() => {
