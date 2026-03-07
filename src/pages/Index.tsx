@@ -102,6 +102,8 @@ const SkeletonCard = () => (
 );
 
 const Index = () => {
+  const { isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
   const [range, setRange] = useState("today");
   const [customRange, setCustomRange] = useState<{ from: Date; to: Date } | undefined>();
   const [data, setData] = useState<any[]>([]);
