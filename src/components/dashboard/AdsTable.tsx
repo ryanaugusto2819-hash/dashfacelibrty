@@ -114,13 +114,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
     }
   };
 
-  if (!ads || ads.length === 0) {
-    return (
-      <div className="glass-card p-8 text-center text-muted-foreground text-sm">
-        Nenhum anúncio encontrado no período selecionado.
-      </div>
-    );
-  }
+  const isEmpty = !ads || ads.length === 0;
 
   // Build rows data
   const allAdNames = ads.map(a => (a.ad_name || a.name || "").toLowerCase().trim()).filter(Boolean);
@@ -315,6 +309,14 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [] }: Ads
       </div>
     );
   };
+
+  if (isEmpty) {
+    return (
+      <div className="glass-card p-8 text-center text-muted-foreground text-sm">
+        Nenhum anúncio encontrado no período selecionado.
+      </div>
+    );
+  }
 
   return (
     <>
