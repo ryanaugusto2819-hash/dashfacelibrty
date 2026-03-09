@@ -115,7 +115,7 @@ const Index = () => {
   const [hideValues, setHideValues] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "argentina">("all");
-  const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "prosta">("all");
+  const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "prosta" | "emagrecimento">("all");
 
   const fetchData = async () => {
     try {
@@ -189,10 +189,11 @@ const Index = () => {
     return isUY || !isAR;
   };
 
-  const isAdNicho = (ad: any, nicho: "adulto" | "prosta") => {
+  const isAdNicho = (ad: any, nicho: "adulto" | "prosta" | "emagrecimento") => {
     const campaignName = (ad.campaign_name || "").toLowerCase();
     if (nicho === "adulto") return campaignName.includes("adulto");
     if (nicho === "prosta") return campaignName.includes("prosta");
+    if (nicho === "emagrecimento") return campaignName.includes("emagrecimento");
     return true;
   };
 
@@ -383,6 +384,7 @@ const Index = () => {
                 <TabsTrigger value="all" className="text-xs px-3 h-6">Todos</TabsTrigger>
                 <TabsTrigger value="adulto" className="text-xs px-3 h-6">Adulto</TabsTrigger>
                 <TabsTrigger value="prosta" className="text-xs px-3 h-6">Prósta</TabsTrigger>
+                <TabsTrigger value="emagrecimento" className="text-xs px-3 h-6">Emagrecimento</TabsTrigger>
               </TabsList>
             </Tabs>
             <button
