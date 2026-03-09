@@ -384,6 +384,7 @@ const Index = () => {
                 <TabsTrigger value="all" className="text-xs px-3 h-6">Todos</TabsTrigger>
                 <TabsTrigger value="adulto" className="text-xs px-3 h-6">Adulto</TabsTrigger>
                 <TabsTrigger value="prosta" className="text-xs px-3 h-6">Prósta</TabsTrigger>
+                <TabsTrigger value="emagrecimento" className="text-xs px-3 h-6">Emagrecimento</TabsTrigger>
               </TabsList>
             </Tabs>
             <button
