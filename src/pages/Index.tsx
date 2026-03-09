@@ -115,7 +115,7 @@ const Index = () => {
   const [hideValues, setHideValues] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "argentina">("all");
-  const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "prosta">("all");
+  const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "prosta" | "emagrecimento">("all");
 
   const fetchData = async () => {
     try {
