@@ -189,10 +189,11 @@ const Index = () => {
     return isUY || !isAR;
   };
 
-  const isAdNicho = (ad: any, nicho: "adulto" | "prosta") => {
+  const isAdNicho = (ad: any, nicho: "adulto" | "prosta" | "emagrecimento") => {
     const campaignName = (ad.campaign_name || "").toLowerCase();
     if (nicho === "adulto") return campaignName.includes("adulto");
     if (nicho === "prosta") return campaignName.includes("prosta");
+    if (nicho === "emagrecimento") return campaignName.includes("emagrecimento");
     return true;
   };
 
