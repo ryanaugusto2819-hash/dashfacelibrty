@@ -193,7 +193,7 @@ const Index = () => {
     const campaignName = (ad.campaign_name || "").toLowerCase();
     if (nicho === "adulto") return campaignName.includes("adulto");
     if (nicho === "prosta") return campaignName.includes("prosta");
-    if (nicho === "emagrecimento") return campaignName.includes("emagrecimento");
+    if (nicho === "emagrecimento") return campaignName.includes("ema");
     return true;
   };
 
