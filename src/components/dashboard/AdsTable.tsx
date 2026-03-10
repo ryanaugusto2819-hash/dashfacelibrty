@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Video, Upload, Trash2, Play, TrendingUp, TrendingDown, Minus, Search, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { Video, Upload, Trash2, Play, TrendingUp, TrendingDown, Minus, Search, ArrowUp, ArrowDown, ArrowUpDown, DollarSign, Check, X, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -10,6 +10,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { toast } from "sonner";
 
 interface SaleEntry {
@@ -54,6 +59,35 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [editingBudget, setEditingBudget] = useState<string | null>(null);
+  const [budgetValue, setBudgetValue] = useState("");
+  const [updatingBudget, setUpdatingBudget] = useState<string | null>(null);
+
+  const handleBudgetUpdate = async (adName: string, campaignIds: string[]) => {
+    const value = parseFloat(budgetValue.replace(",", "."));
+    if (isNaN(value) || value <= 0) {
+      toast.error("Valor inválido");
+      return;
+    }
+    setUpdatingBudget(adName);
+    try {
+      for (const campaignId of campaignIds) {
+        const { data, error } = await supabase.functions.invoke("updateCampaignBudget", {
+          body: { campaign_id: campaignId, daily_budget: value },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.details?.message || data.error);
+      }
+      toast.success(`Orçamento atualizado para R$${value.toFixed(2)}`);
+      setEditingBudget(null);
+      setBudgetValue("");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Erro ao atualizar orçamento: " + (err.message || "erro desconhecido"));
+    } finally {
+      setUpdatingBudget(null);
+    }
+  };
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -369,6 +403,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
               <tr className="border-b border-border/10">
                 <th className="bg-secondary/10" />
                 <th className="bg-secondary/10" />
+                <th className="bg-secondary/10" />
                 <th colSpan={3} className="text-center text-[9px] font-bold uppercase tracking-[0.15em] text-primary/70 py-2 bg-primary/[0.03] border-x border-border/10">
                   💰 Custos
                 </th>
@@ -389,6 +424,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
               <tr className="border-b border-border/20 bg-secondary/20">
                 <th onClick={() => toggleSort("adName")} className={`text-left ${thBase} min-w-[180px] sticky left-0 bg-secondary/20 z-10`}>Anúncio <SortIcon col="adName" /></th>
                 <th className="text-center text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-2 py-3">Status</th>
+                <th className="text-center text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-2 py-3">Orçamento</th>
                 {/* Custos */}
                 <th onClick={() => toggleSort("spend")} className={`text-right ${thBase} bg-primary/[0.02]`}>Gasto <SortIcon col="spend" /></th>
                 <th onClick={() => toggleSort("cpa")} className={`text-right ${thBase} bg-primary/[0.02]`}>CPA <SortIcon col="cpa" /></th>
@@ -443,6 +479,58 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                       >
                         {isActive ? "Ativo" : ad.status === "paused" ? "Pausado" : "—"}
                       </Badge>
+                    </td>
+                    {/* Orçamento */}
+                    <td className="px-2 py-3.5 text-center">
+                      {isAdmin && ad.campaignIds && ad.campaignIds.length > 0 ? (
+                        <Popover open={editingBudget === adName} onOpenChange={(open) => {
+                          if (open) {
+                            setEditingBudget(adName);
+                            setBudgetValue("");
+                          } else {
+                            setEditingBudget(null);
+                          }
+                        }}>
+                          <PopoverTrigger asChild>
+                            <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/10" title="Editar orçamento diário">
+                              <DollarSign className="h-3.5 w-3.5" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-56 p-3" align="center">
+                            <div className="space-y-2">
+                              <p className="text-xs font-medium text-muted-foreground">Orçamento Diário (R$)</p>
+                              <div className="flex items-center gap-1.5">
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  placeholder="0.00"
+                                  value={budgetValue}
+                                  onChange={(e) => setBudgetValue(e.target.value)}
+                                  className="h-8 text-sm"
+                                  autoFocus
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") handleBudgetUpdate(adName, ad.campaignIds);
+                                  }}
+                                />
+                                <Button
+                                  size="icon"
+                                  className="h-8 w-8 flex-shrink-0"
+                                  disabled={updatingBudget === adName || !budgetValue}
+                                  onClick={() => handleBudgetUpdate(adName, ad.campaignIds)}
+                                >
+                                  {updatingBudget === adName ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                                </Button>
+                              </div>
+                              {ad.campaignIds.length > 1 && (
+                                <p className="text-[10px] text-muted-foreground">Será aplicado a {ad.campaignIds.length} campanhas</p>
+                              )}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
                     </td>
                     {/* Custos */}
                     <td className={`${tc} bg-primary/[0.01] font-medium`}><MetricCell current={spend} prev={prev?.spend} prefix="R$" /></td>
@@ -572,6 +660,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                   <td className="px-2 py-3.5 text-center"><Badge variant="secondary" className="bg-muted/60 text-muted-foreground border-0 text-[10px]">—</Badge></td>
                   <td className="text-right text-sm tabular-nums px-3 py-3.5 text-muted-foreground">—</td>
                   <td className="text-right text-sm tabular-nums px-3 py-3.5 text-muted-foreground">—</td>
+                  <td className="text-right text-sm tabular-nums px-3 py-3.5 text-muted-foreground">—</td>
                   <td className="text-right text-sm tabular-nums px-3 py-3.5 text-muted-foreground border-r border-border/[0.06]">—</td>
                   <td className="text-right text-sm tabular-nums px-3 py-3.5 text-muted-foreground">—</td>
                   <td className="text-right text-sm tabular-nums px-3 py-3.5 font-medium">{uSales.toLocaleString("pt-BR")}</td>
@@ -626,6 +715,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                       </div>
                     </td>
                     <td className="px-2 py-3.5 text-center"><Badge className="bg-primary/15 text-primary border-primary/20 border text-[10px] px-2 py-0.5">{filteredRows.length}</Badge></td>
+                    <td className="px-2 py-3.5 text-center text-muted-foreground text-xs">—</td>
                     <td className={`${ttc} bg-primary/[0.02]`}>R${fmt(tSpend)}</td>
                     <td className={`${ttc} bg-primary/[0.02]`}>R${fmt(tCpa)}</td>
                     <td className={`${ttc} bg-primary/[0.02] border-r border-border/[0.06]`}>R${fmt(tCpl)}</td>

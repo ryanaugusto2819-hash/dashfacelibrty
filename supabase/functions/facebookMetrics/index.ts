@@ -25,6 +25,7 @@ interface ProcessedMetric {
   date: string;
   ad_id: string;
   ad_name: string;
+  campaign_id: string;
   campaign_name: string;
   spend: number;
   impressions: number;
@@ -97,9 +98,10 @@ serve(async (req) => {
       "cpc",
       "actions",
       "video_play_actions",
-      "video_p95_watched_actions",
+    "video_p95_watched_actions",
       "ad_id",
       "ad_name",
+      "campaign_id",
       "campaign_name",
     ].join(",");
 
@@ -149,6 +151,7 @@ serve(async (req) => {
         date: row.date_start,
         ad_id: row.ad_id,
         ad_name: row.ad_name,
+        campaign_id: (row as any).campaign_id || "",
         campaign_name: (row as any).campaign_name || "",
         spend,
         impressions,
