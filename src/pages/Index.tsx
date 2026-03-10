@@ -116,6 +116,7 @@ const Index = () => {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "argentina">("all");
   const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "prosta" | "emagrecimento">("all");
+  const [campaignBudgets, setCampaignBudgets] = useState<Record<string, { daily_budget: number; name: string; status: string }>>({});
 
   const fetchData = async () => {
     try {
@@ -139,7 +140,7 @@ const Index = () => {
       const prevFromStr = format(prev.from, "yyyy-MM-dd");
       const prevToStr = format(prev.to, "yyyy-MM-dd");
 
-      const [metricsRes, prevMetricsRes, salesRes] = await Promise.all([
+      const [metricsRes, prevMetricsRes, salesRes, budgetsRes] = await Promise.all([
         supabase.functions.invoke("facebookMetrics", {
           body: { from: fromStr, to: toStr },
         }),
@@ -147,6 +148,7 @@ const Index = () => {
           body: { from: prevFromStr, to: prevToStr },
         }),
         supabase.functions.invoke("salesFromSheet"),
+        supabase.functions.invoke("getCampaignBudgets"),
       ]);
 
       if (metricsRes.error) throw new Error("Erro ao buscar métricas");
@@ -164,6 +166,11 @@ const Index = () => {
 
       const prevFiltered = allSales.filter((s: any) => s.date >= prevFromStr && s.date <= prevToStr);
       setPrevSalesData(prevFiltered);
+
+      // Set campaign budgets
+      if (budgetsRes.data?.budgets) {
+        setCampaignBudgets(budgetsRes.data.budgets);
+      }
     } catch (err: any) {
       console.error("Erro:", err);
       setError(err.message || "Erro inesperado");
@@ -542,7 +549,7 @@ const Index = () => {
                 Detalhamento
               </h2>
             </div>
-            <AdsTable ads={deduplicatedAds} salesData={filteredSalesData} prevAds={deduplicatedPrevAds} prevSalesData={filteredPrevSalesData} isAdmin={isAdmin} />
+            <AdsTable ads={deduplicatedAds} salesData={filteredSalesData} prevAds={deduplicatedPrevAds} prevSalesData={filteredPrevSalesData} isAdmin={isAdmin} campaignBudgets={campaignBudgets} />
           </section>
         )}
       </main>
