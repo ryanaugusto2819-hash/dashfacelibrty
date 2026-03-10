@@ -715,6 +715,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                       </div>
                     </td>
                     <td className="px-2 py-3.5 text-center"><Badge className="bg-primary/15 text-primary border-primary/20 border text-[10px] px-2 py-0.5">{filteredRows.length}</Badge></td>
+                    <td className="px-2 py-3.5 text-center text-muted-foreground text-xs">—</td>
                     <td className={`${ttc} bg-primary/[0.02]`}>R${fmt(tSpend)}</td>
                     <td className={`${ttc} bg-primary/[0.02]`}>R${fmt(tCpa)}</td>
                     <td className={`${ttc} bg-primary/[0.02] border-r border-border/[0.06]`}>R${fmt(tCpl)}</td>
