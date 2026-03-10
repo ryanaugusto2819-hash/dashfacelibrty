@@ -140,7 +140,7 @@ const Index = () => {
       const prevFromStr = format(prev.from, "yyyy-MM-dd");
       const prevToStr = format(prev.to, "yyyy-MM-dd");
 
-      const [metricsRes, prevMetricsRes, salesRes] = await Promise.all([
+      const [metricsRes, prevMetricsRes, salesRes, budgetsRes] = await Promise.all([
         supabase.functions.invoke("facebookMetrics", {
           body: { from: fromStr, to: toStr },
         }),
@@ -148,6 +148,7 @@ const Index = () => {
           body: { from: prevFromStr, to: prevToStr },
         }),
         supabase.functions.invoke("salesFromSheet"),
+        supabase.functions.invoke("getCampaignBudgets"),
       ]);
 
       if (metricsRes.error) throw new Error("Erro ao buscar métricas");
