@@ -480,6 +480,58 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                         {isActive ? "Ativo" : ad.status === "paused" ? "Pausado" : "—"}
                       </Badge>
                     </td>
+                    {/* Orçamento */}
+                    <td className="px-2 py-3.5 text-center">
+                      {isAdmin && ad.campaignIds && ad.campaignIds.length > 0 ? (
+                        <Popover open={editingBudget === adName} onOpenChange={(open) => {
+                          if (open) {
+                            setEditingBudget(adName);
+                            setBudgetValue("");
+                          } else {
+                            setEditingBudget(null);
+                          }
+                        }}>
+                          <PopoverTrigger asChild>
+                            <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/10" title="Editar orçamento diário">
+                              <DollarSign className="h-3.5 w-3.5" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-56 p-3" align="center">
+                            <div className="space-y-2">
+                              <p className="text-xs font-medium text-muted-foreground">Orçamento Diário (R$)</p>
+                              <div className="flex items-center gap-1.5">
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  placeholder="0.00"
+                                  value={budgetValue}
+                                  onChange={(e) => setBudgetValue(e.target.value)}
+                                  className="h-8 text-sm"
+                                  autoFocus
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") handleBudgetUpdate(adName, ad.campaignIds);
+                                  }}
+                                />
+                                <Button
+                                  size="icon"
+                                  className="h-8 w-8 flex-shrink-0"
+                                  disabled={updatingBudget === adName || !budgetValue}
+                                  onClick={() => handleBudgetUpdate(adName, ad.campaignIds)}
+                                >
+                                  {updatingBudget === adName ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                                </Button>
+                              </div>
+                              {ad.campaignIds.length > 1 && (
+                                <p className="text-[10px] text-muted-foreground">Será aplicado a {ad.campaignIds.length} campanhas</p>
+                              )}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
+                    </td>
                     {/* Custos */}
                     <td className={`${tc} bg-primary/[0.01] font-medium`}><MetricCell current={spend} prev={prev?.spend} prefix="R$" /></td>
                     <td className={`${tc} bg-primary/[0.01]`}>
