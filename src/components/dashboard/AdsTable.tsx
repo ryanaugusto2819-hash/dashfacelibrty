@@ -424,6 +424,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
               <tr className="border-b border-border/20 bg-secondary/20">
                 <th onClick={() => toggleSort("adName")} className={`text-left ${thBase} min-w-[180px] sticky left-0 bg-secondary/20 z-10`}>Anúncio <SortIcon col="adName" /></th>
                 <th className="text-center text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-2 py-3">Status</th>
+                <th className="text-center text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-2 py-3">Orçamento</th>
                 {/* Custos */}
                 <th onClick={() => toggleSort("spend")} className={`text-right ${thBase} bg-primary/[0.02]`}>Gasto <SortIcon col="spend" /></th>
                 <th onClick={() => toggleSort("cpa")} className={`text-right ${thBase} bg-primary/[0.02]`}>CPA <SortIcon col="cpa" /></th>
