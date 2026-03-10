@@ -293,11 +293,20 @@ const Index = () => {
           existing._bodyWeighted = (existing._bodyWeighted || 0) + (ad.bodyRate || 0) * Number(ad.impressions || 0);
           existing.bodyRate = totalImpressions > 0 ? existing._bodyWeighted / totalImpressions : 0;
         }
+        // Collect unique campaign_ids
+        if (ad.campaign_id && !existing._campaignIds.has(ad.campaign_id)) {
+          existing._campaignIds.add(ad.campaign_id);
+        }
       } else {
-        map.set(name, { ...ad, _hookWeighted: (ad.hookRate || 0) * Number(ad.impressions || 0), _bodyWeighted: (ad.bodyRate || 0) * Number(ad.impressions || 0) });
+        const campaignIds = new Set<string>();
+        if (ad.campaign_id) campaignIds.add(ad.campaign_id);
+        map.set(name, { ...ad, _hookWeighted: (ad.hookRate || 0) * Number(ad.impressions || 0), _bodyWeighted: (ad.bodyRate || 0) * Number(ad.impressions || 0), _campaignIds: campaignIds });
       }
     });
-    return Array.from(map.values());
+    return Array.from(map.values()).map(ad => ({
+      ...ad,
+      campaignIds: Array.from(ad._campaignIds || []),
+    }));
   }, [filteredData]);
 
   const deduplicatedPrevAds = useMemo(() => {
