@@ -59,6 +59,35 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [editingBudget, setEditingBudget] = useState<string | null>(null);
+  const [budgetValue, setBudgetValue] = useState("");
+  const [updatingBudget, setUpdatingBudget] = useState<string | null>(null);
+
+  const handleBudgetUpdate = async (adName: string, campaignIds: string[]) => {
+    const value = parseFloat(budgetValue.replace(",", "."));
+    if (isNaN(value) || value <= 0) {
+      toast.error("Valor inválido");
+      return;
+    }
+    setUpdatingBudget(adName);
+    try {
+      for (const campaignId of campaignIds) {
+        const { data, error } = await supabase.functions.invoke("updateCampaignBudget", {
+          body: { campaign_id: campaignId, daily_budget: value },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.details?.message || data.error);
+      }
+      toast.success(`Orçamento atualizado para R$${value.toFixed(2)}`);
+      setEditingBudget(null);
+      setBudgetValue("");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Erro ao atualizar orçamento: " + (err.message || "erro desconhecido"));
+    } finally {
+      setUpdatingBudget(null);
+    }
+  };
 
   useEffect(() => {
     const fetchVideos = async () => {
