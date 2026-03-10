@@ -116,6 +116,7 @@ const Index = () => {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "argentina">("all");
   const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "prosta" | "emagrecimento">("all");
+  const [campaignBudgets, setCampaignBudgets] = useState<Record<string, { daily_budget: number; name: string; status: string }>>({});
 
   const fetchData = async () => {
     try {
