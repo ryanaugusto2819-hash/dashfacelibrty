@@ -166,6 +166,11 @@ const Index = () => {
 
       const prevFiltered = allSales.filter((s: any) => s.date >= prevFromStr && s.date <= prevToStr);
       setPrevSalesData(prevFiltered);
+
+      // Set campaign budgets
+      if (budgetsRes.data?.budgets) {
+        setCampaignBudgets(budgetsRes.data.budgets);
+      }
     } catch (err: any) {
       console.error("Erro:", err);
       setError(err.message || "Erro inesperado");
