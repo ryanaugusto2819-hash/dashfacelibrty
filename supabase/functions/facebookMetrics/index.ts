@@ -97,9 +97,10 @@ serve(async (req) => {
       "cpc",
       "actions",
       "video_play_actions",
-      "video_p95_watched_actions",
+    "video_p95_watched_actions",
       "ad_id",
       "ad_name",
+      "campaign_id",
       "campaign_name",
     ].join(",");
 
