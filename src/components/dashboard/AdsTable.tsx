@@ -403,6 +403,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
               <tr className="border-b border-border/10">
                 <th className="bg-secondary/10" />
                 <th className="bg-secondary/10" />
+                <th className="bg-secondary/10" />
                 <th colSpan={3} className="text-center text-[9px] font-bold uppercase tracking-[0.15em] text-primary/70 py-2 bg-primary/[0.03] border-x border-border/10">
                   💰 Custos
                 </th>
