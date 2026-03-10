@@ -43,6 +43,7 @@ interface AdsTableProps {
   prevAds?: any[];
   prevSalesData?: SaleEntry[];
   isAdmin?: boolean;
+  campaignBudgets?: Record<string, { daily_budget: number; name: string; status: string }>;
 }
 
 const fmt = (n: number | null | undefined) => {
