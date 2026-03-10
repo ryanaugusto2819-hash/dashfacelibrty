@@ -660,6 +660,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                   <td className="px-2 py-3.5 text-center"><Badge variant="secondary" className="bg-muted/60 text-muted-foreground border-0 text-[10px]">—</Badge></td>
                   <td className="text-right text-sm tabular-nums px-3 py-3.5 text-muted-foreground">—</td>
                   <td className="text-right text-sm tabular-nums px-3 py-3.5 text-muted-foreground">—</td>
+                  <td className="text-right text-sm tabular-nums px-3 py-3.5 text-muted-foreground">—</td>
                   <td className="text-right text-sm tabular-nums px-3 py-3.5 text-muted-foreground border-r border-border/[0.06]">—</td>
                   <td className="text-right text-sm tabular-nums px-3 py-3.5 text-muted-foreground">—</td>
                   <td className="text-right text-sm tabular-nums px-3 py-3.5 font-medium">{uSales.toLocaleString("pt-BR")}</td>
