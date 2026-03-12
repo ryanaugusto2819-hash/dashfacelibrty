@@ -115,7 +115,7 @@ const Index = () => {
   const [hideValues, setHideValues] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "argentina">("all");
-  const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "prosta" | "emagrecimento">("all");
+  const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "prosta" | "emagrecimento" | "diabetes">("all");
   const [campaignBudgets, setCampaignBudgets] = useState<Record<string, { daily_budget: number; name: string; status: string }>>({});
 
   const fetchData = async () => {
@@ -196,11 +196,12 @@ const Index = () => {
     return isUY || !isAR;
   };
 
-  const isAdNicho = (ad: any, nicho: "adulto" | "prosta" | "emagrecimento") => {
+  const isAdNicho = (ad: any, nicho: "adulto" | "prosta" | "emagrecimento" | "diabetes") => {
     const campaignName = (ad.campaign_name || "").toLowerCase();
     if (nicho === "adulto") return campaignName.includes("adulto");
     if (nicho === "prosta") return campaignName.includes("prosta");
     if (nicho === "emagrecimento") return campaignName.includes("ema");
+    if (nicho === "diabetes") return campaignName.includes("diabet");
     return true;
   };
 
@@ -401,6 +402,7 @@ const Index = () => {
                 <TabsTrigger value="adulto" className="text-xs px-3 h-6">Adulto</TabsTrigger>
                 <TabsTrigger value="prosta" className="text-xs px-3 h-6">Prósta</TabsTrigger>
                 <TabsTrigger value="emagrecimento" className="text-xs px-3 h-6">Emagrecimento</TabsTrigger>
+                <TabsTrigger value="diabetes" className="text-xs px-3 h-6">Diabetes</TabsTrigger>
               </TabsList>
             </Tabs>
             <button
