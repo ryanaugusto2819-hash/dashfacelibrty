@@ -402,6 +402,7 @@ const Index = () => {
                 <TabsTrigger value="adulto" className="text-xs px-3 h-6">Adulto</TabsTrigger>
                 <TabsTrigger value="prosta" className="text-xs px-3 h-6">Prósta</TabsTrigger>
                 <TabsTrigger value="emagrecimento" className="text-xs px-3 h-6">Emagrecimento</TabsTrigger>
+                <TabsTrigger value="diabetes" className="text-xs px-3 h-6">Diabetes</TabsTrigger>
               </TabsList>
             </Tabs>
             <button
