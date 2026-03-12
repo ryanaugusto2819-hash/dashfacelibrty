@@ -196,11 +196,12 @@ const Index = () => {
     return isUY || !isAR;
   };
 
-  const isAdNicho = (ad: any, nicho: "adulto" | "prosta" | "emagrecimento") => {
+  const isAdNicho = (ad: any, nicho: "adulto" | "prosta" | "emagrecimento" | "diabetes") => {
     const campaignName = (ad.campaign_name || "").toLowerCase();
     if (nicho === "adulto") return campaignName.includes("adulto");
     if (nicho === "prosta") return campaignName.includes("prosta");
     if (nicho === "emagrecimento") return campaignName.includes("ema");
+    if (nicho === "diabetes") return campaignName.includes("diabet");
     return true;
   };
 
