@@ -57,7 +57,9 @@ const convertRevenue = (sale: SaleEntry) => {
   const country = (sale.country || "").toLowerCase();
   const creative = (sale.creative || "").toLowerCase().trim();
   const isArgentina = country.includes("argentin") || creative.endsWith(" ar");
+  const isBrasil = country.includes("brasil") || country.includes("brazil") || creative.endsWith(" br");
   if (isArgentina) return raw / ARS_TO_BRL;
+  if (isBrasil) return raw; // Already in BRL
   return raw / UYU_TO_BRL;
 };
 
@@ -114,7 +116,7 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   const [hideValues, setHideValues] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "argentina">("all");
+  const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "argentina" | "brasil">("all");
   const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "prosta" | "emagrecimento" | "diabetes">("all");
   const [campaignBudgets, setCampaignBudgets] = useState<Record<string, { daily_budget: number; name: string; status: string }>>({});
 
@@ -188,12 +190,14 @@ const Index = () => {
     fetchData();
   }, [range, customRange]);
 
-  const isAdCountry = (ad: any, country: "uruguay" | "argentina") => {
+  const isAdCountry = (ad: any, country: "uruguay" | "argentina" | "brasil") => {
     const campaignName = (ad.campaign_name || "").toUpperCase();
     const isAR = campaignName.includes("(AR-") || campaignName.includes("(AR ");
     const isUY = campaignName.includes("(UY-") || campaignName.includes("(UY ");
+    const isBR = campaignName.includes("(BR-") || campaignName.includes("(BR ");
     if (country === "argentina") return isAR;
-    return isUY || !isAR;
+    if (country === "brasil") return isBR;
+    return isUY || (!isAR && !isBR);
   };
 
   const isAdNicho = (ad: any, nicho: "adulto" | "prosta" | "emagrecimento" | "diabetes") => {
@@ -224,7 +228,10 @@ const Index = () => {
         const country = (s.country || "").toLowerCase();
         const creative = (s.creative || "").toLowerCase().trim();
         const isAR = country.includes("argentin") || creative.endsWith(" ar");
-        return countryFilter === "argentina" ? isAR : !isAR;
+        const isBR = country.includes("brasil") || country.includes("brazil") || creative.endsWith(" br");
+        if (countryFilter === "argentina") return isAR;
+        if (countryFilter === "brasil") return isBR;
+        return !isAR && !isBR;
       });
     }
     if (nichoFilter !== "all") {
@@ -259,7 +266,10 @@ const Index = () => {
         const country = (s.country || "").toLowerCase();
         const creative = (s.creative || "").toLowerCase().trim();
         const isAR = country.includes("argentin") || creative.endsWith(" ar");
-        return countryFilter === "argentina" ? isAR : !isAR;
+        const isBR = country.includes("brasil") || country.includes("brazil") || creative.endsWith(" br");
+        if (countryFilter === "argentina") return isAR;
+        if (countryFilter === "brasil") return isBR;
+        return !isAR && !isBR;
       });
     }
     if (nichoFilter !== "all") {
@@ -394,6 +404,7 @@ const Index = () => {
                 <TabsTrigger value="all" className="text-xs px-3 h-6">Todos</TabsTrigger>
                 <TabsTrigger value="uruguay" className="text-xs px-3 h-6">🇺🇾 Uruguai</TabsTrigger>
                 <TabsTrigger value="argentina" className="text-xs px-3 h-6">🇦🇷 Argentina</TabsTrigger>
+                <TabsTrigger value="brasil" className="text-xs px-3 h-6">🇧🇷 Brasil</TabsTrigger>
               </TabsList>
             </Tabs>
             <Tabs value={nichoFilter} onValueChange={(v) => setNichoFilter(v as any)}>
