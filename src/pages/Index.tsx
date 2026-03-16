@@ -57,7 +57,9 @@ const convertRevenue = (sale: SaleEntry) => {
   const country = (sale.country || "").toLowerCase();
   const creative = (sale.creative || "").toLowerCase().trim();
   const isArgentina = country.includes("argentin") || creative.endsWith(" ar");
+  const isBrasil = country.includes("brasil") || country.includes("brazil") || creative.endsWith(" br");
   if (isArgentina) return raw / ARS_TO_BRL;
+  if (isBrasil) return raw; // Already in BRL
   return raw / UYU_TO_BRL;
 };
 
