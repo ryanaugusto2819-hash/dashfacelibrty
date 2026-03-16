@@ -266,7 +266,10 @@ const Index = () => {
         const country = (s.country || "").toLowerCase();
         const creative = (s.creative || "").toLowerCase().trim();
         const isAR = country.includes("argentin") || creative.endsWith(" ar");
-        return countryFilter === "argentina" ? isAR : !isAR;
+        const isBR = country.includes("brasil") || country.includes("brazil") || creative.endsWith(" br");
+        if (countryFilter === "argentina") return isAR;
+        if (countryFilter === "brasil") return isBR;
+        return !isAR && !isBR;
       });
     }
     if (nichoFilter !== "all") {
