@@ -396,6 +396,7 @@ const Index = () => {
                 <TabsTrigger value="all" className="text-xs px-3 h-6">Todos</TabsTrigger>
                 <TabsTrigger value="uruguay" className="text-xs px-3 h-6">🇺🇾 Uruguai</TabsTrigger>
                 <TabsTrigger value="argentina" className="text-xs px-3 h-6">🇦🇷 Argentina</TabsTrigger>
+                <TabsTrigger value="brasil" className="text-xs px-3 h-6">🇧🇷 Brasil</TabsTrigger>
               </TabsList>
             </Tabs>
             <Tabs value={nichoFilter} onValueChange={(v) => setNichoFilter(v as any)}>
