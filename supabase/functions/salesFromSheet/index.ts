@@ -133,15 +133,19 @@ serve(async (req) => {
       // Check creative suffix
       if (creativeLower.endsWith(" ar")) {
         country = "argentina";
+      } else if (creativeLower.endsWith(" br")) {
+        country = "brasil";
       }
       // Check pais column if available
       if (paisIdx >= 0 && row[paisIdx]) {
         const paisVal = row[paisIdx].toLowerCase().trim();
         if (paisVal.includes("argentin")) {
           country = "argentina";
+        } else if (paisVal.includes("brasil") || paisVal.includes("brazil") || paisVal.includes("br")) {
+          country = "brasil";
         }
       }
-      // Heuristic: UYU sales are typically 7000-15000. Values >= 20000 are almost certainly ARS.
+      // Heuristic: UYU sales are typically 7000-15000. Values >= 20000 are almost certainly ARS (not BRL).
       if (country === "uruguay" && revenue >= 20000) {
         country = "argentina";
       }
