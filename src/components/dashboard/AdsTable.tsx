@@ -187,7 +187,8 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     const lucro50 = revenue * 0.5 - spend;
     const lucro40 = revenue * 0.4 - spend;
 
-    return { ad, adName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 };
+    const campaignName = (ad.campaign_name || "").toLowerCase().trim();
+    return { ad, adName, campaignName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 };
   });
 
   // Build previous period rows map for comparison
