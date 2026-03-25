@@ -77,6 +77,39 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_sales: {
+        Row: {
+          campaign: string
+          country: string
+          created_at: string
+          creative: string
+          date: string
+          id: string
+          revenue: number
+          sales: number
+        }
+        Insert: {
+          campaign?: string
+          country?: string
+          created_at?: string
+          creative?: string
+          date?: string
+          id?: string
+          revenue?: number
+          sales?: number
+        }
+        Update: {
+          campaign?: string
+          country?: string
+          created_at?: string
+          creative?: string
+          date?: string
+          id?: string
+          revenue?: number
+          sales?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

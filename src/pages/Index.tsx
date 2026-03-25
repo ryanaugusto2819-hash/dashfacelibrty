@@ -142,14 +142,15 @@ const Index = () => {
       const prevFromStr = format(prev.from, "yyyy-MM-dd");
       const prevToStr = format(prev.to, "yyyy-MM-dd");
 
-      const [metricsRes, prevMetricsRes, salesRes, budgetsRes] = await Promise.all([
+      const [metricsRes, prevMetricsRes, salesRes, prevSalesRes, budgetsRes] = await Promise.all([
         supabase.functions.invoke("facebookMetrics", {
           body: { from: fromStr, to: toStr },
         }),
         supabase.functions.invoke("facebookMetrics", {
           body: { from: prevFromStr, to: prevToStr },
         }),
-        supabase.functions.invoke("salesFromSheet"),
+        supabase.from("webhook_sales").select("*").gte("date", fromStr).lte("date", toStr),
+        supabase.from("webhook_sales").select("*").gte("date", prevFromStr).lte("date", prevToStr),
         supabase.functions.invoke("getCampaignBudgets"),
       ]);
 
@@ -161,12 +162,23 @@ const Index = () => {
       const prevItems = prevMetricsRes.data?.data ?? [];
       setPrevData(Array.isArray(prevItems) ? prevItems : []);
 
-      // Filter sales by date range
-      const allSales = Array.isArray(salesRes.data) ? salesRes.data : [];
-      const filtered = allSales.filter((s: any) => s.date >= fromStr && s.date <= toStr);
+      // Sales from webhook_sales table
+      const filtered = (salesRes.data || []).map((s: any) => ({
+        date: s.date,
+        creative: s.creative || s.campaign || "",
+        sales: Number(s.sales || 0),
+        revenue: Number(s.revenue || 0),
+        country: s.country || "",
+      }));
       setSalesData(filtered);
 
-      const prevFiltered = allSales.filter((s: any) => s.date >= prevFromStr && s.date <= prevToStr);
+      const prevFiltered = (prevSalesRes.data || []).map((s: any) => ({
+        date: s.date,
+        creative: s.creative || s.campaign || "",
+        sales: Number(s.sales || 0),
+        revenue: Number(s.revenue || 0),
+        country: s.country || "",
+      }));
       setPrevSalesData(prevFiltered);
 
       // Set campaign budgets
