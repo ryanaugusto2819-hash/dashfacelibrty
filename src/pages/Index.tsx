@@ -54,13 +54,10 @@ const ARS_TO_BRL = 266;
 
 const convertRevenue = (sale: SaleEntry) => {
   const raw = Number(sale.revenue || 0);
-  const country = (sale.country || "").toLowerCase();
-  const creative = (sale.creative || "").toLowerCase().trim();
-  const isArgentina = country.includes("argentin") || creative.endsWith(" ar");
-  const isBrasil = country.includes("brasil") || country.includes("brazil") || creative.endsWith(" br");
-  if (isArgentina) return raw / ARS_TO_BRL;
-  if (isBrasil) return raw; // Already in BRL
-  return raw / UYU_TO_BRL;
+  const currency = (sale.currency || "").toUpperCase();
+  if (currency === "UYU") return raw / UYU_TO_BRL;
+  if (currency === "ARS") return raw / ARS_TO_BRL;
+  return raw; // BRL by default
 };
 
 const calcKpis = (data: any[], salesData: SaleEntry[]) => {

@@ -13,8 +13,6 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-
-    // Support single object or array
     const entries = Array.isArray(body) ? body : [body];
 
     if (entries.length === 0) {
@@ -29,14 +27,18 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const rows = entries.map((entry: any) => ({
-      date: entry.date || new Date().toISOString().split("T")[0],
-      creative: entry.creative || entry.criativo || "",
-      campaign: entry.campaign || entry.campanha || "",
-      revenue: Number(entry.revenue || entry.valor || entry.value || 0),
-      country: entry.country || entry.pais || entry.país || "",
-      sales: Number(entry.sales || entry.vendas || entry.quantity || 1),
-    }));
+    const rows = entries.map((entry: any) => {
+      const currency = (entry.currency || entry.moeda || "BRL").toUpperCase();
+      return {
+        date: entry.date || entry.data || new Date().toISOString().split("T")[0],
+        campaign: entry.campaign || entry.campanha || "",
+        revenue: Number(entry.revenue || entry.valor || entry.value || 0),
+        country: entry.country || entry.pais || entry.país || "",
+        sales: Number(entry.sales || entry.vendas || entry.quantity || 1),
+        currency,
+        creative: entry.campaign || entry.campanha || "",
+      };
+    });
 
     const { data, error } = await supabase
       .from("webhook_sales")
