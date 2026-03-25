@@ -83,6 +83,7 @@ export type Database = {
           country: string
           created_at: string
           creative: string
+          currency: string
           date: string
           id: string
           revenue: number
@@ -93,6 +94,7 @@ export type Database = {
           country?: string
           created_at?: string
           creative?: string
+          currency?: string
           date?: string
           id?: string
           revenue?: number
@@ -103,6 +105,7 @@ export type Database = {
           country?: string
           created_at?: string
           creative?: string
+          currency?: string
           date?: string
           id?: string
           revenue?: number

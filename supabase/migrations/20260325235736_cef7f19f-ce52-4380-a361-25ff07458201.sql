@@ -1,0 +1,1 @@
+ALTER TABLE public.webhook_sales ADD COLUMN currency TEXT NOT NULL DEFAULT 'BRL';
