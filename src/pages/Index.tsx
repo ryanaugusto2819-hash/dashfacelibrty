@@ -176,9 +176,11 @@ const Index = () => {
       const prevFiltered = (prevSalesRes.data || []).map((s: any) => ({
         date: s.date,
         creative: s.creative || s.campaign || "",
+        campaign: s.campaign || "",
         sales: Number(s.sales || 0),
         revenue: Number(s.revenue || 0),
         country: s.country || "",
+        currency: s.currency || "BRL",
       }));
       setPrevSalesData(prevFiltered);
 
