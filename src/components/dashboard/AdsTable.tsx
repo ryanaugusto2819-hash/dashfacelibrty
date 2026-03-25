@@ -270,7 +270,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      result = result.filter(r => r.adName.toLowerCase().includes(q));
+      result = result.filter(r => r.adName.toLowerCase().includes(q) || (r.campaignName && r.campaignName.toLowerCase().includes(q)));
     }
     if (sortKey) {
       result = [...result].sort((a, b) => {
