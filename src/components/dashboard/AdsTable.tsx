@@ -187,7 +187,8 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     const lucro50 = revenue * 0.5 - spend;
     const lucro40 = revenue * 0.4 - spend;
 
-    return { ad, adName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 };
+    const campaignName = (ad.campaign_name || "").toLowerCase().trim();
+    return { ad, adName, campaignName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 };
   });
 
   // Build previous period rows map for comparison
@@ -225,7 +226,8 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
       const lucro60 = revenue * 0.6 - spend;
       const lucro50 = revenue * 0.5 - spend;
       const lucro40 = revenue * 0.4 - spend;
-      map.set(adNameNorm, { ad, adName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 });
+      const campaignName = (ad.campaign_name || "").toLowerCase().trim();
+      map.set(adNameNorm, { ad, adName, campaignName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 });
     });
     return map;
   }, [prevAds, prevSalesData, prevAllAdNames]);
@@ -270,7 +272,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      result = result.filter(r => r.adName.toLowerCase().includes(q));
+      result = result.filter(r => r.adName.toLowerCase().includes(q) || (r.campaignName && r.campaignName.toLowerCase().includes(q)));
     }
     if (sortKey) {
       result = [...result].sort((a, b) => {
