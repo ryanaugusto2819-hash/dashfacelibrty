@@ -362,7 +362,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
         {/* Header */}
         <div className="p-6 border-b border-border/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h2 className="text-lg font-display font-semibold">Métricas por Anúncio</h2>
+            <h2 className="text-lg font-display font-semibold">Métricas por Campanha</h2>
             <p className="text-[11px] text-muted-foreground mt-1 tracking-wide">Performance individual de cada criativo</p>
           </div>
           <div className="flex items-center gap-2">
@@ -390,7 +390,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
             <div className="relative w-full sm:w-56">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar anúncio..."
+                placeholder="Buscar campanha..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 h-9 bg-secondary/50 border-border/30 text-sm"
@@ -425,7 +425,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                 <th className="bg-secondary/10" />
               </tr>
               <tr className="border-b border-border/20 bg-secondary/20">
-                <th onClick={() => toggleSort("adName")} className={`text-left ${thBase} min-w-[180px] sticky left-0 bg-secondary/20 z-10`}>Anúncio <SortIcon col="adName" /></th>
+                <th onClick={() => toggleSort("adName")} className={`text-left ${thBase} min-w-[180px] sticky left-0 bg-secondary/20 z-10`}>Campanha <SortIcon col="adName" /></th>
                 <th className="text-center text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-2 py-3">Status</th>
                 <th className="text-center text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-2 py-3">Orçamento</th>
                 {/* Custos */}
@@ -471,7 +471,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                     <td className="px-4 py-3.5 font-medium text-sm whitespace-nowrap sticky left-0 bg-background/80 backdrop-blur-sm z-10 group-hover:bg-accent/40 transition-colors">
                       <div className="flex items-center gap-2">
                         <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? 'bg-profit' : 'bg-muted-foreground/40'}`} />
-                        <span className="truncate max-w-[160px]" title={adName}>{adName || "—"}</span>
+                        <span className="truncate max-w-[160px]" title={ad.campaign_name || adName}>{ad.campaign_name || adName || "—"}</span>
                       </div>
                     </td>
                     {/* Status */}
