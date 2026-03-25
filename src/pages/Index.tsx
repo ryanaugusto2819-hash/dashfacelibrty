@@ -13,9 +13,11 @@ import SpendChart from "@/components/dashboard/SpendChart";
 interface SaleEntry {
   date: string;
   creative: string;
+  campaign: string;
   sales: number;
   revenue: number;
   country: string;
+  currency: string;
 }
 
 const fmt = (n: number) =>
