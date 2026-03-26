@@ -202,18 +202,23 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
 
   // Build previous period rows map for comparison
   const prevAllAdNames = prevAds.map(a => (a.ad_name || a.name || "").toLowerCase().trim()).filter(Boolean);
+  const prevAllCampaignNames = prevAds.map(a => (a.campaign_name || "").toLowerCase().trim()).filter(Boolean);
   const prevRowsMap = useMemo(() => {
     const map = new Map<string, typeof rows[0]>();
     prevAds.forEach((ad) => {
       const adName = ad.ad_name || ad.name || "";
       const adNameNorm = adName.toLowerCase().trim();
+      const adCampaignNorm = (ad.campaign_name || "").toLowerCase().trim();
       const matchedSales = prevSalesData.filter(s => {
-        if (!s.creative || !adName) return false;
-        const cFull = s.creative.toLowerCase().trim();
-        if (!cFull) return false;
-        if (adNameNorm === cFull) return true;
-        const cStripped = cFull.replace(/ ar$/, "");
-        if (cStripped !== cFull && !prevAllAdNames.includes(cFull) && adNameNorm === cStripped) return true;
+        if (!adName) return false;
+        const cFull = (s.creative || "").toLowerCase().trim();
+        const campFull = (s.campaign || "").toLowerCase().trim();
+        if (cFull && adNameNorm === cFull) return true;
+        if (campFull && adCampaignNorm && adCampaignNorm === campFull) return true;
+        if (cFull) {
+          const cStripped = cFull.replace(/ ar$/, "");
+          if (cStripped !== cFull && !prevAllAdNames.includes(cFull) && adNameNorm === cStripped) return true;
+        }
         return false;
       });
       const spend = ad.spend ?? ad.spent ?? 0;
@@ -221,10 +226,10 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
       const sales = matchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);
       const revenue = matchedSales.reduce((sum, s) => {
         const raw = Number(s.revenue || 0);
-        const country = (s.country || "").toLowerCase();
-        const creative = (s.creative || "").toLowerCase().trim();
-        const isAR = country.includes("argentin") || creative.endsWith(" ar");
-        return sum + raw / (isAR ? 266 : 7.49);
+        const currency = (s.currency || "").toUpperCase();
+        if (currency === "UYU") return sum + raw / 7.49;
+        if (currency === "ARS") return sum + raw / 266;
+        return sum + raw;
       }, 0);
       const cpl = ad.costPerLead ?? ad.cpl ?? (leads > 0 ? spend / leads : 0);
       const cpa = ad.cpa ?? (sales > 0 ? spend / sales : 0);
@@ -235,28 +240,33 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
       const lucro60 = revenue * 0.6 - spend;
       const lucro50 = revenue * 0.5 - spend;
       const lucro40 = revenue * 0.4 - spend;
-      const campaignName = (ad.campaign_name || "").toLowerCase().trim();
+      const campaignName = adCampaignNorm;
       map.set(adNameNorm, { ad, adName, campaignName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 });
     });
     return map;
   }, [prevAds, prevSalesData, prevAllAdNames]);
 
+  const allCampaignNames = ads.map(a => (a.campaign_name || "").toLowerCase().trim()).filter(Boolean);
   const unmatchedSales = salesData.filter(s => {
-    if (!s.creative) return true;
-    const cFull = s.creative.toLowerCase().trim();
-    if (!cFull || cFull === "sem criativo" || cFull === "não identificado" || cFull === "sem crtiativo" || cFull === "criativo não identificado") return true;
-    if (allAdNames.includes(cFull)) return false;
-    const cStripped = cFull.replace(/ ar$/, "");
-    if (cStripped !== cFull && !allAdNames.includes(cFull) && allAdNames.includes(cStripped)) return false;
+    const cFull = (s.creative || "").toLowerCase().trim();
+    const campFull = (s.campaign || "").toLowerCase().trim();
+    if (!cFull && !campFull) return true;
+    if (cFull === "sem criativo" || cFull === "não identificado" || cFull === "sem crtiativo" || cFull === "criativo não identificado") return true;
+    if (cFull && allAdNames.includes(cFull)) return false;
+    if (campFull && allCampaignNames.includes(campFull)) return false;
+    if (cFull) {
+      const cStripped = cFull.replace(/ ar$/, "");
+      if (cStripped !== cFull && !allAdNames.includes(cFull) && allAdNames.includes(cStripped)) return false;
+    }
     return true;
   });
   const uSales = unmatchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);
   const uRevenue = unmatchedSales.reduce((sum, s) => {
     const raw = Number(s.revenue || 0);
-    const country = (s.country || "").toLowerCase();
-    const creative = (s.creative || "").toLowerCase().trim();
-    const isAR = country.includes("argentin") || creative.endsWith(" ar");
-    return sum + raw / (isAR ? 266 : 7.49);
+    const currency = (s.currency || "").toUpperCase();
+    if (currency === "UYU") return sum + raw / 7.49;
+    if (currency === "ARS") return sum + raw / 266;
+    return sum + raw;
   }, 0);
 
   const toggleSort = useCallback((key: SortKey) => {
