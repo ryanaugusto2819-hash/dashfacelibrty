@@ -27,10 +27,13 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
+    // Use São Paulo timezone for default date
+    const nowBRT = new Date().toLocaleString("en-CA", { timeZone: "America/Sao_Paulo" }).split(",")[0];
+
     const rows = entries.map((entry: any) => {
       const currency = (entry.currency || entry.moeda || "BRL").toUpperCase();
       return {
-        date: entry.date || entry.data || new Date().toISOString().split("T")[0],
+        date: entry.date || entry.data || nowBRT,
         campaign: entry.campaign || entry.campanha || "",
         revenue: Number(entry.revenue || entry.valor || entry.value || 0),
         country: entry.country || entry.pais || entry.país || "",
