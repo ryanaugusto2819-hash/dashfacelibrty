@@ -119,8 +119,22 @@ serve(async (req) => {
     let nextUrl: string | null = url.toString();
 
     while (nextUrl) {
-      const res = await fetch(nextUrl);
-      const json = await res.json();
+      let res: Response | null = null;
+      let json: any = null;
+
+      // Retry with exponential backoff for rate limits
+      for (let attempt = 0; attempt < 5; attempt++) {
+        res = await fetch(nextUrl);
+        json = await res.json();
+
+        if (json.error && (json.error.code === 4 || json.error.code === 17 || json.error.is_transient)) {
+          const delay = Math.min(1000 * Math.pow(2, attempt), 30000);
+          console.warn(`Rate limited. Retrying in ${delay}ms (attempt ${attempt + 1}/5)`);
+          await new Promise(r => setTimeout(r, delay));
+          continue;
+        }
+        break;
+      }
 
       if (json.error) {
         return new Response(
