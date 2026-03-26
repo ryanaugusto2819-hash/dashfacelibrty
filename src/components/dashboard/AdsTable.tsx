@@ -20,9 +20,11 @@ import { toast } from "sonner";
 interface SaleEntry {
   date: string;
   creative: string;
+  campaign?: string;
   sales: number;
   revenue: number;
   country: string;
+  currency?: string;
 }
 
 interface AdVideo {
