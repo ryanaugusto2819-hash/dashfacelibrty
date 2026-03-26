@@ -160,13 +160,20 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
   const rows = ads.map((ad) => {
     const adName = ad.ad_name || ad.name || "";
     const adNameNorm = adName.toLowerCase().trim();
+    const adCampaignNorm = (ad.campaign_name || "").toLowerCase().trim();
     const matchedSales = salesData.filter(s => {
-      if (!s.creative || !adName) return false;
-      const cFull = s.creative.toLowerCase().trim();
-      if (!cFull) return false;
-      if (adNameNorm === cFull) return true;
-      const cStripped = cFull.replace(/ ar$/, "");
-      if (cStripped !== cFull && !allAdNames.includes(cFull) && adNameNorm === cStripped) return true;
+      if (!adName) return false;
+      const cFull = (s.creative || "").toLowerCase().trim();
+      const campFull = (s.campaign || "").toLowerCase().trim();
+      // Match by ad name
+      if (cFull && adNameNorm === cFull) return true;
+      // Match by campaign name
+      if (campFull && adCampaignNorm && adCampaignNorm === campFull) return true;
+      // Fallback: stripped AR suffix
+      if (cFull) {
+        const cStripped = cFull.replace(/ ar$/, "");
+        if (cStripped !== cFull && !allAdNames.includes(cFull) && adNameNorm === cStripped) return true;
+      }
       return false;
     });
     const spend = ad.spend ?? ad.spent ?? 0;
@@ -174,10 +181,10 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     const sales = matchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);
     const revenue = matchedSales.reduce((sum, s) => {
       const raw = Number(s.revenue || 0);
-      const country = (s.country || "").toLowerCase();
-      const creative = (s.creative || "").toLowerCase().trim();
-      const isAR = country.includes("argentin") || creative.endsWith(" ar");
-      return sum + raw / (isAR ? 266 : 7.49);
+      const currency = (s.currency || "").toUpperCase();
+      if (currency === "UYU") return sum + raw / 7.49;
+      if (currency === "ARS") return sum + raw / 266;
+      return sum + raw;
     }, 0);
     const cpl = ad.costPerLead ?? ad.cpl ?? (leads > 0 ? spend / leads : 0);
     const cpa = ad.cpa ?? (sales > 0 ? spend / sales : 0);
