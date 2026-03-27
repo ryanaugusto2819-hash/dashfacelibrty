@@ -165,10 +165,13 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
       if (!adName) return false;
       const cFull = (s.creative || "").toLowerCase().trim();
       const campFull = (s.campaign || "").toLowerCase().trim();
-      // Match by ad name
+      // Exact match by ad name
       if (cFull && adNameNorm === cFull) return true;
-      // Match by campaign name
+      // Exact match by campaign name
       if (campFull && adCampaignNorm && adCampaignNorm === campFull) return true;
+      // Fuzzy match: one contains the other (handles missing parentheses/typos)
+      if (campFull && adCampaignNorm && campFull.length > 5 && (adCampaignNorm.includes(campFull) || campFull.includes(adCampaignNorm))) return true;
+      if (cFull && adCampaignNorm && cFull.length > 5 && (adCampaignNorm.includes(cFull) || cFull.includes(adCampaignNorm))) return true;
       // Fallback: stripped AR suffix
       if (cFull) {
         const cStripped = cFull.replace(/ ar$/, "");
