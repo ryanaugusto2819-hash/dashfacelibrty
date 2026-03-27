@@ -205,12 +205,11 @@ const Index = () => {
     fetchData();
   }, [range, customRange]);
 
-  const isAdCountry = (ad: any, country: "uruguay" | "argentina" | "brasil") => {
+  const isAdCountry = (ad: any, country: "uruguay" | "brasil") => {
     const campaignName = (ad.campaign_name || "").toUpperCase();
     const isAR = campaignName.includes("(AR-") || campaignName.includes("(AR ");
     const isUY = campaignName.includes("(UY-") || campaignName.includes("(UY ");
     const isBR = campaignName.includes("(BR-") || campaignName.includes("(BR ");
-    if (country === "argentina") return isAR;
     if (country === "brasil") return isBR;
     return isUY || (!isAR && !isBR);
   };
