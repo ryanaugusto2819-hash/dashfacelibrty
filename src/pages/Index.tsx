@@ -244,7 +244,6 @@ const Index = () => {
         const creative = (s.creative || "").toLowerCase().trim();
         const isAR = country.includes("argentin") || creative.endsWith(" ar");
         const isBR = country.includes("brasil") || country.includes("brazil") || creative.endsWith(" br");
-        if (countryFilter === "argentina") return isAR;
         if (countryFilter === "brasil") return isBR;
         return !isAR && !isBR;
       });
@@ -282,7 +281,6 @@ const Index = () => {
         const creative = (s.creative || "").toLowerCase().trim();
         const isAR = country.includes("argentin") || creative.endsWith(" ar");
         const isBR = country.includes("brasil") || country.includes("brazil") || creative.endsWith(" br");
-        if (countryFilter === "argentina") return isAR;
         if (countryFilter === "brasil") return isBR;
         return !isAR && !isBR;
       });
