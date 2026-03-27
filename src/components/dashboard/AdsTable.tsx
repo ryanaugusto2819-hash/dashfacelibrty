@@ -165,10 +165,13 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
       if (!adName) return false;
       const cFull = (s.creative || "").toLowerCase().trim();
       const campFull = (s.campaign || "").toLowerCase().trim();
-      // Match by ad name
+      // Exact match by ad name
       if (cFull && adNameNorm === cFull) return true;
-      // Match by campaign name
+      // Exact match by campaign name
       if (campFull && adCampaignNorm && adCampaignNorm === campFull) return true;
+      // Fuzzy match: one contains the other (handles missing parentheses/typos)
+      if (campFull && adCampaignNorm && campFull.length > 5 && (adCampaignNorm.includes(campFull) || campFull.includes(adCampaignNorm))) return true;
+      if (cFull && adCampaignNorm && cFull.length > 5 && (adCampaignNorm.includes(cFull) || cFull.includes(adCampaignNorm))) return true;
       // Fallback: stripped AR suffix
       if (cFull) {
         const cStripped = cFull.replace(/ ar$/, "");
@@ -215,6 +218,8 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
         const campFull = (s.campaign || "").toLowerCase().trim();
         if (cFull && adNameNorm === cFull) return true;
         if (campFull && adCampaignNorm && adCampaignNorm === campFull) return true;
+        if (campFull && adCampaignNorm && campFull.length > 5 && (adCampaignNorm.includes(campFull) || campFull.includes(adCampaignNorm))) return true;
+        if (cFull && adCampaignNorm && cFull.length > 5 && (adCampaignNorm.includes(cFull) || cFull.includes(adCampaignNorm))) return true;
         if (cFull) {
           const cStripped = cFull.replace(/ ar$/, "");
           if (cStripped !== cFull && !prevAllAdNames.includes(cFull) && adNameNorm === cStripped) return true;
@@ -254,6 +259,9 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     if (cFull === "sem criativo" || cFull === "não identificado" || cFull === "sem crtiativo" || cFull === "criativo não identificado") return true;
     if (cFull && allAdNames.includes(cFull)) return false;
     if (campFull && allCampaignNames.includes(campFull)) return false;
+    // Fuzzy match: check if any campaign/ad contains or is contained by the sale's names
+    if (campFull && campFull.length > 5 && allCampaignNames.some(cn => cn.includes(campFull) || campFull.includes(cn))) return false;
+    if (cFull && cFull.length > 5 && allCampaignNames.some(cn => cn.includes(cFull) || cFull.includes(cn))) return false;
     if (cFull) {
       const cStripped = cFull.replace(/ ar$/, "");
       if (cStripped !== cFull && !allAdNames.includes(cFull) && allAdNames.includes(cStripped)) return false;
