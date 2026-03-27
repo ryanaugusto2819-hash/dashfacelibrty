@@ -113,7 +113,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     }
   };
 
-
+  useEffect(() => {
     const fetchVideos = async () => {
       const { data } = await supabase.from("ad_videos").select("*");
       if (data) {
