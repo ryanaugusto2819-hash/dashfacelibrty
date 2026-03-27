@@ -218,6 +218,8 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
         const campFull = (s.campaign || "").toLowerCase().trim();
         if (cFull && adNameNorm === cFull) return true;
         if (campFull && adCampaignNorm && adCampaignNorm === campFull) return true;
+        if (campFull && adCampaignNorm && campFull.length > 5 && (adCampaignNorm.includes(campFull) || campFull.includes(adCampaignNorm))) return true;
+        if (cFull && adCampaignNorm && cFull.length > 5 && (adCampaignNorm.includes(cFull) || cFull.includes(adCampaignNorm))) return true;
         if (cFull) {
           const cStripped = cFull.replace(/ ar$/, "");
           if (cStripped !== cFull && !prevAllAdNames.includes(cFull) && adNameNorm === cStripped) return true;
