@@ -289,7 +289,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
   }, [sortKey]);
 
   const filteredRows = useMemo(() => {
-    let result = rows;
+    let result = rows.filter(r => r.spend > 0);
     if (countryFilter !== "all") {
       result = result.filter(r => {
         const campaign = (r.ad.campaign_name || "").toUpperCase();
