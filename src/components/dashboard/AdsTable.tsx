@@ -507,7 +507,11 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
               {filteredRows.map((row, i) => {
                 const { ad, adName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 } = row;
                 const video = adVideos[adName];
-                const isActive = ad.status === "active";
+                const campaignIds: string[] = ad.campaignIds || (ad.campaign_id ? [ad.campaign_id] : []);
+                // Get campaign status from budgets data (real Meta status)
+                const campaignStatuses = campaignIds.map(cid => localStatuses[cid] || campaignBudgets[cid]?.status || "").filter(Boolean);
+                const campaignStatus = campaignStatuses.includes("ACTIVE") ? "ACTIVE" : (campaignStatuses[0] || ad.status?.toUpperCase() || "");
+                const isActive = campaignStatus === "ACTIVE";
                 const prevKey = (ad.campaign_name || "").toLowerCase().trim() || adName.toLowerCase().trim();
                 const prev = prevRowsMap.get(prevKey);
 
@@ -525,14 +529,34 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                         <span className="truncate max-w-[160px]" title={ad.campaign_name || adName}>{ad.campaign_name || adName || "—"}</span>
                       </div>
                     </td>
-                    {/* Status */}
+                    {/* Status with toggle */}
                     <td className="px-2 py-3.5 text-center">
-                      <Badge
-                        variant={isActive ? "default" : "secondary"}
-                        className={`text-[10px] px-2 py-0.5 ${isActive ? "bg-profit/15 text-profit border-profit/20 border" : "bg-muted/60 text-muted-foreground border-0"}`}
-                      >
-                        {isActive ? "Ativo" : ad.status === "paused" ? "Pausado" : "—"}
-                      </Badge>
+                      {isAdmin && campaignIds.length > 0 ? (
+                        <button
+                          onClick={() => handleStatusToggle(campaignIds[0], campaignStatus)}
+                          disabled={togglingStatus === campaignIds[0]}
+                          className="group/btn inline-flex items-center gap-1.5 transition-all"
+                          title={isActive ? "Clique para pausar" : "Clique para ativar"}
+                        >
+                          {togglingStatus === campaignIds[0] ? (
+                            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                          ) : (
+                            <Badge
+                              variant={isActive ? "default" : "secondary"}
+                              className={`text-[10px] px-2 py-0.5 cursor-pointer hover:opacity-80 transition-opacity ${isActive ? "bg-profit/15 text-profit border-profit/20 border" : "bg-loss/15 text-loss border-loss/20 border"}`}
+                            >
+                              {isActive ? "Ativo" : "Pausado"}
+                            </Badge>
+                          )}
+                        </button>
+                      ) : (
+                        <Badge
+                          variant={isActive ? "default" : "secondary"}
+                          className={`text-[10px] px-2 py-0.5 ${isActive ? "bg-profit/15 text-profit border-profit/20 border" : "bg-muted/60 text-muted-foreground border-0"}`}
+                        >
+                          {isActive ? "Ativo" : campaignStatus === "PAUSED" ? "Pausado" : "—"}
+                        </Badge>
+                      )}
                     </td>
                     {/* Orçamento */}
                     <td className="px-2 py-3.5 text-center">
