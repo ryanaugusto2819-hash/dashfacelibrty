@@ -257,6 +257,9 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     if (cFull === "sem criativo" || cFull === "não identificado" || cFull === "sem crtiativo" || cFull === "criativo não identificado") return true;
     if (cFull && allAdNames.includes(cFull)) return false;
     if (campFull && allCampaignNames.includes(campFull)) return false;
+    // Fuzzy match: check if any campaign/ad contains or is contained by the sale's names
+    if (campFull && campFull.length > 5 && allCampaignNames.some(cn => cn.includes(campFull) || campFull.includes(cn))) return false;
+    if (cFull && cFull.length > 5 && allCampaignNames.some(cn => cn.includes(cFull) || cFull.includes(cn))) return false;
     if (cFull) {
       const cStripped = cFull.replace(/ ar$/, "");
       if (cStripped !== cFull && !allAdNames.includes(cFull) && allAdNames.includes(cStripped)) return false;
