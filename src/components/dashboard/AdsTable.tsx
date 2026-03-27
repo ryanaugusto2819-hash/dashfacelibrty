@@ -94,7 +94,26 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     }
   };
 
-  useEffect(() => {
+  const handleStatusToggle = async (campaignId: string, currentStatus: string) => {
+    const newStatus = currentStatus === "ACTIVE" ? "PAUSED" : "ACTIVE";
+    setTogglingStatus(campaignId);
+    try {
+      const { data, error } = await supabase.functions.invoke("updateCampaignStatus", {
+        body: { campaign_id: campaignId, status: newStatus },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.details?.message || data.error);
+      setLocalStatuses(prev => ({ ...prev, [campaignId]: newStatus }));
+      toast.success(`Campanha ${newStatus === "ACTIVE" ? "ativada" : "pausada"} com sucesso!`);
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Erro ao alterar status: " + (err.message || "erro desconhecido"));
+    } finally {
+      setTogglingStatus(null);
+    }
+  };
+
+
     const fetchVideos = async () => {
       const { data } = await supabase.from("ad_videos").select("*");
       if (data) {
