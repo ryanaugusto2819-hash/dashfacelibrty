@@ -65,6 +65,8 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
   const [editingBudget, setEditingBudget] = useState<string | null>(null);
   const [budgetValue, setBudgetValue] = useState("");
   const [updatingBudget, setUpdatingBudget] = useState<string | null>(null);
+  const [togglingStatus, setTogglingStatus] = useState<string | null>(null);
+  const [localStatuses, setLocalStatuses] = useState<Record<string, string>>({});
 
   const handleBudgetUpdate = async (adName: string, campaignIds: string[]) => {
     const value = parseFloat(budgetValue.replace(",", "."));
