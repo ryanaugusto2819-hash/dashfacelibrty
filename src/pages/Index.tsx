@@ -303,9 +303,10 @@ const Index = () => {
   const deduplicatedAds = useMemo(() => {
     const map = new Map<string, any>();
     filteredData.forEach((ad) => {
-      const name = (ad.ad_name || ad.name || "").toLowerCase().trim();
-      if (!name) return;
-      const existing = map.get(name);
+      const campaignName = (ad.campaign_name || "").toLowerCase().trim();
+      const key = campaignName || (ad.ad_name || ad.name || "").toLowerCase().trim();
+      if (!key) return;
+      const existing = map.get(key);
       if (existing) {
         existing.spend = (existing.spend || 0) + Number(ad.spend || 0);
         existing.leads = (existing.leads || 0) + Number(ad.leads || 0);
@@ -333,7 +334,7 @@ const Index = () => {
       } else {
         const campaignIds = new Set<string>();
         if (ad.campaign_id) campaignIds.add(ad.campaign_id);
-        map.set(name, { ...ad, _hookWeighted: (ad.hookRate || 0) * Number(ad.impressions || 0), _bodyWeighted: (ad.bodyRate || 0) * Number(ad.impressions || 0), _campaignIds: campaignIds });
+        map.set(key, { ...ad, _hookWeighted: (ad.hookRate || 0) * Number(ad.impressions || 0), _bodyWeighted: (ad.bodyRate || 0) * Number(ad.impressions || 0), _campaignIds: campaignIds });
       }
     });
     return Array.from(map.values()).map(ad => ({
@@ -345,9 +346,10 @@ const Index = () => {
   const deduplicatedPrevAds = useMemo(() => {
     const map = new Map<string, any>();
     filteredPrevData.forEach((ad) => {
-      const name = (ad.ad_name || ad.name || "").toLowerCase().trim();
-      if (!name) return;
-      const existing = map.get(name);
+      const campaignName = (ad.campaign_name || "").toLowerCase().trim();
+      const key = campaignName || (ad.ad_name || ad.name || "").toLowerCase().trim();
+      if (!key) return;
+      const existing = map.get(key);
       if (existing) {
         existing.spend = (existing.spend || 0) + Number(ad.spend || 0);
         existing.leads = (existing.leads || 0) + Number(ad.leads || 0);
@@ -369,7 +371,7 @@ const Index = () => {
           existing.bodyRate = totalImpressions > 0 ? existing._bodyWeighted / totalImpressions : 0;
         }
       } else {
-        map.set(name, { ...ad, _hookWeighted: (ad.hookRate || 0) * Number(ad.impressions || 0), _bodyWeighted: (ad.bodyRate || 0) * Number(ad.impressions || 0) });
+        map.set(key, { ...ad, _hookWeighted: (ad.hookRate || 0) * Number(ad.impressions || 0), _bodyWeighted: (ad.bodyRate || 0) * Number(ad.impressions || 0) });
       }
     });
     return Array.from(map.values());
