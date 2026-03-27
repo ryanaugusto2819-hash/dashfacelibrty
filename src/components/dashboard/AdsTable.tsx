@@ -246,9 +246,9 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
       const lucro50 = revenue * 0.5 - spend;
       const lucro40 = revenue * 0.4 - spend;
       const campaignName = adCampaignNorm;
-      const campaignName = adCampaignNorm;
+      const prevCampaignName = adCampaignNorm;
       const mapKey = adCampaignNorm || adNameNorm;
-      map.set(mapKey, { ad, adName, campaignName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 });
+      map.set(mapKey, { ad, adName, campaignName: prevCampaignName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 });
     });
     return map;
   }, [prevAds, prevSalesData, prevAllAdNames]);
