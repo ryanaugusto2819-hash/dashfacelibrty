@@ -561,21 +561,21 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                     {/* Orçamento */}
                     <td className="px-2 py-3.5 text-center">
                       {(() => {
-                        const campaignIds: string[] = ad.campaignIds || [];
-                        // Get the max daily budget across campaigns for this ad
-                        const budgetValues = campaignIds
+                        const cIds: string[] = ad.campaignIds || (ad.campaign_id ? [ad.campaign_id] : []);
+                        const budgetValues = cIds
                           .map((cid: string) => campaignBudgets[cid]?.daily_budget)
                           .filter((b: number | undefined): b is number => b != null && b > 0);
                         const currentBudget = budgetValues.length > 0 ? Math.max(...budgetValues) : null;
+                        const budgetKey = ad.campaign_id || ad.campaign_name || adName;
 
-                        if (!isAdmin || campaignIds.length === 0) {
+                        if (!isAdmin || cIds.length === 0) {
                           return <span className="text-muted-foreground text-xs">—</span>;
                         }
 
                         return (
-                          <Popover open={editingBudget === adName} onOpenChange={(open) => {
+                          <Popover open={editingBudget === budgetKey} onOpenChange={(open) => {
                             if (open) {
-                              setEditingBudget(adName);
+                              setEditingBudget(budgetKey);
                               setBudgetValue(currentBudget ? currentBudget.toString() : "");
                             } else {
                               setEditingBudget(null);
@@ -598,7 +598,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                                 )}
                               </button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-56 p-3" align="center">
+                            <PopoverContent className="w-56 p-3" align="center" onOpenAutoFocus={(e) => e.preventDefault()}>
                               <div className="space-y-2">
                                 <p className="text-xs font-medium text-muted-foreground">Orçamento Diário (R$)</p>
                                 {currentBudget != null && (
@@ -615,20 +615,20 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                                     className="h-8 text-sm"
                                     autoFocus
                                     onKeyDown={(e) => {
-                                      if (e.key === "Enter") handleBudgetUpdate(adName, campaignIds);
+                                      if (e.key === "Enter") handleBudgetUpdate(budgetKey, cIds);
                                     }}
                                   />
                                   <Button
                                     size="icon"
                                     className="h-8 w-8 flex-shrink-0"
-                                    disabled={updatingBudget === adName || !budgetValue}
-                                    onClick={() => handleBudgetUpdate(adName, campaignIds)}
+                                    disabled={updatingBudget === budgetKey || !budgetValue}
+                                    onClick={() => handleBudgetUpdate(budgetKey, cIds)}
                                   >
-                                    {updatingBudget === adName ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                                    {updatingBudget === budgetKey ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
                                   </Button>
                                 </div>
-                                {campaignIds.length > 1 && (
-                                  <p className="text-[10px] text-muted-foreground">Será aplicado a {campaignIds.length} campanhas</p>
+                                {cIds.length > 1 && (
+                                  <p className="text-[10px] text-muted-foreground">Será aplicado a {cIds.length} campanhas</p>
                                 )}
                               </div>
                             </PopoverContent>
