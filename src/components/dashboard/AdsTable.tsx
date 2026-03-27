@@ -246,7 +246,9 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
       const lucro50 = revenue * 0.5 - spend;
       const lucro40 = revenue * 0.4 - spend;
       const campaignName = adCampaignNorm;
-      map.set(adNameNorm, { ad, adName, campaignName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 });
+      const campaignName = adCampaignNorm;
+      const mapKey = adCampaignNorm || adNameNorm;
+      map.set(mapKey, { ad, adName, campaignName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 });
     });
     return map;
   }, [prevAds, prevSalesData, prevAllAdNames]);
@@ -485,7 +487,8 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                 const { ad, adName, spend, leads, sales, revenue, cpl, cpa, convRate, avgTicket, roi, lucro70, lucro60, lucro50, lucro40 } = row;
                 const video = adVideos[adName];
                 const isActive = ad.status === "active";
-                const prev = prevRowsMap.get(adName.toLowerCase().trim());
+                const prevKey = (ad.campaign_name || "").toLowerCase().trim() || adName.toLowerCase().trim();
+                const prev = prevRowsMap.get(prevKey);
 
                 const tc = "text-right text-sm tabular-nums px-3 py-3.5 whitespace-nowrap";
 
