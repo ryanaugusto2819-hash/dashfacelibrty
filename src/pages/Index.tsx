@@ -115,7 +115,7 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   const [hideValues, setHideValues] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "argentina" | "brasil">("all");
+  const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "brasil">("all");
   const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "prosta" | "emagrecimento" | "diabetes">("all");
   const [campaignBudgets, setCampaignBudgets] = useState<Record<string, { daily_budget: number; name: string; status: string }>>({});
 
@@ -205,12 +205,11 @@ const Index = () => {
     fetchData();
   }, [range, customRange]);
 
-  const isAdCountry = (ad: any, country: "uruguay" | "argentina" | "brasil") => {
+  const isAdCountry = (ad: any, country: "uruguay" | "brasil") => {
     const campaignName = (ad.campaign_name || "").toUpperCase();
     const isAR = campaignName.includes("(AR-") || campaignName.includes("(AR ");
     const isUY = campaignName.includes("(UY-") || campaignName.includes("(UY ");
     const isBR = campaignName.includes("(BR-") || campaignName.includes("(BR ");
-    if (country === "argentina") return isAR;
     if (country === "brasil") return isBR;
     return isUY || (!isAR && !isBR);
   };
@@ -244,7 +243,6 @@ const Index = () => {
         const creative = (s.creative || "").toLowerCase().trim();
         const isAR = country.includes("argentin") || creative.endsWith(" ar");
         const isBR = country.includes("brasil") || country.includes("brazil") || creative.endsWith(" br");
-        if (countryFilter === "argentina") return isAR;
         if (countryFilter === "brasil") return isBR;
         return !isAR && !isBR;
       });
@@ -282,7 +280,6 @@ const Index = () => {
         const creative = (s.creative || "").toLowerCase().trim();
         const isAR = country.includes("argentin") || creative.endsWith(" ar");
         const isBR = country.includes("brasil") || country.includes("brazil") || creative.endsWith(" br");
-        if (countryFilter === "argentina") return isAR;
         if (countryFilter === "brasil") return isBR;
         return !isAR && !isBR;
       });
@@ -420,7 +417,6 @@ const Index = () => {
               <TabsList className="h-8">
                 <TabsTrigger value="all" className="text-xs px-3 h-6">Todos</TabsTrigger>
                 <TabsTrigger value="uruguay" className="text-xs px-3 h-6">🇺🇾 Uruguai</TabsTrigger>
-                <TabsTrigger value="argentina" className="text-xs px-3 h-6">🇦🇷 Argentina</TabsTrigger>
                 <TabsTrigger value="brasil" className="text-xs px-3 h-6">🇧🇷 Brasil</TabsTrigger>
               </TabsList>
             </Tabs>

@@ -34,7 +34,7 @@ interface AdVideo {
   file_name: string | null;
 }
 
-type CountryFilter = "all" | "uruguay" | "argentina";
+type CountryFilter = "all" | "uruguay";
 
 type SortKey = "adName" | "spend" | "cpa" | "cpl" | "leads" | "sales" | "convRate" | "avgTicket" | "hookRate" | "bodyRate" | "ctr" | "cpm" | "revenue" | "roi" | "lucro70" | "lucro60" | "lucro50" | "lucro40";
 type SortDir = "asc" | "desc";
@@ -314,10 +314,8 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     if (countryFilter !== "all") {
       result = result.filter(r => {
         const campaign = (r.ad.campaign_name || "").toUpperCase();
-        const isAR = campaign.includes("(AR-") || campaign.includes("(AR ");
         const isUY = campaign.includes("(UY-") || campaign.includes("(UY ");
-        if (countryFilter === "argentina") return isAR;
-        return isUY || !isAR;
+        return isUY || (!campaign.includes("(AR-") && !campaign.includes("(AR "));
       });
     }
     if (searchQuery.trim()) {
@@ -421,7 +419,6 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
               {([
                 { value: "all" as CountryFilter, label: "Todos" },
                 { value: "uruguay" as CountryFilter, label: "🇺🇾" },
-                { value: "argentina" as CountryFilter, label: "🇦🇷" },
               ]).map(opt => (
                 <button
                   key={opt.value}
