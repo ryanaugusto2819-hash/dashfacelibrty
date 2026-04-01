@@ -92,6 +92,20 @@ const calcTrend = (current: number, previous: number, invertColors = false) => {
   };
 };
 
+const getFunctionErrorMessage = (result: { data?: any; error?: { message?: string } }, fallback: string) => {
+  if (result.error?.message) return result.error.message;
+  if (result.data?.details?.message) return result.data.details.message;
+  if (result.data?.error) return result.data.error;
+  return fallback;
+};
+
+const normalizeMetaErrorMessage = (message: string) => {
+  if (/ads_management|ads_read/i.test(message)) {
+    return "A conexão da Meta precisa ser refeita no novo App/BM. Gere um novo token com ads_read e ads_management para a conta correta.";
+  }
+  return message;
+};
+
 const SkeletonCard = () => (
   <div className="glass-card p-5">
     <div className="flex items-start justify-between mb-3">
@@ -141,7 +155,7 @@ const Index = () => {
       const prevFromStr = format(prev.from, "yyyy-MM-dd");
       const prevToStr = format(prev.to, "yyyy-MM-dd");
 
-      const [metricsRes, prevMetricsRes, salesRes, prevSalesRes, budgetsRes] = await Promise.all([
+      const [metricsRes, prevMetricsRes, salesRes, prevSalesRes, budgetsRes] = await Promise.allSettled([
         supabase.functions.invoke("facebookMetrics", {
           body: { from: fromStr, to: toStr },
         }),
@@ -153,41 +167,84 @@ const Index = () => {
         supabase.functions.invoke("getCampaignBudgets"),
       ]);
 
-      if (metricsRes.error) throw new Error("Erro ao buscar métricas");
+      const nextErrors = new Set<string>();
 
-      const items = metricsRes.data?.data ?? [];
-      setData(Array.isArray(items) ? items : []);
-
-      const prevItems = prevMetricsRes.data?.data ?? [];
-      setPrevData(Array.isArray(prevItems) ? prevItems : []);
-
-      // Sales from webhook_sales table
-      const filtered = (salesRes.data || []).map((s: any) => ({
-        date: s.date,
-        creative: s.creative || s.campaign || "",
-        campaign: s.campaign || "",
-        sales: Number(s.sales || 0),
-        revenue: Number(s.revenue || 0),
-        country: s.country || "",
-        currency: s.currency || "BRL",
-      }));
-      setSalesData(filtered);
-
-      const prevFiltered = (prevSalesRes.data || []).map((s: any) => ({
-        date: s.date,
-        creative: s.creative || s.campaign || "",
-        campaign: s.campaign || "",
-        sales: Number(s.sales || 0),
-        revenue: Number(s.revenue || 0),
-        country: s.country || "",
-        currency: s.currency || "BRL",
-      }));
-      setPrevSalesData(prevFiltered);
-
-      // Set campaign budgets
-      if (budgetsRes.data?.budgets) {
-        setCampaignBudgets(budgetsRes.data.budgets);
+      if (metricsRes.status === "fulfilled") {
+        if (metricsRes.value.error || metricsRes.value.data?.error) {
+          setData([]);
+          nextErrors.add(normalizeMetaErrorMessage(getFunctionErrorMessage(metricsRes.value, "Erro ao buscar métricas")));
+        } else {
+          const items = metricsRes.value.data?.data ?? [];
+          setData(Array.isArray(items) ? items : []);
+        }
+      } else {
+        setData([]);
+        nextErrors.add("Erro ao buscar métricas");
       }
+
+      if (prevMetricsRes.status === "fulfilled") {
+        if (prevMetricsRes.value.error || prevMetricsRes.value.data?.error) {
+          setPrevData([]);
+        } else {
+          const prevItems = prevMetricsRes.value.data?.data ?? [];
+          setPrevData(Array.isArray(prevItems) ? prevItems : []);
+        }
+      } else {
+        setPrevData([]);
+      }
+
+      if (salesRes.status === "fulfilled") {
+        if (salesRes.value.error) {
+          setSalesData([]);
+          nextErrors.add("Erro ao buscar vendas");
+        } else {
+          const filtered = (salesRes.value.data || []).map((s: any) => ({
+            date: s.date,
+            creative: s.creative || s.campaign || "",
+            campaign: s.campaign || "",
+            sales: Number(s.sales || 0),
+            revenue: Number(s.revenue || 0),
+            country: s.country || "",
+            currency: s.currency || "BRL",
+          }));
+          setSalesData(filtered);
+        }
+      } else {
+        setSalesData([]);
+        nextErrors.add("Erro ao buscar vendas");
+      }
+
+      if (prevSalesRes.status === "fulfilled") {
+        if (prevSalesRes.value.error) {
+          setPrevSalesData([]);
+        } else {
+          const prevFiltered = (prevSalesRes.value.data || []).map((s: any) => ({
+            date: s.date,
+            creative: s.creative || s.campaign || "",
+            campaign: s.campaign || "",
+            sales: Number(s.sales || 0),
+            revenue: Number(s.revenue || 0),
+            country: s.country || "",
+            currency: s.currency || "BRL",
+          }));
+          setPrevSalesData(prevFiltered);
+        }
+      } else {
+        setPrevSalesData([]);
+      }
+
+      if (budgetsRes.status === "fulfilled") {
+        if (budgetsRes.value.error || budgetsRes.value.data?.error) {
+          setCampaignBudgets({});
+          nextErrors.add(normalizeMetaErrorMessage(getFunctionErrorMessage(budgetsRes.value, "Erro ao buscar orçamentos")));
+        } else {
+          setCampaignBudgets(budgetsRes.value.data?.budgets ?? {});
+        }
+      } else {
+        setCampaignBudgets({});
+      }
+
+      setError(Array.from(nextErrors)[0] ?? null);
     } catch (err: any) {
       console.error("Erro:", err);
       setError(err.message || "Erro inesperado");
@@ -195,6 +252,7 @@ const Index = () => {
       setSalesData([]);
       setPrevData([]);
       setPrevSalesData([]);
+      setCampaignBudgets({});
     } finally {
       setLoading(false);
       setLastUpdate(new Date());
