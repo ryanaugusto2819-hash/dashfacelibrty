@@ -31,6 +31,22 @@ serve(async (req) => {
       const json = await res.json();
 
       if (json.error) {
+        const metaMessage = String(json.error?.message || "");
+        const isConnectionError = json.error?.code === 190 || /ads_management|ads_read/i.test(metaMessage);
+
+        if (isConnectionError) {
+          return new Response(
+            JSON.stringify({
+              budgets: {},
+              total: 0,
+              connected: false,
+              error: "Meta connection error",
+              details: json.error,
+            }),
+            { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
         return new Response(
           JSON.stringify({ error: "Meta API error", details: json.error }),
           { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
