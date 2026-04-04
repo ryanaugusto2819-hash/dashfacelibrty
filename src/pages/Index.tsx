@@ -266,7 +266,7 @@ const Index = () => {
 
   useEffect(() => {
     fetchData();
-  }, [range, customRange]);
+  }, [range, customRange, bmFilter]);
 
   const isAdCountry = (ad: any, country: "uruguay" | "brasil") => {
     const campaignName = (ad.campaign_name || "").toUpperCase();
