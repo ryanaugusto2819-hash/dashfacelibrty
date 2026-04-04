@@ -156,16 +156,20 @@ const Index = () => {
       const prevFromStr = format(prev.from, "yyyy-MM-dd");
       const prevToStr = format(prev.to, "yyyy-MM-dd");
 
+      const accountParam = bmFilter !== "all" ? bmFilter : "all";
+
       const [metricsRes, prevMetricsRes, salesRes, prevSalesRes, budgetsRes] = await Promise.allSettled([
         supabase.functions.invoke("facebookMetrics", {
-          body: { from: fromStr, to: toStr },
+          body: { from: fromStr, to: toStr, account: accountParam },
         }),
         supabase.functions.invoke("facebookMetrics", {
-          body: { from: prevFromStr, to: prevToStr },
+          body: { from: prevFromStr, to: prevToStr, account: accountParam },
         }),
         supabase.from("webhook_sales").select("*").gte("date", fromStr).lte("date", toStr),
         supabase.from("webhook_sales").select("*").gte("date", prevFromStr).lte("date", prevToStr),
-        supabase.functions.invoke("getCampaignBudgets"),
+        supabase.functions.invoke("getCampaignBudgets", {
+          body: { account: accountParam },
+        }),
       ]);
 
       const nextErrors = new Set<string>();
