@@ -131,6 +131,7 @@ const Index = () => {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "brasil">("all");
   const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "prosta" | "emagrecimento" | "diabetes">("all");
+  const [bmFilter, setBmFilter] = useState<"all" | "bm1" | "bm2">("all");
   const [campaignBudgets, setCampaignBudgets] = useState<Record<string, { daily_budget: number; name: string; status: string }>>({});
 
   const fetchData = async () => {
@@ -155,16 +156,20 @@ const Index = () => {
       const prevFromStr = format(prev.from, "yyyy-MM-dd");
       const prevToStr = format(prev.to, "yyyy-MM-dd");
 
+      const accountParam = bmFilter !== "all" ? bmFilter : "all";
+
       const [metricsRes, prevMetricsRes, salesRes, prevSalesRes, budgetsRes] = await Promise.allSettled([
         supabase.functions.invoke("facebookMetrics", {
-          body: { from: fromStr, to: toStr },
+          body: { from: fromStr, to: toStr, account: accountParam },
         }),
         supabase.functions.invoke("facebookMetrics", {
-          body: { from: prevFromStr, to: prevToStr },
+          body: { from: prevFromStr, to: prevToStr, account: accountParam },
         }),
         supabase.from("webhook_sales").select("*").gte("date", fromStr).lte("date", toStr),
         supabase.from("webhook_sales").select("*").gte("date", prevFromStr).lte("date", prevToStr),
-        supabase.functions.invoke("getCampaignBudgets"),
+        supabase.functions.invoke("getCampaignBudgets", {
+          body: { account: accountParam },
+        }),
       ]);
 
       const nextErrors = new Set<string>();
@@ -261,7 +266,7 @@ const Index = () => {
 
   useEffect(() => {
     fetchData();
-  }, [range, customRange]);
+  }, [range, customRange, bmFilter]);
 
   const isAdCountry = (ad: any, country: "uruguay" | "brasil") => {
     const campaignName = (ad.campaign_name || "").toUpperCase();
@@ -471,6 +476,13 @@ const Index = () => {
                 Atualizado às {lastUpdate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
               </span>
             )}
+            <Tabs value={bmFilter} onValueChange={(v) => setBmFilter(v as any)}>
+              <TabsList className="h-8">
+                <TabsTrigger value="all" className="text-xs px-3 h-6">Todas</TabsTrigger>
+                <TabsTrigger value="bm1" className="text-xs px-3 h-6">BM 1</TabsTrigger>
+                <TabsTrigger value="bm2" className="text-xs px-3 h-6">BM 2</TabsTrigger>
+              </TabsList>
+            </Tabs>
             <Tabs value={countryFilter} onValueChange={(v) => setCountryFilter(v as any)}>
               <TabsList className="h-8">
                 <TabsTrigger value="all" className="text-xs px-3 h-6">Todos</TabsTrigger>
