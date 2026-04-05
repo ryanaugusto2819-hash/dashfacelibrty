@@ -450,9 +450,6 @@ const Index = () => {
   const roiTrend = calcTrend(kpi.roi, prevKpi.roi);
   const convTrend = calcTrend(kpi.conversionRate, prevKpi.conversionRate);
   const ticketTrend = calcTrend(kpi.averageTicket, prevKpi.averageTicket);
-  const lucro70Trend = calcTrend(kpi.lucro70, prevKpi.lucro70);
-  const lucro60Trend = calcTrend(kpi.lucro60, prevKpi.lucro60);
-  const lucro50Trend = calcTrend(kpi.lucro50, prevKpi.lucro50);
 
   return (
     <div className="min-h-screen">
@@ -562,70 +559,55 @@ const Index = () => {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+              {Array.from({ length: 9 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
               <div className="animate-fade-in-up" style={{ animationDelay: "0ms" }}>
                 <KPICard title="Valor Gasto" value={`R$ ${fmt(kpi.totalSpent)}`} icon={DollarSign} variant="blue"
                   trend={spentTrend.trend} trendUp={spentTrend.trendUp} trendNeutral={spentTrend.trendNeutral}
                   previousValue={`R$ ${fmt(prevKpi.totalSpent)}`} hidden={hideValues} />
               </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "50ms" }}>
-                <KPICard title="Leads" value={kpi.totalLeads.toLocaleString("pt-BR")} icon={Users} variant="cyan"
-                  trend={leadsTrend.trend} trendUp={leadsTrend.trendUp} trendNeutral={leadsTrend.trendNeutral}
-                  previousValue={prevKpi.totalLeads.toLocaleString("pt-BR")} hidden={hideValues} />
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: "100ms" }}>
-                <KPICard title="Custo / Lead" value={`R$ ${fmt(kpi.costPerLead)}`} icon={Target} variant="orange"
-                  trend={cplTrend.trend} trendUp={cplTrend.trendUp} trendNeutral={cplTrend.trendNeutral}
-                  previousValue={`R$ ${fmt(prevKpi.costPerLead)}`} hidden={hideValues} />
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: "150ms" }}>
-                <KPICard title="Vendas" value={kpi.totalSales.toLocaleString("pt-BR")} icon={Receipt} variant="purple"
-                  trend={salesTrend.trend} trendUp={salesTrend.trendUp} trendNeutral={salesTrend.trendNeutral}
-                  previousValue={prevKpi.totalSales.toLocaleString("pt-BR")} hidden={hideValues} />
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: "175ms" }}>
-                <KPICard title="CPA" value={`R$ ${fmt(kpi.cpa)}`} icon={Target} variant="orange"
-                  trend={cpaTrend.trend} trendUp={cpaTrend.trendUp} trendNeutral={cpaTrend.trendNeutral}
-                  previousValue={`R$ ${fmt(prevKpi.cpa)}`} hidden={hideValues} />
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: "200ms" }}>
                 <KPICard title="Faturamento" value={`R$ ${fmt(kpi.totalRevenue)}`} icon={Wallet} variant="green"
                   trend={revenueTrend.trend} trendUp={revenueTrend.trendUp} trendNeutral={revenueTrend.trendNeutral}
                   previousValue={`R$ ${fmt(prevKpi.totalRevenue)}`} hidden={hideValues} />
               </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: "250ms" }}>
-                <KPICard title="ROAS" value={`${fmt(kpi.roi)}x`} icon={Percent} variant="green"
+              <div className="animate-fade-in-up" style={{ animationDelay: "100ms" }}>
+                <KPICard title="ROAS" value={`${fmt(kpi.roi)}x`} icon={Percent} variant="purple"
                   trend={roiTrend.trend} trendUp={roiTrend.trendUp} trendNeutral={roiTrend.trendNeutral}
                   previousValue={`${fmt(prevKpi.roi)}x`} hidden={hideValues} />
               </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
-                <KPICard title="Tx. Conversão" value={`${fmt(kpi.conversionRate)}%`} icon={TrendingUp} variant="cyan"
-                  trend={convTrend.trend} trendUp={convTrend.trendUp} trendNeutral={convTrend.trendNeutral}
-                  previousValue={`${fmt(prevKpi.conversionRate)}%`} hidden={hideValues} />
+              <div className="animate-fade-in-up" style={{ animationDelay: "150ms" }}>
+                <KPICard title="Vendas" value={kpi.totalSales.toLocaleString("pt-BR")} icon={Receipt} variant="cyan"
+                  trend={salesTrend.trend} trendUp={salesTrend.trendUp} trendNeutral={salesTrend.trendNeutral}
+                  previousValue={prevKpi.totalSales.toLocaleString("pt-BR")} hidden={hideValues} />
               </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: "350ms" }}>
-                <KPICard title="Ticket Médio" value={`R$ ${fmt(kpi.averageTicket)}`} icon={Receipt} variant="blue"
+              <div className="animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+                <KPICard title="Ticket Médio" value={`R$ ${fmt(kpi.averageTicket)}`} icon={TrendingUp} variant="green"
                   trend={ticketTrend.trend} trendUp={ticketTrend.trendUp} trendNeutral={ticketTrend.trendNeutral}
                   previousValue={`R$ ${fmt(prevKpi.averageTicket)}`} hidden={hideValues} />
               </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "250ms" }}>
+                <KPICard title="Leads" value={kpi.totalLeads.toLocaleString("pt-BR")} icon={Users} variant="blue"
+                  trend={leadsTrend.trend} trendUp={leadsTrend.trendUp} trendNeutral={leadsTrend.trendNeutral}
+                  previousValue={prevKpi.totalLeads.toLocaleString("pt-BR")} hidden={hideValues} />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
+                <KPICard title="Custo / Lead" value={`R$ ${fmt(kpi.costPerLead)}`} icon={Target} variant="orange"
+                  trend={cplTrend.trend} trendUp={cplTrend.trendUp} trendNeutral={cplTrend.trendNeutral}
+                  previousValue={`R$ ${fmt(prevKpi.costPerLead)}`} hidden={hideValues} />
+              </div>
+              <div className="animate-fade-in-up" style={{ animationDelay: "350ms" }}>
+                <KPICard title="CPA" value={`R$ ${fmt(kpi.cpa)}`} icon={Target} variant="orange"
+                  trend={cpaTrend.trend} trendUp={cpaTrend.trendUp} trendNeutral={cpaTrend.trendNeutral}
+                  previousValue={`R$ ${fmt(prevKpi.cpa)}`} hidden={hideValues} />
+              </div>
               <div className="animate-fade-in-up" style={{ animationDelay: "400ms" }}>
-                <KPICard title="Lucro 70%" value={`R$ ${fmt(kpi.lucro70)}`} icon={Wallet} variant="green"
-                  trend={lucro70Trend.trend} trendUp={lucro70Trend.trendUp} trendNeutral={lucro70Trend.trendNeutral}
-                  previousValue={`R$ ${fmt(prevKpi.lucro70)}`} hidden={hideValues || !isAdmin} />
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: "450ms" }}>
-                <KPICard title="Lucro 60%" value={`R$ ${fmt(kpi.lucro60)}`} icon={Wallet} variant="green"
-                  trend={lucro60Trend.trend} trendUp={lucro60Trend.trendUp} trendNeutral={lucro60Trend.trendNeutral}
-                  previousValue={`R$ ${fmt(prevKpi.lucro60)}`} hidden={hideValues || !isAdmin} />
-              </div>
-              <div className="animate-fade-in-up" style={{ animationDelay: "500ms" }}>
-                <KPICard title="Lucro 50%" value={`R$ ${fmt(kpi.lucro50)}`} icon={Wallet} variant="orange"
-                  trend={lucro50Trend.trend} trendUp={lucro50Trend.trendUp} trendNeutral={lucro50Trend.trendNeutral}
-                  previousValue={`R$ ${fmt(prevKpi.lucro50)}`} hidden={hideValues || !isAdmin} />
+                <KPICard title="Tx. Conversão" value={`${fmt(kpi.conversionRate)}%`} icon={Activity} variant="cyan"
+                  trend={convTrend.trend} trendUp={convTrend.trendUp} trendNeutral={convTrend.trendNeutral}
+                  previousValue={`${fmt(prevKpi.conversionRate)}%`} hidden={hideValues} />
               </div>
             </div>
           )}
