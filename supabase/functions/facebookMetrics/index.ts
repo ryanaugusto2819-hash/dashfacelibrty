@@ -126,8 +126,12 @@ async function fetchAccountMetrics(
     nextUrl = json.paging?.next || null;
   }
 
+  const USD_TO_BRL = 5.16;
+  const isUsd = config.label === "bm2";
+
   const processed: ProcessedMetric[] = allData.map((row) => {
-    const spend = parseFloat(row.spend) || 0;
+    const rawSpend = parseFloat(row.spend) || 0;
+    const spend = isUsd ? rawSpend * USD_TO_BRL : rawSpend;
     const impressions = parseInt(row.impressions) || 0;
     const clicks = parseInt(row.clicks) || 0;
     const leads = getActionValue(row.actions, "onsite_conversion.total_messaging_connection");
