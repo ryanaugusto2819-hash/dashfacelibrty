@@ -107,12 +107,14 @@ const normalizeMetaErrorMessage = (message: string) => {
 };
 
 const SkeletonCard = () => (
-  <div className="glass-card p-5">
-    <div className="flex items-start justify-between mb-3">
-      <div className="shimmer h-3 w-20 rounded" />
-      <div className="shimmer h-8 w-8 rounded-lg" />
+  <div className="glass-card p-5 relative overflow-hidden">
+    <div className="absolute inset-x-0 top-0 h-[3px] shimmer" />
+    <div className="flex items-start justify-between mb-4">
+      <div className="shimmer h-2.5 w-20 rounded-full" />
+      <div className="shimmer h-11 w-11 rounded-xl" />
     </div>
-    <div className="shimmer h-7 w-28 rounded mt-1" />
+    <div className="shimmer h-8 w-28 rounded-lg mt-1" />
+    <div className="shimmer h-5 w-16 rounded-full mt-3" />
   </div>
 );
 
@@ -130,7 +132,7 @@ const Index = () => {
   const [hideValues, setHideValues] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "brasil">("all");
-  const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "prosta" | "emagrecimento" | "diabetes">("all");
+  const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "emagrecimento">("all");
   const [bmFilter, setBmFilter] = useState<"all" | "bm1" | "bm2">("all");
   const [campaignBudgets, setCampaignBudgets] = useState<Record<string, { daily_budget: number; name: string; status: string }>>({});
 
@@ -277,12 +279,10 @@ const Index = () => {
     return isUY || (!isAR && !isBR);
   };
 
-  const isAdNicho = (ad: any, nicho: "adulto" | "prosta" | "emagrecimento" | "diabetes") => {
+  const isAdNicho = (ad: any, nicho: "adulto" | "emagrecimento") => {
     const campaignName = (ad.campaign_name || "").toLowerCase();
     if (nicho === "adulto") return campaignName.includes("adulto");
-    if (nicho === "prosta") return campaignName.includes("prosta");
     if (nicho === "emagrecimento") return campaignName.includes("ema");
-    if (nicho === "diabetes") return campaignName.includes("diabet");
     return true;
   };
 
@@ -455,17 +455,27 @@ const Index = () => {
   const lucro50Trend = calcTrend(kpi.lucro50, prevKpi.lucro50);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border/30 bg-background/80 backdrop-blur-xl px-6 py-4">
+      <header className="sticky top-0 z-50 border-b border-border/40 header-glow px-6 py-3.5"
+        style={{ background: "hsl(258 35% 5% / 0.85)", backdropFilter: "blur(24px)" }}>
+        {/* Top purple line */}
+        <div className="absolute inset-x-0 top-0 h-px accent-bar-purple opacity-60" />
         <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
-              <BarChart3 className="h-5 w-5 text-primary-foreground" />
+            <div
+              className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{
+                background: "linear-gradient(135deg, rgba(124,58,237,0.35), rgba(109,40,217,0.2))",
+                boxShadow: "0 0 24px rgba(124,58,237,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
+                border: "1px solid rgba(124,58,237,0.3)",
+              }}
+            >
+              <BarChart3 className="h-5 w-5 text-violet-400" />
             </div>
             <div>
-              <h1 className="text-xl font-display font-bold tracking-tight">Facebook Ads</h1>
-              <p className="text-[11px] text-muted-foreground tracking-wide">Dashboard de Performance</p>
+              <h1 className="text-xl font-display font-bold tracking-tight text-gradient-neon">Facebook Ads</h1>
+              <p className="text-[10px] text-muted-foreground tracking-[0.1em] uppercase">Dashboard de Performance</p>
             </div>
           </div>
 
@@ -494,9 +504,7 @@ const Index = () => {
               <TabsList className="h-8">
                 <TabsTrigger value="all" className="text-xs px-3 h-6">Todos</TabsTrigger>
                 <TabsTrigger value="adulto" className="text-xs px-3 h-6">Adulto</TabsTrigger>
-                <TabsTrigger value="prosta" className="text-xs px-3 h-6">Prósta</TabsTrigger>
                 <TabsTrigger value="emagrecimento" className="text-xs px-3 h-6">Emagrecimento</TabsTrigger>
-                <TabsTrigger value="diabetes" className="text-xs px-3 h-6">Diabetes</TabsTrigger>
               </TabsList>
             </Tabs>
             <button
@@ -538,17 +546,17 @@ const Index = () => {
       <main className="max-w-[1440px] mx-auto px-6 py-8 space-y-8">
         {/* Error Banner */}
         {error && (
-          <div className="glass-card border-loss/30 bg-loss/5 p-4 flex items-center gap-3 animate-fade-in-up">
-            <Activity className="h-4 w-4 text-loss flex-shrink-0" />
-            <p className="text-sm text-loss">{error}</p>
+          <div className="glass-card p-4 flex items-center gap-3 animate-fade-in-up badge-danger rounded-xl">
+            <Activity className="h-4 w-4 flex-shrink-0" />
+            <p className="text-sm">{error}</p>
           </div>
         )}
 
         {/* Section: KPIs */}
         <section>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="h-1 w-1 rounded-full bg-primary" />
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <div className="flex items-center gap-2.5 mb-5">
+            <div className="h-4 w-[3px] rounded-full" style={{ background: "linear-gradient(180deg, #a78bfa, #7c3aed)" }} />
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
               Visão Geral
             </h2>
           </div>
@@ -626,9 +634,9 @@ const Index = () => {
         {/* Section: Chart */}
         {!loading && (
           <section className="animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="h-1 w-1 rounded-full bg-success" />
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            <div className="flex items-center gap-2.5 mb-5">
+              <div className="h-4 w-[3px] rounded-full" style={{ background: "linear-gradient(180deg, #34d399, #059669)" }} />
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
                 Evolução
               </h2>
             </div>
@@ -639,9 +647,9 @@ const Index = () => {
         {/* Section: Table */}
         {!loading && (
           <section className="animate-fade-in-up" style={{ animationDelay: "300ms" }}>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="h-1 w-1 rounded-full bg-warning" />
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            <div className="flex items-center gap-2.5 mb-5">
+              <div className="h-4 w-[3px] rounded-full" style={{ background: "linear-gradient(180deg, #fcd34d, #d97706)" }} />
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
                 Detalhamento
               </h2>
             </div>

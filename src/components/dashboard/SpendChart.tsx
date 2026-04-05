@@ -15,7 +15,6 @@ interface SpendChartProps {
 }
 
 const SpendChart = ({ data, range }: SpendChartProps) => {
-  // Group data by date for the chart
   const chartData = (() => {
     const byDate: Record<string, { date: string; spend: number; leads: number }> = {};
     for (const row of data) {
@@ -33,52 +32,78 @@ const SpendChart = ({ data, range }: SpendChartProps) => {
 
   if (sliced.length === 0) {
     return (
-      <div className="glass-card p-6 text-center text-muted-foreground text-sm">
-        Sem dados de evolução para o período.
+      <div className="glass-card p-8 text-center">
+        <p className="text-muted-foreground/60 text-sm">Sem dados de evolução para o período.</p>
       </div>
     );
   }
 
+  const PURPLE = "#a78bfa";
+  const TEAL = "#2dd4bf";
+  const GRID = "hsl(258, 20%, 14%)";
+  const TICK = "hsl(258, 12%, 45%)";
+
   return (
-    <div className="glass-card p-6">
-      <h2 className="text-lg font-display font-semibold mb-1">Investimento Diário</h2>
-      <p className="text-[11px] text-muted-foreground mb-5 tracking-wide">Evolução do gasto e leads no período</p>
-      <div className="h-[300px]">
+    <div className="glass-card p-6 relative overflow-hidden">
+      {/* Top accent bar */}
+      <div className="absolute inset-x-0 top-0 h-[3px] accent-bar-purple opacity-90" />
+
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <h2 className="text-base font-display font-semibold text-foreground">Investimento Diário</h2>
+          <p className="text-[11px] text-muted-foreground mt-0.5 tracking-wide">
+            Evolução do gasto e leads no período
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full" style={{ background: PURPLE }} />
+            <span className="text-[11px] text-muted-foreground">Gasto</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full" style={{ background: TEAL }} />
+            <span className="text-[11px] text-muted-foreground">Leads</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="h-[280px]">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={sliced} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+          <AreaChart data={sliced} margin={{ top: 8, right: 4, left: -16, bottom: 0 }}>
             <defs>
               <linearGradient id="colorSpend" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0.35} />
-                <stop offset="100%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0} />
+                <stop offset="0%" stopColor={PURPLE} stopOpacity={0.4} />
+                <stop offset="85%" stopColor={PURPLE} stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorLeads" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="hsl(152, 69%, 46%)" stopOpacity={0.35} />
-                <stop offset="100%" stopColor="hsl(152, 69%, 46%)" stopOpacity={0} />
+                <stop offset="0%" stopColor={TEAL} stopOpacity={0.35} />
+                <stop offset="85%" stopColor={TEAL} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(228, 16%, 14%)" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
             <XAxis
               dataKey="date"
-              tick={{ fill: "hsl(215, 16%, 50%)", fontSize: 11 }}
+              tick={{ fill: TICK, fontSize: 11, fontFamily: 'Inter' }}
               axisLine={false}
               tickLine={false}
               dy={8}
             />
             <YAxis
-              tick={{ fill: "hsl(215, 16%, 50%)", fontSize: 11 }}
+              tick={{ fill: TICK, fontSize: 11, fontFamily: 'Inter' }}
               axisLine={false}
               tickLine={false}
               width={55}
             />
             <Tooltip
               contentStyle={{
-                background: "hsl(228, 22%, 10%)",
-                border: "1px solid hsl(228, 16%, 18%)",
+                background: "hsl(258, 30%, 9%)",
+                border: "1px solid hsl(258, 25%, 18%)",
                 borderRadius: "10px",
                 fontSize: "12px",
-                boxShadow: "0 8px 32px -8px rgba(0,0,0,0.5)",
+                fontFamily: 'Inter',
+                boxShadow: "0 12px 32px -8px rgba(0,0,0,0.6), 0 0 0 1px hsl(271 76% 62% / 0.1)",
               }}
-              labelStyle={{ color: "hsl(210, 40%, 96%)", fontWeight: 600 }}
+              labelStyle={{ color: "hsl(0, 0%, 90%)", fontWeight: 600 }}
               formatter={(value: number, name: string) => [
                 name === "spend"
                   ? `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
@@ -86,34 +111,24 @@ const SpendChart = ({ data, range }: SpendChartProps) => {
                 name === "spend" ? "Gasto" : "Leads",
               ]}
             />
-            <Legend
-              verticalAlign="top"
-              align="right"
-              iconType="circle"
-              iconSize={8}
-              formatter={(value: string) => (
-                <span style={{ color: "hsl(215, 16%, 50%)", fontSize: 11 }}>
-                  {value === "spend" ? "Gasto" : "Leads"}
-                </span>
-              )}
-            />
+            <Legend hide />
             <Area
               type="monotone"
               dataKey="spend"
-              stroke="hsl(217, 91%, 60%)"
+              stroke={PURPLE}
               fill="url(#colorSpend)"
               strokeWidth={2.5}
               dot={false}
-              activeDot={{ r: 4, strokeWidth: 2 }}
+              activeDot={{ r: 5, strokeWidth: 0, fill: PURPLE }}
             />
             <Area
               type="monotone"
               dataKey="leads"
-              stroke="hsl(152, 69%, 46%)"
+              stroke={TEAL}
               fill="url(#colorLeads)"
               strokeWidth={2.5}
               dot={false}
-              activeDot={{ r: 4, strokeWidth: 2 }}
+              activeDot={{ r: 5, strokeWidth: 0, fill: TEAL }}
             />
           </AreaChart>
         </ResponsiveContainer>
