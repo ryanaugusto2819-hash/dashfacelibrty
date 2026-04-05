@@ -50,10 +50,14 @@ async function fetchAccountBudgets(config: AccountConfig): Promise<{
     nextUrl = json.paging?.next || null;
   }
 
+  const USD_TO_BRL = 5.16;
+  const isUsd = config.label === "bm2";
+
   const budgets: Record<string, { daily_budget: number; name: string; status: string; bm_account: string }> = {};
   for (const c of allCampaigns) {
+    const rawBudget = c.daily_budget ? parseFloat(c.daily_budget) / 100 : 0;
     budgets[c.id] = {
-      daily_budget: c.daily_budget ? parseFloat(c.daily_budget) / 100 : 0,
+      daily_budget: isUsd ? rawBudget * USD_TO_BRL : rawBudget,
       name: c.name || "",
       status: c.status || "",
       bm_account: config.label,
