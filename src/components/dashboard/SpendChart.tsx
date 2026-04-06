@@ -111,7 +111,7 @@ const SpendChart = ({ data, range }: SpendChartProps) => {
                 name === "spend" ? "Gasto" : "Leads",
               ]}
             />
-            <Legend hide />
+            <Legend content={() => null} />
             <Area
               type="monotone"
               dataKey="spend"

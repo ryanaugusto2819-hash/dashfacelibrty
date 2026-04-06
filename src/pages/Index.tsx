@@ -165,7 +165,7 @@ const Index = () => {
 
       const [metricsRes, prevMetricsRes, salesRes, prevSalesRes, budgetsRes] = await Promise.allSettled([
         supabase.functions.invoke("facebookMetrics", {
-          body: { from: fromStr, to: toStr, account: accountParam },
+          body: { from: metaFromStr, to: toStr, account: accountParam },
         }),
         supabase.functions.invoke("facebookMetrics", {
           body: { from: prevFromStr, to: prevToStr, account: accountParam },
