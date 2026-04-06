@@ -10,6 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 import { DateRange } from "react-day-picker";
 
 interface DateFilterProps {
@@ -32,11 +33,13 @@ const DateFilter = ({ selected, onSelect, customRange, onCustomRange }: DateFilt
   const [dateRange, setDateRange] = useState<DateRange | undefined>(
     customRange ? { from: customRange.from, to: customRange.to } : undefined
   );
+  const [startTime, setStartTime] = useState("00:00");
+  const [endTime, setEndTime] = useState("23:59");
 
   const isCustom = selected === "custom";
 
   const label = isCustom && customRange
-    ? `${format(customRange.from, "dd/MM/yy")} – ${format(customRange.to, "dd/MM/yy")}`
+    ? `${format(customRange.from, "dd/MM/yy HH:mm")} – ${format(customRange.to, "dd/MM/yy HH:mm")}`
     : presets.find((o) => o.value === selected)?.label ?? selected;
 
   const handlePreset = (value: string) => {
@@ -47,7 +50,16 @@ const DateFilter = ({ selected, onSelect, customRange, onCustomRange }: DateFilt
 
   const handleApplyCustom = () => {
     if (dateRange?.from && dateRange?.to && onCustomRange) {
-      onCustomRange({ from: dateRange.from, to: dateRange.to });
+      const [sh, sm] = startTime.split(":").map(Number);
+      const [eh, em] = endTime.split(":").map(Number);
+
+      const fromDate = new Date(dateRange.from);
+      fromDate.setHours(sh || 0, sm || 0, 0, 0);
+
+      const toDate = new Date(dateRange.to);
+      toDate.setHours(eh || 23, em || 59, 59, 999);
+
+      onCustomRange({ from: fromDate, to: toDate });
       onSelect("custom");
       setShowCalendar(false);
       setOpen(false);
@@ -100,10 +112,33 @@ const DateFilter = ({ selected, onSelect, customRange, onCustomRange }: DateFilt
               disabled={(date) => date > new Date()}
               className={cn("p-3 pointer-events-auto")}
             />
+
+            {/* Time inputs */}
+            <div className="flex items-center gap-3 mt-3 px-3">
+              <div className="flex items-center gap-1.5">
+                <label className="text-xs text-muted-foreground whitespace-nowrap">Início:</label>
+                <Input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="h-8 w-[100px] text-xs bg-secondary/50 border-border/50"
+                />
+              </div>
+              <div className="flex items-center gap-1.5">
+                <label className="text-xs text-muted-foreground whitespace-nowrap">Fim:</label>
+                <Input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="h-8 w-[100px] text-xs bg-secondary/50 border-border/50"
+                />
+              </div>
+            </div>
+
             <div className="flex items-center justify-between mt-3 px-3 pb-1">
               <span className="text-xs text-muted-foreground">
                 {dateRange?.from && dateRange?.to
-                  ? `${format(dateRange.from, "dd/MM/yyyy")} – ${format(dateRange.to, "dd/MM/yyyy")}`
+                  ? `${format(dateRange.from, "dd/MM/yyyy")} ${startTime} – ${format(dateRange.to, "dd/MM/yyyy")} ${endTime}`
                   : "Selecione o intervalo"}
               </span>
               <div className="flex gap-2">
