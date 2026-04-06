@@ -6,6 +6,13 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+/** Shift a YYYY-MM-DD string by `days` days */
+function shiftDateStr(dateStr: string, days: number): string {
+  const d = new Date(dateStr + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
 interface MetaInsight {
   date_start: string;
   spend: string;
@@ -88,7 +95,14 @@ async function fetchAccountMetrics(
     "ad_id", "ad_name", "campaign_id", "campaign_name",
   ].join(",");
 
-  const timeRange = JSON.stringify({ since: from, until: to });
+  // BM 2 is in PDT (UTC-7) while dates are in BRT (UTC-3).
+  // A Brazilian "today" starts at 20:00 PDT the previous day,
+  // so we fetch one extra day before to capture all data.
+  const adjustedFrom = config.label === "bm2"
+    ? shiftDateStr(from, -1)
+    : from;
+
+  const timeRange = JSON.stringify({ since: adjustedFrom, until: to });
   const url = new URL(`https://graph.facebook.com/v19.0/act_${config.adAccount}/insights`);
   url.searchParams.set("level", "ad");
   url.searchParams.set("time_range", timeRange);
