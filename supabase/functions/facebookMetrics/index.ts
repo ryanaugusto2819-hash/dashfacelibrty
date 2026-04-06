@@ -88,7 +88,14 @@ async function fetchAccountMetrics(
     "ad_id", "ad_name", "campaign_id", "campaign_name",
   ].join(",");
 
-  const timeRange = JSON.stringify({ since: from, until: to });
+  // BM 2 is in PDT (UTC-7) while dates are in BRT (UTC-3).
+  // A Brazilian "today" starts at 20:00 PDT the previous day,
+  // so we fetch one extra day before to capture all data.
+  const adjustedFrom = config.label === "bm2"
+    ? shiftDateStr(from, -1)
+    : from;
+
+  const timeRange = JSON.stringify({ since: adjustedFrom, until: to });
   const url = new URL(`https://graph.facebook.com/v19.0/act_${config.adAccount}/insights`);
   url.searchParams.set("level", "ad");
   url.searchParams.set("time_range", timeRange);
