@@ -155,6 +155,9 @@ const Index = () => {
 
       const fromStr = format(from, "yyyy-MM-dd");
       const toStr = format(to, "yyyy-MM-dd");
+      // Extend Meta query range by -1 day to account for timezone offset (PDT→BRT)
+      // Campaigns active at 20:00 PDT appear as next day 00:00 in Brazil
+      const metaFromStr = format(subDays(from, 1), "yyyy-MM-dd");
       const prevFromStr = format(prev.from, "yyyy-MM-dd");
       const prevToStr = format(prev.to, "yyyy-MM-dd");
 
