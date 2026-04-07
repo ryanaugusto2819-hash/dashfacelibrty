@@ -620,7 +620,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                                     size="icon"
                                     className="h-8 w-8 flex-shrink-0"
                                     disabled={updatingBudget === budgetKey || !budgetValue}
-                                    onClick={() => handleBudgetUpdate(budgetKey, cIds)}
+                                    onClick={() => handleBudgetUpdate(budgetKey, cIds, ad.bm_account)}
                                   >
                                     {updatingBudget === budgetKey ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
                                   </Button>
