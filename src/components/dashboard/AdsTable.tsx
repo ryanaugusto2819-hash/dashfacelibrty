@@ -531,7 +531,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                     <td className="px-2 py-3.5 text-center">
                       {isAdmin && campaignIds.length > 0 ? (
                         <button
-                          onClick={() => handleStatusToggle(campaignIds[0], campaignStatus)}
+                          onClick={() => handleStatusToggle(campaignIds[0], campaignStatus, ad.bm_account)}
                           disabled={togglingStatus === campaignIds[0]}
                           className="group/btn inline-flex items-center gap-1.5 transition-all"
                           title={isActive ? "Clique para pausar" : "Clique para ativar"}
