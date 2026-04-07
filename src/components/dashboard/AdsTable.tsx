@@ -100,7 +100,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     setTogglingStatus(campaignId);
     try {
       const { data, error } = await supabase.functions.invoke("updateCampaignStatus", {
-        body: { campaign_id: campaignId, status: newStatus },
+        body: { campaign_id: campaignId, status: newStatus, bm_account: bmFilter },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.details?.message || data.error);
