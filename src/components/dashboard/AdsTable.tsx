@@ -79,7 +79,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     try {
       for (const campaignId of campaignIds) {
         const { data, error } = await supabase.functions.invoke("updateCampaignBudget", {
-          body: { campaign_id: campaignId, daily_budget: value },
+          body: { campaign_id: campaignId, daily_budget: value, bm_account: bmFilter },
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.details?.message || data.error);
