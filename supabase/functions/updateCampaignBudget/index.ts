@@ -26,6 +26,7 @@ serve(async (req) => {
     }
 
     const { campaign_id, daily_budget, bm_account } = await req.json();
+    console.log("Request:", { campaign_id, daily_budget, bm_account });
 
     if (!campaign_id || daily_budget == null) {
       return new Response(
@@ -36,6 +37,7 @@ serve(async (req) => {
 
     const accessToken = getAccessToken(bm_account);
     if (!accessToken) {
+      console.error("No access token found for bm_account:", bm_account);
       return new Response(
         JSON.stringify({ error: "Missing access token for account" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -47,6 +49,7 @@ serve(async (req) => {
     const isUsd = bm_account === "bm2" || bm_account === "bm3";
     const budgetValue = isUsd ? daily_budget / USD_TO_BRL : daily_budget;
     const budgetInCents = Math.round(budgetValue * 100);
+    console.log("Budget calc:", { isUsd, budgetValue, budgetInCents });
 
     const url = `https://graph.facebook.com/v19.0/${campaign_id}`;
     const res = await fetch(url, {
