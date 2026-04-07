@@ -46,6 +46,7 @@ interface AdsTableProps {
   prevSalesData?: SaleEntry[];
   isAdmin?: boolean;
   campaignBudgets?: Record<string, { daily_budget: number; name: string; status: string }>;
+  bmFilter?: string;
 }
 
 const fmt = (n: number | null | undefined) => {
