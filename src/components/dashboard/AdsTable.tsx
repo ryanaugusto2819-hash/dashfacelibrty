@@ -69,7 +69,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
   const [togglingStatus, setTogglingStatus] = useState<string | null>(null);
   const [localStatuses, setLocalStatuses] = useState<Record<string, string>>({});
 
-  const handleBudgetUpdate = async (adName: string, campaignIds: string[]) => {
+  const handleBudgetUpdate = async (adName: string, campaignIds: string[], bmAccount?: string) => {
     const value = parseFloat(budgetValue.replace(",", "."));
     if (isNaN(value) || value <= 0) {
       toast.error("Valor inválido");
@@ -79,7 +79,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     try {
       for (const campaignId of campaignIds) {
         const { data, error } = await supabase.functions.invoke("updateCampaignBudget", {
-          body: { campaign_id: campaignId, daily_budget: value, bm_account: bmFilter },
+          body: { campaign_id: campaignId, daily_budget: value, bm_account: bmAccount || bmFilter },
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.details?.message || data.error);
