@@ -46,6 +46,7 @@ interface AdsTableProps {
   prevSalesData?: SaleEntry[];
   isAdmin?: boolean;
   campaignBudgets?: Record<string, { daily_budget: number; name: string; status: string }>;
+  bmFilter?: string;
 }
 
 const fmt = (n: number | null | undefined) => {
@@ -53,7 +54,7 @@ const fmt = (n: number | null | undefined) => {
   return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
-const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdmin = false, campaignBudgets = {} }: AdsTableProps) => {
+const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdmin = false, campaignBudgets = {}, bmFilter }: AdsTableProps) => {
   const [adVideos, setAdVideos] = useState<Record<string, AdVideo>>({});
   const [uploading, setUploading] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
@@ -78,7 +79,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     try {
       for (const campaignId of campaignIds) {
         const { data, error } = await supabase.functions.invoke("updateCampaignBudget", {
-          body: { campaign_id: campaignId, daily_budget: value },
+          body: { campaign_id: campaignId, daily_budget: value, bm_account: bmFilter },
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.details?.message || data.error);
@@ -99,7 +100,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     setTogglingStatus(campaignId);
     try {
       const { data, error } = await supabase.functions.invoke("updateCampaignStatus", {
-        body: { campaign_id: campaignId, status: newStatus },
+        body: { campaign_id: campaignId, status: newStatus, bm_account: bmFilter },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.details?.message || data.error);
