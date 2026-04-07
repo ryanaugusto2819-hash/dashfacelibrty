@@ -55,7 +55,7 @@ async function fetchAccountBudgets(config: AccountConfig): Promise<{
   }
 
   const USD_TO_BRL = 5.16;
-  const isUsd = config.label === "bm2";
+  const isUsd = config.label === "bm2" || config.label === "bm3";
 
   const budgets: Record<string, { daily_budget: number; name: string; status: string; bm_account: string }> = {};
   for (const c of allCampaigns) {
