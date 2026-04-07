@@ -74,6 +74,10 @@ function getAccountConfigs(): AccountConfig[] {
   const a2 = Deno.env.get("META_AD_ACCOUNT_2");
   if (t2 && a2) configs.push({ label: "bm2", accessToken: t2, adAccount: a2 });
 
+  const t3 = Deno.env.get("META_ACCESS_TOKEN_3");
+  const a3 = Deno.env.get("META_AD_ACCOUNT_3");
+  if (t3 && a3) configs.push({ label: "bm3", accessToken: t3, adAccount: a3 });
+
   return configs;
 }
 
@@ -127,7 +131,7 @@ async function fetchAccountMetrics(
   }
 
   const USD_TO_BRL = 5.16;
-  const isUsd = config.label === "bm2";
+  const isUsd = config.label === "bm2" || config.label === "bm3";
 
   const processed: ProcessedMetric[] = allData.map((row) => {
     const rawSpend = parseFloat(row.spend) || 0;
