@@ -6,6 +6,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function getAccessToken(bmAccount?: string): string | undefined {
+  if (bmAccount === "bm2") return Deno.env.get("META_ACCESS_TOKEN_2");
+  if (bmAccount === "bm3") return Deno.env.get("META_ACCESS_TOKEN_3");
+  return Deno.env.get("META_ACCESS_TOKEN");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -19,7 +25,7 @@ serve(async (req) => {
       });
     }
 
-    const { campaign_id, daily_budget } = await req.json();
+    const { campaign_id, daily_budget, bm_account } = await req.json();
 
     if (!campaign_id || daily_budget == null) {
       return new Response(
@@ -28,16 +34,19 @@ serve(async (req) => {
       );
     }
 
-    const accessToken = Deno.env.get("META_ACCESS_TOKEN");
+    const accessToken = getAccessToken(bm_account);
     if (!accessToken) {
       return new Response(
-        JSON.stringify({ error: "Missing META_ACCESS_TOKEN" }),
+        JSON.stringify({ error: "Missing access token for account" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Meta API expects budget in cents (integer)
-    const budgetInCents = Math.round(daily_budget * 100);
+    // For USD accounts (bm2, bm3), convert BRL back to USD before sending to Meta
+    const USD_TO_BRL = 5.16;
+    const isUsd = bm_account === "bm2" || bm_account === "bm3";
+    const budgetValue = isUsd ? daily_budget / USD_TO_BRL : daily_budget;
+    const budgetInCents = Math.round(budgetValue * 100);
 
     const url = `https://graph.facebook.com/v19.0/${campaign_id}`;
     const res = await fetch(url, {
