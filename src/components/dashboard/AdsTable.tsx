@@ -95,12 +95,12 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     }
   };
 
-  const handleStatusToggle = async (campaignId: string, currentStatus: string) => {
+  const handleStatusToggle = async (campaignId: string, currentStatus: string, bmAccount?: string) => {
     const newStatus = currentStatus === "ACTIVE" ? "PAUSED" : "ACTIVE";
     setTogglingStatus(campaignId);
     try {
       const { data, error } = await supabase.functions.invoke("updateCampaignStatus", {
-        body: { campaign_id: campaignId, status: newStatus, bm_account: bmFilter },
+        body: { campaign_id: campaignId, status: newStatus, bm_account: bmAccount || bmFilter },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.details?.message || data.error);
