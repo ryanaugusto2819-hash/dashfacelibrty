@@ -613,7 +613,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                                     className="h-8 text-sm"
                                     autoFocus
                                     onKeyDown={(e) => {
-                                      if (e.key === "Enter") handleBudgetUpdate(budgetKey, cIds);
+                                      if (e.key === "Enter") handleBudgetUpdate(budgetKey, cIds, ad.bm_account);
                                     }}
                                   />
                                   <Button
