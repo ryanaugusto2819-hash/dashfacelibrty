@@ -133,7 +133,7 @@ const Index = () => {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "brasil">("all");
   const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "emagrecimento">("all");
-  const [bmFilter, setBmFilter] = useState<"all" | "bm1" | "bm2">("all");
+  const [bmFilter, setBmFilter] = useState<"all" | "bm1" | "bm2" | "bm3" | "bm4" | "bm5">("all");
   const [campaignBudgets, setCampaignBudgets] = useState<Record<string, { daily_budget: number; name: string; status: string }>>({});
 
   const fetchData = async () => {
@@ -488,6 +488,9 @@ const Index = () => {
                 <TabsTrigger value="all" className="text-xs px-3 h-6">Todas</TabsTrigger>
                 <TabsTrigger value="bm1" className="text-xs px-3 h-6">BM 1</TabsTrigger>
                 <TabsTrigger value="bm2" className="text-xs px-3 h-6">BM 2</TabsTrigger>
+                <TabsTrigger value="bm3" className="text-xs px-3 h-6">BM 3</TabsTrigger>
+                <TabsTrigger value="bm4" className="text-xs px-3 h-6">BM 4</TabsTrigger>
+                <TabsTrigger value="bm5" className="text-xs px-3 h-6">BM 5</TabsTrigger>
               </TabsList>
             </Tabs>
             <Tabs value={countryFilter} onValueChange={(v) => setCountryFilter(v as any)}>

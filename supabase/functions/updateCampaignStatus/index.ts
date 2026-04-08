@@ -19,7 +19,7 @@ serve(async (req) => {
       });
     }
 
-    const { campaign_id, status } = await req.json();
+    const { campaign_id, status, bm_account } = await req.json();
 
     if (!campaign_id || !status) {
       return new Response(
@@ -35,7 +35,14 @@ serve(async (req) => {
       );
     }
 
-    const accessToken = Deno.env.get("META_ACCESS_TOKEN");
+    const tokenMap: Record<string, string> = {
+      bm1: Deno.env.get("META_ACCESS_TOKEN") || "",
+      bm2: Deno.env.get("META_ACCESS_TOKEN_2") || "",
+      bm3: Deno.env.get("META_ACCESS_TOKEN_3") || "",
+      bm4: Deno.env.get("META_ACCESS_TOKEN_4") || "",
+      bm5: Deno.env.get("META_ACCESS_TOKEN_5") || "",
+    };
+    const accessToken = (bm_account && tokenMap[bm_account]) || Deno.env.get("META_ACCESS_TOKEN");
     if (!accessToken) {
       return new Response(
         JSON.stringify({ error: "Missing META_ACCESS_TOKEN" }),

@@ -22,6 +22,18 @@ function getAccountConfigs(): AccountConfig[] {
   const a2 = Deno.env.get("META_AD_ACCOUNT_2");
   if (t2 && a2) configs.push({ label: "bm2", accessToken: t2, adAccount: a2 });
 
+  const t3 = Deno.env.get("META_ACCESS_TOKEN_3");
+  const a3 = Deno.env.get("META_AD_ACCOUNT_3");
+  if (t3 && a3) configs.push({ label: "bm3", accessToken: t3, adAccount: a3 });
+
+  const t4 = Deno.env.get("META_ACCESS_TOKEN_4");
+  const a4 = Deno.env.get("META_AD_ACCOUNT_4");
+  if (t4 && a4) configs.push({ label: "bm4", accessToken: t4, adAccount: a4 });
+
+  const t5 = Deno.env.get("META_ACCESS_TOKEN_5");
+  const a5 = Deno.env.get("META_AD_ACCOUNT_5");
+  if (t5 && a5) configs.push({ label: "bm5", accessToken: t5, adAccount: a5 });
+
   return configs;
 }
 
