@@ -14,17 +14,16 @@ interface AccountConfig {
 
 function getAccountConfigs(): AccountConfig[] {
   const configs: AccountConfig[] = [];
-  const t1 = Deno.env.get("META_ACCESS_TOKEN");
+  const mainToken = Deno.env.get("META_ACCESS_TOKEN");
+
   const a1 = Deno.env.get("META_AD_ACCOUNT");
+  const t1 = mainToken;
   if (t1 && a1) configs.push({ label: "bm1", accessToken: t1, adAccount: a1 });
 
-  const t2 = Deno.env.get("META_ACCESS_TOKEN_2");
   const a2 = Deno.env.get("META_AD_ACCOUNT_2");
+  const t2 = Deno.env.get("META_ACCESS_TOKEN_2") || mainToken;
   if (t2 && a2) configs.push({ label: "bm2", accessToken: t2, adAccount: a2 });
 
-  const t3 = Deno.env.get("META_ACCESS_TOKEN_3");
-  const a3 = Deno.env.get("META_AD_ACCOUNT_3");
-  if (t3 && a3) configs.push({ label: "bm3", accessToken: t3, adAccount: a3 });
 
   const t4 = Deno.env.get("META_ACCESS_TOKEN_4");
   const a4 = Deno.env.get("META_AD_ACCOUNT_4");
@@ -33,7 +32,6 @@ function getAccountConfigs(): AccountConfig[] {
   const t5 = Deno.env.get("META_ACCESS_TOKEN_5");
   const a5 = Deno.env.get("META_AD_ACCOUNT_5");
   if (t5 && a5) configs.push({ label: "bm5", accessToken: t5, adAccount: a5 });
-
   return configs;
 }
 
@@ -63,7 +61,7 @@ async function fetchAccountBudgets(config: AccountConfig): Promise<{
   }
 
   const USD_TO_BRL = 5.16;
-  const isUsd = config.label === "bm2";
+  const isUsd = config.label === "bm2" || config.label === "bm3";
 
   const budgets: Record<string, { daily_budget: number; name: string; status: string; bm_account: string }> = {};
   for (const c of allCampaigns) {

@@ -46,6 +46,7 @@ interface AdsTableProps {
   prevSalesData?: SaleEntry[];
   isAdmin?: boolean;
   campaignBudgets?: Record<string, { daily_budget: number; name: string; status: string }>;
+  bmFilter?: string;
 }
 
 const fmt = (n: number | null | undefined) => {
@@ -53,7 +54,7 @@ const fmt = (n: number | null | undefined) => {
   return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
-const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdmin = false, campaignBudgets = {} }: AdsTableProps) => {
+const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdmin = false, campaignBudgets = {}, bmFilter }: AdsTableProps) => {
   const [adVideos, setAdVideos] = useState<Record<string, AdVideo>>({});
   const [uploading, setUploading] = useState<string | null>(null);
   const [previewVideo, setPreviewVideo] = useState<string | null>(null);
@@ -68,7 +69,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
   const [togglingStatus, setTogglingStatus] = useState<string | null>(null);
   const [localStatuses, setLocalStatuses] = useState<Record<string, string>>({});
 
-  const handleBudgetUpdate = async (adName: string, campaignIds: string[]) => {
+  const handleBudgetUpdate = async (adName: string, campaignIds: string[], bmAccount?: string) => {
     const value = parseFloat(budgetValue.replace(",", "."));
     if (isNaN(value) || value <= 0) {
       toast.error("Valor inválido");
@@ -78,7 +79,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     try {
       for (const campaignId of campaignIds) {
         const { data, error } = await supabase.functions.invoke("updateCampaignBudget", {
-          body: { campaign_id: campaignId, daily_budget: value },
+          body: { campaign_id: campaignId, daily_budget: value, bm_account: bmAccount || bmFilter },
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.details?.message || data.error);
@@ -94,12 +95,12 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     }
   };
 
-  const handleStatusToggle = async (campaignId: string, currentStatus: string) => {
+  const handleStatusToggle = async (campaignId: string, currentStatus: string, bmAccount?: string) => {
     const newStatus = currentStatus === "ACTIVE" ? "PAUSED" : "ACTIVE";
     setTogglingStatus(campaignId);
     try {
       const { data, error } = await supabase.functions.invoke("updateCampaignStatus", {
-        body: { campaign_id: campaignId, status: newStatus },
+        body: { campaign_id: campaignId, status: newStatus, bm_account: bmAccount || bmFilter },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.details?.message || data.error);
@@ -530,7 +531,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                     <td className="px-2 py-3.5 text-center">
                       {isAdmin && campaignIds.length > 0 ? (
                         <button
-                          onClick={() => handleStatusToggle(campaignIds[0], campaignStatus)}
+                          onClick={() => handleStatusToggle(campaignIds[0], campaignStatus, ad.bm_account)}
                           disabled={togglingStatus === campaignIds[0]}
                           className="group/btn inline-flex items-center gap-1.5 transition-all"
                           title={isActive ? "Clique para pausar" : "Clique para ativar"}
@@ -612,14 +613,14 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                                     className="h-8 text-sm"
                                     autoFocus
                                     onKeyDown={(e) => {
-                                      if (e.key === "Enter") handleBudgetUpdate(budgetKey, cIds);
+                                      if (e.key === "Enter") handleBudgetUpdate(budgetKey, cIds, ad.bm_account);
                                     }}
                                   />
                                   <Button
                                     size="icon"
                                     className="h-8 w-8 flex-shrink-0"
                                     disabled={updatingBudget === budgetKey || !budgetValue}
-                                    onClick={() => handleBudgetUpdate(budgetKey, cIds)}
+                                    onClick={() => handleBudgetUpdate(budgetKey, cIds, ad.bm_account)}
                                   >
                                     {updatingBudget === budgetKey ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
                                   </Button>

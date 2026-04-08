@@ -6,6 +6,13 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function getAccessToken(bmAccount?: string): string | undefined {
+  const mainToken = Deno.env.get("META_ACCESS_TOKEN");
+  if (bmAccount === "bm2") return Deno.env.get("META_ACCESS_TOKEN_2") || mainToken;
+  if (bmAccount === "bm3") return Deno.env.get("META_ACCESS_TOKEN_3") || mainToken;
+  return mainToken;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -28,23 +35,20 @@ serve(async (req) => {
       );
     }
 
-    const tokenMap: Record<string, string> = {
-      bm1: Deno.env.get("META_ACCESS_TOKEN") || "",
-      bm2: Deno.env.get("META_ACCESS_TOKEN_2") || "",
-      bm3: Deno.env.get("META_ACCESS_TOKEN_3") || "",
-      bm4: Deno.env.get("META_ACCESS_TOKEN_4") || "",
-      bm5: Deno.env.get("META_ACCESS_TOKEN_5") || "",
-    };
-    const accessToken = (bm_account && tokenMap[bm_account]) || Deno.env.get("META_ACCESS_TOKEN");
     if (!accessToken) {
+      console.error("No access token found for bm_account:", bm_account);
       return new Response(
-        JSON.stringify({ error: "Missing META_ACCESS_TOKEN" }),
+        JSON.stringify({ error: "Missing access token for account" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Meta API expects budget in cents (integer)
-    const budgetInCents = Math.round(daily_budget * 100);
+    // For USD accounts (bm2, bm3), convert BRL back to USD before sending to Meta
+    const USD_TO_BRL = 5.16;
+    const isUsd = bm_account === "bm2" || bm_account === "bm3";
+    const budgetValue = isUsd ? daily_budget / USD_TO_BRL : daily_budget;
+    const budgetInCents = Math.round(budgetValue * 100);
+    console.log("Budget calc:", { isUsd, budgetValue, budgetInCents });
 
     const url = `https://graph.facebook.com/v19.0/${campaign_id}`;
     const res = await fetch(url, {

@@ -6,6 +6,13 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function getAccessToken(bmAccount?: string): string | undefined {
+  const mainToken = Deno.env.get("META_ACCESS_TOKEN");
+  if (bmAccount === "bm2") return Deno.env.get("META_ACCESS_TOKEN_2") || mainToken;
+  if (bmAccount === "bm3") return Deno.env.get("META_ACCESS_TOKEN_3") || mainToken;
+  return mainToken;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -35,17 +42,9 @@ serve(async (req) => {
       );
     }
 
-    const tokenMap: Record<string, string> = {
-      bm1: Deno.env.get("META_ACCESS_TOKEN") || "",
-      bm2: Deno.env.get("META_ACCESS_TOKEN_2") || "",
-      bm3: Deno.env.get("META_ACCESS_TOKEN_3") || "",
-      bm4: Deno.env.get("META_ACCESS_TOKEN_4") || "",
-      bm5: Deno.env.get("META_ACCESS_TOKEN_5") || "",
-    };
-    const accessToken = (bm_account && tokenMap[bm_account]) || Deno.env.get("META_ACCESS_TOKEN");
     if (!accessToken) {
       return new Response(
-        JSON.stringify({ error: "Missing META_ACCESS_TOKEN" }),
+        JSON.stringify({ error: "Missing access token for account" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
