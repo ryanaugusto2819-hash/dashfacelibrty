@@ -42,18 +42,13 @@ interface ProcessedMetric {
   bm_account: string;
 }
 
-function getActionValue(
-  actions: { action_type: string; value: string }[] | undefined,
-  type: string
-): number {
+function getActionValue(actions: { action_type: string; value: string }[] | undefined, type: string): number {
   if (!actions) return 0;
   const found = actions.find((a) => a.action_type === type);
   return found ? parseFloat(found.value) : 0;
 }
 
-function getFirstActionValue(
-  actions: { action_type: string; value: string }[] | undefined
-): number {
+function getFirstActionValue(actions: { action_type: string; value: string }[] | undefined): number {
   if (!actions || actions.length === 0) return 0;
   return parseFloat(actions[0].value) || 0;
 }
@@ -66,7 +61,6 @@ interface AccountConfig {
 
 function getAccountConfigs(): AccountConfig[] {
   const configs: AccountConfig[] = [];
-
   const mainToken = Deno.env.get("META_ACCESS_TOKEN");
 
   const a1 = Deno.env.get("META_AD_ACCOUNT");
@@ -94,14 +88,23 @@ function getAccountConfigs(): AccountConfig[] {
 async function fetchAccountMetrics(
   config: AccountConfig,
   from: string,
-  to: string
+  to: string,
 ): Promise<{ data: ProcessedMetric[]; error?: any; connected: boolean }> {
   const fields = [
-    "spend", "impressions", "clicks", "ctr", "cpm", "cpc",
-    "actions", "video_play_actions", "video_p95_watched_actions",
-    "ad_id", "ad_name", "campaign_id", "campaign_name",
+    "spend",
+    "impressions",
+    "clicks",
+    "ctr",
+    "cpm",
+    "cpc",
+    "actions",
+    "video_play_actions",
+    "video_p95_watched_actions",
+    "ad_id",
+    "ad_name",
+    "campaign_id",
+    "campaign_name",
   ].join(",");
-
   const timeRange = JSON.stringify({ since: from, until: to });
   const url = new URL(`https://graph.facebook.com/v19.0/act_${config.adAccount}/insights`);
   url.searchParams.set("level", "ad");
@@ -120,22 +123,16 @@ async function fetchAccountMetrics(
       const res = await fetch(nextUrl);
       json = await res.json();
       if (json.error && (json.error.code === 4 || json.error.code === 17 || json.error.is_transient)) {
-        const delay = Math.min(1000 * Math.pow(2, attempt), 30000);
-        await new Promise(r => setTimeout(r, delay));
+        await new Promise((r) => setTimeout(r, Math.min(1000 * Math.pow(2, attempt), 30000)));
         continue;
       }
       break;
     }
-
     if (json.error) {
       const metaMessage = String(json.error?.message || "");
       const isConnectionError = json.error?.code === 190 || /ads_management|ads_read/i.test(metaMessage);
-      if (isConnectionError) {
-        return { data: [], connected: false, error: json.error };
-      }
-      return { data: [], connected: true, error: json.error };
+      return { data: [], connected: !isConnectionError, error: json.error };
     }
-
     if (json.data) allData.push(...json.data);
     nextUrl = json.paging?.next || null;
   }
@@ -151,20 +148,22 @@ async function fetchAccountMetrics(
     const leads = getActionValue(row.actions, "onsite_conversion.total_messaging_connection");
     const video3s = getActionValue(row.actions, "video_view");
     const videoP95 = getFirstActionValue(row.video_p95_watched_actions);
-
     return {
       date: row.date_start,
       ad_id: row.ad_id,
       ad_name: row.ad_name,
       campaign_id: (row as any).campaign_id || "",
       campaign_name: (row as any).campaign_name || "",
-      spend, impressions, clicks,
+      spend,
+      impressions,
+      clicks,
       ctr: impressions > 0 ? (clicks / impressions) * 100 : 0,
       cpm: impressions > 0 ? (spend / impressions) * 1000 : 0,
       cpc: clicks > 0 ? spend / clicks : 0,
       leads,
       costPerLead: leads > 0 ? spend / leads : null,
-      video3s, videoP95,
+      video3s,
+      videoP95,
       hookRate: impressions > 0 ? (video3s / impressions) * 100 : 0,
       bodyRate: impressions > 0 ? (videoP95 / impressions) * 100 : 0,
       bm_account: config.label,
@@ -175,42 +174,29 @@ async function fetchAccountMetrics(
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
-
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    if (req.method !== "POST") {
+    if (req.method !== "POST")
       return new Response(JSON.stringify({ error: "Method not allowed" }), {
-        status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 405,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-    }
-
     const { from, to, account } = await req.json();
-
-    if (!from || !to) {
-      return new Response(
-        JSON.stringify({ error: "Missing 'from' and 'to' date parameters (YYYY-MM-DD)" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    if (!from || !to)
+      return new Response(JSON.stringify({ error: "Missing from/to" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
 
     const allConfigs = getAccountConfigs();
-    if (allConfigs.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "No Meta accounts configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    if (allConfigs.length === 0)
+      return new Response(JSON.stringify({ error: "No Meta accounts configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
 
-    // Filter configs based on account param
-    const configs = account && account !== "all"
-      ? allConfigs.filter(c => c.label === account)
-      : allConfigs;
-
-    const results = await Promise.allSettled(
-      configs.map(c => fetchAccountMetrics(c, from, to))
-    );
+    const configs = account && account !== "all" ? allConfigs.filter((c) => c.label === account) : allConfigs;
+    const results = await Promise.allSettled(configs.map((c) => fetchAccountMetrics(c, from, to)));
 
     const allProcessed: ProcessedMetric[] = [];
     const errors: any[] = [];
@@ -238,15 +224,15 @@ serve(async (req) => {
         byDate,
         total: allProcessed.length,
         connected: anyConnected || errors.length === 0,
-        accounts: allConfigs.map(c => c.label),
+        accounts: allConfigs.map((c) => c.label),
         ...(errors.length > 0 ? { errors } : {}),
       }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
-    return new Response(
-      JSON.stringify({ error: "Internal error", message: String(err) }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Internal error", message: String(err) }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
