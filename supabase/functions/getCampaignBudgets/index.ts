@@ -17,13 +17,15 @@ function getAccountConfigs(): AccountConfig[] {
   const mainToken = Deno.env.get("META_ACCESS_TOKEN");
 
   const a1 = Deno.env.get("META_AD_ACCOUNT");
-  const t1 = mainToken;
-  if (t1 && a1) configs.push({ label: "bm1", accessToken: t1, adAccount: a1 });
+  if (mainToken && a1) configs.push({ label: "bm1", accessToken: mainToken, adAccount: a1 });
 
   const a2 = Deno.env.get("META_AD_ACCOUNT_2");
   const t2 = Deno.env.get("META_ACCESS_TOKEN_2") || mainToken;
   if (t2 && a2) configs.push({ label: "bm2", accessToken: t2, adAccount: a2 });
 
+  const a3 = Deno.env.get("META_AD_ACCOUNT_3");
+  const t3 = Deno.env.get("META_ACCESS_TOKEN_3") || mainToken;
+  if (t3 && a3) configs.push({ label: "bm3", accessToken: t3, adAccount: a3 });
 
   const t4 = Deno.env.get("META_ACCESS_TOKEN_4");
   const a4 = Deno.env.get("META_AD_ACCOUNT_4");
@@ -32,6 +34,7 @@ function getAccountConfigs(): AccountConfig[] {
   const t5 = Deno.env.get("META_ACCESS_TOKEN_5");
   const a5 = Deno.env.get("META_AD_ACCOUNT_5");
   if (t5 && a5) configs.push({ label: "bm5", accessToken: t5, adAccount: a5 });
+
   return configs;
 }
 
@@ -50,9 +53,7 @@ async function fetchAccountBudgets(config: AccountConfig): Promise<{
     if (json.error) {
       const metaMessage = String(json.error?.message || "");
       const isConnectionError = json.error?.code === 190 || /ads_management|ads_read/i.test(metaMessage);
-      if (isConnectionError) {
-        return { budgets: {}, connected: false, error: json.error };
-      }
+      if (isConnectionError) return { budgets: {}, connected: false, error: json.error };
       return { budgets: {}, connected: true, error: json.error };
     }
 
@@ -78,25 +79,17 @@ async function fetchAccountBudgets(config: AccountConfig): Promise<{
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     let account: string | undefined;
-    try {
-      const body = await req.json();
-      account = body?.account;
-    } catch {
-      // no body is fine
-    }
+    try { const body = await req.json(); account = body?.account; } catch {}
 
     const allConfigs = getAccountConfigs();
     if (allConfigs.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "No Meta accounts configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "No Meta accounts configured" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const configs = account && account !== "all"
@@ -104,7 +97,6 @@ serve(async (req) => {
       : allConfigs;
 
     const results = await Promise.allSettled(configs.map(c => fetchAccountBudgets(c)));
-
     const mergedBudgets: Record<string, { daily_budget: number; name: string; status: string; bm_account: string }> = {};
     let totalCount = 0;
 
@@ -116,17 +108,12 @@ serve(async (req) => {
     });
 
     return new Response(
-      JSON.stringify({
-        budgets: mergedBudgets,
-        total: totalCount,
-        accounts: allConfigs.map(c => c.label),
-      }),
+      JSON.stringify({ budgets: mergedBudgets, total: totalCount, accounts: allConfigs.map(c => c.label) }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
-    return new Response(
-      JSON.stringify({ error: "Internal error", message: String(err) }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Internal error", message: String(err) }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
