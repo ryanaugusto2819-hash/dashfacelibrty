@@ -138,7 +138,7 @@ async function fetchAccountMetrics(
   }
 
   const USD_TO_BRL = 5.10;
-  const isUsd = config.label === "bm2" || config.label === "bm3" || config.label === "bm4" || config.label === "bm5";
+  const isUsd = config.label === "bm2" || config.label === "bm3";
 
   const processed: ProcessedMetric[] = allData.map((row) => {
     const rawSpend = parseFloat(row.spend) || 0;
