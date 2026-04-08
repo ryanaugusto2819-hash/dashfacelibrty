@@ -7,9 +7,10 @@ const corsHeaders = {
 };
 
 function getAccessToken(bmAccount?: string): string | undefined {
-  if (bmAccount === "bm2") return Deno.env.get("META_ACCESS_TOKEN_2");
-  if (bmAccount === "bm3") return Deno.env.get("META_ACCESS_TOKEN_3");
-  return Deno.env.get("META_ACCESS_TOKEN");
+  const mainToken = Deno.env.get("META_ACCESS_TOKEN");
+  if (bmAccount === "bm2") return Deno.env.get("META_ACCESS_TOKEN_2") || mainToken;
+  if (bmAccount === "bm3") return Deno.env.get("META_ACCESS_TOKEN_3") || mainToken;
+  return mainToken;
 }
 
 serve(async (req) => {

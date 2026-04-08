@@ -66,16 +66,18 @@ interface AccountConfig {
 
 function getAccountConfigs(): AccountConfig[] {
   const configs: AccountConfig[] = [];
-  const t1 = Deno.env.get("META_ACCESS_TOKEN");
+  const mainToken = Deno.env.get("META_ACCESS_TOKEN");
+
   const a1 = Deno.env.get("META_AD_ACCOUNT");
+  const t1 = mainToken;
   if (t1 && a1) configs.push({ label: "bm1", accessToken: t1, adAccount: a1 });
 
-  const t2 = Deno.env.get("META_ACCESS_TOKEN_2");
   const a2 = Deno.env.get("META_AD_ACCOUNT_2");
+  const t2 = Deno.env.get("META_ACCESS_TOKEN_2") || mainToken;
   if (t2 && a2) configs.push({ label: "bm2", accessToken: t2, adAccount: a2 });
 
-  const t3 = Deno.env.get("META_ACCESS_TOKEN_3");
   const a3 = Deno.env.get("META_AD_ACCOUNT_3");
+  const t3 = Deno.env.get("META_ACCESS_TOKEN_3") || mainToken;
   if (t3 && a3) configs.push({ label: "bm3", accessToken: t3, adAccount: a3 });
 
   return configs;
