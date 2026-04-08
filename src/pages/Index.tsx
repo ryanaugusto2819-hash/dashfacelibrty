@@ -53,6 +53,19 @@ const getPreviousDateRange = (from: Date, to: Date) => {
 
 const UYU_TO_BRL = 7.49;
 const ARS_TO_BRL = 266;
+const USD_TO_BRL = 5.10;
+
+const applyUsdConversion = (items: any[]) =>
+  items.map((item) => {
+    if (item.bm_account !== "bm4" && item.bm_account !== "bm5") return item;
+    return {
+      ...item,
+      spend: Number(item.spend || 0) * USD_TO_BRL,
+      cpm: Number(item.cpm || 0) * USD_TO_BRL,
+      cpc: Number(item.cpc || 0) * USD_TO_BRL,
+      costPerLead: item.costPerLead != null ? Number(item.costPerLead) * USD_TO_BRL : null,
+    };
+  });
 
 const convertRevenue = (sale: SaleEntry) => {
   const raw = Number(sale.revenue || 0);
@@ -182,7 +195,7 @@ const Index = () => {
           nextErrors.add(normalizeMetaErrorMessage(getFunctionErrorMessage(metricsRes.value, "Erro ao buscar métricas")));
         } else {
           const items = metricsRes.value.data?.data ?? [];
-          setData(Array.isArray(items) ? items : []);
+          setData(Array.isArray(items) ? applyUsdConversion(items) : []);
         }
       } else {
         setData([]);
@@ -194,7 +207,7 @@ const Index = () => {
           setPrevData([]);
         } else {
           const prevItems = prevMetricsRes.value.data?.data ?? [];
-          setPrevData(Array.isArray(prevItems) ? prevItems : []);
+          setPrevData(Array.isArray(prevItems) ? applyUsdConversion(prevItems) : []);
         }
       } else {
         setPrevData([]);
@@ -245,7 +258,16 @@ const Index = () => {
           setCampaignBudgets({});
           nextErrors.add(normalizeMetaErrorMessage(getFunctionErrorMessage(budgetsRes.value, "Erro ao buscar orçamentos")));
         } else {
-          setCampaignBudgets(budgetsRes.value.data?.budgets ?? {});
+          const rawBudgets = budgetsRes.value.data?.budgets ?? {};
+          const convertedBudgets = Object.fromEntries(
+            Object.entries(rawBudgets).map(([id, b]: [string, any]) => [
+              id,
+              b.bm_account === "bm4" || b.bm_account === "bm5"
+                ? { ...b, daily_budget: Number(b.daily_budget || 0) * USD_TO_BRL }
+                : b,
+            ])
+          );
+          setCampaignBudgets(convertedBudgets);
         }
       } else {
         setCampaignBudgets({});
