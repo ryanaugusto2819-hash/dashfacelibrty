@@ -35,6 +35,10 @@ function getAccountConfigs(): AccountConfig[] {
   const a5 = Deno.env.get("META_AD_ACCOUNT_5");
   if (t5 && a5) configs.push({ label: "bm5", accessToken: t5, adAccount: a5 });
 
+  const a6 = Deno.env.get("META_AD_ACCOUNT_6");
+  const t6 = Deno.env.get("META_ACCESS_TOKEN_6") || mainToken;
+  if (t6 && a6) configs.push({ label: "bm6", accessToken: t6, adAccount: a6 });
+
   return configs;
 }
 
@@ -47,8 +51,8 @@ async function fetchAccountBudgets(config: AccountConfig): Promise<{
   let nextUrl: string | null = `https://graph.facebook.com/v19.0/act_${config.adAccount}/campaigns?fields=id,name,daily_budget,status&limit=500&access_token=${config.accessToken}`;
 
   while (nextUrl) {
-    const res = await fetch(nextUrl);
-    const json = await res.json();
+    const res: Response = await fetch(nextUrl);
+    const json: any = await res.json();
 
     if (json.error) {
       const metaMessage = String(json.error?.message || "");
@@ -62,7 +66,7 @@ async function fetchAccountBudgets(config: AccountConfig): Promise<{
   }
 
   const USD_TO_BRL = 5.10;
-  const isUsd = config.label === "bm2" || config.label === "bm3";
+  const isUsd = config.label === "bm2" || config.label === "bm3" || config.label === "bm6";
 
   const budgets: Record<string, { daily_budget: number; name: string; status: string; bm_account: string }> = {};
   for (const c of allCampaigns) {

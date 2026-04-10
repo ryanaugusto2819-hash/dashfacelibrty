@@ -41,7 +41,7 @@ serve(async (req) => {
     }
 
     const USD_TO_BRL = 5.10;
-    const isUsd = bm_account === "bm2" || bm_account === "bm3" || bm_account === "bm4" || bm_account === "bm5";
+    const isUsd = bm_account === "bm2" || bm_account === "bm3" || bm_account === "bm4" || bm_account === "bm5" || bm_account === "bm6";
     const budgetValue = isUsd ? daily_budget / USD_TO_BRL : daily_budget;
     const budgetInCents = Math.round(budgetValue * 100);
 
