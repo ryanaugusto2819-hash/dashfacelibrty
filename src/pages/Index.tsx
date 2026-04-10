@@ -513,6 +513,7 @@ const Index = () => {
                 <TabsTrigger value="bm3" className="text-xs px-3 h-6">BM 3</TabsTrigger>
                 <TabsTrigger value="bm4" className="text-xs px-3 h-6">BM 4</TabsTrigger>
                 <TabsTrigger value="bm5" className="text-xs px-3 h-6">BM 5</TabsTrigger>
+                <TabsTrigger value="bm6" className="text-xs px-3 h-6">BM 6</TabsTrigger>
               </TabsList>
             </Tabs>
             <Tabs value={countryFilter} onValueChange={(v) => setCountryFilter(v as any)}>
