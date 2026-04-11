@@ -397,8 +397,9 @@ export function useImportCampaignsFromMeta() {
 export function useFetchMetaCampaigns() {
   return useMutation({
     mutationFn: async (): Promise<MetaCampaign[]> => {
-      const to = new Date().toISOString().split("T")[0];
-      const from = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
+      const today = new Date().toISOString().split("T")[0];
+      const from = today;
+      const to = today;
 
       const { data, error } = await _supabase.functions.invoke("facebookMetrics", {
         body: { from, to },
