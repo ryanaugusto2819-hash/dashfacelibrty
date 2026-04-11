@@ -38,6 +38,208 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_analysis_logs: {
+        Row: {
+          analysis_type: string
+          campaign_config_id: string | null
+          created_at: string | null
+          duration_ms: number | null
+          error: string | null
+          id: string
+          input_data: Json | null
+          output_data: Json | null
+          tokens_used: number | null
+        }
+        Insert: {
+          analysis_type: string
+          campaign_config_id?: string | null
+          created_at?: string | null
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          input_data?: Json | null
+          output_data?: Json | null
+          tokens_used?: number | null
+        }
+        Update: {
+          analysis_type?: string
+          campaign_config_id?: string | null
+          created_at?: string | null
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          input_data?: Json | null
+          output_data?: Json | null
+          tokens_used?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_analysis_logs_campaign_config_id_fkey"
+            columns: ["campaign_config_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_configs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_training_data: {
+        Row: {
+          category: string
+          content: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          priority: number | null
+          tags: string[] | null
+          title: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          tags?: string[] | null
+          title: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          tags?: string[] | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      campaign_configs: {
+        Row: {
+          adset_id: string | null
+          auto_apply: boolean | null
+          bm_account: string | null
+          budget_current: number | null
+          budget_max: number | null
+          budget_min: number | null
+          campaign_id: string | null
+          country: string | null
+          created_at: string | null
+          id: string
+          monitoring_enabled: boolean | null
+          monitoring_interval: number | null
+          name: string
+          target_cpa: number | null
+          target_ctr: number | null
+          target_roas: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          adset_id?: string | null
+          auto_apply?: boolean | null
+          bm_account?: string | null
+          budget_current?: number | null
+          budget_max?: number | null
+          budget_min?: number | null
+          campaign_id?: string | null
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          monitoring_enabled?: boolean | null
+          monitoring_interval?: number | null
+          name: string
+          target_cpa?: number | null
+          target_ctr?: number | null
+          target_roas?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          adset_id?: string | null
+          auto_apply?: boolean | null
+          bm_account?: string | null
+          budget_current?: number | null
+          budget_max?: number | null
+          budget_min?: number | null
+          campaign_id?: string | null
+          country?: string | null
+          created_at?: string | null
+          id?: string
+          monitoring_enabled?: boolean | null
+          monitoring_interval?: number | null
+          name?: string
+          target_cpa?: number | null
+          target_ctr?: number | null
+          target_roas?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      optimization_suggestions: {
+        Row: {
+          applied_at: string | null
+          campaign_config_id: string | null
+          change_percent: number | null
+          created_at: string | null
+          current_value: number | null
+          error_message: string | null
+          expires_at: string | null
+          id: string
+          metrics_snapshot: Json | null
+          reasoning: string
+          status: string | null
+          suggested_value: number | null
+          suggestion_type: string
+          whatsapp_message_id: string | null
+        }
+        Insert: {
+          applied_at?: string | null
+          campaign_config_id?: string | null
+          change_percent?: number | null
+          created_at?: string | null
+          current_value?: number | null
+          error_message?: string | null
+          expires_at?: string | null
+          id?: string
+          metrics_snapshot?: Json | null
+          reasoning: string
+          status?: string | null
+          suggested_value?: number | null
+          suggestion_type: string
+          whatsapp_message_id?: string | null
+        }
+        Update: {
+          applied_at?: string | null
+          campaign_config_id?: string | null
+          change_percent?: number | null
+          created_at?: string | null
+          current_value?: number | null
+          error_message?: string | null
+          expires_at?: string | null
+          id?: string
+          metrics_snapshot?: Json | null
+          reasoning?: string
+          status?: string | null
+          suggested_value?: number | null
+          suggestion_type?: string
+          whatsapp_message_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "optimization_suggestions_campaign_config_id_fkey"
+            columns: ["campaign_config_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_configs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           approved: boolean
@@ -110,6 +312,86 @@ export type Database = {
           id?: string
           revenue?: number
           sales?: number
+        }
+        Relationships: []
+      }
+      whatsapp_conversations: {
+        Row: {
+          created_at: string | null
+          direction: string
+          id: string
+          intent: string | null
+          message: string
+          message_id: string | null
+          phone: string | null
+          processed: boolean | null
+          suggestion_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          direction: string
+          id?: string
+          intent?: string | null
+          message: string
+          message_id?: string | null
+          phone?: string | null
+          processed?: boolean | null
+          suggestion_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          direction?: string
+          id?: string
+          intent?: string | null
+          message?: string
+          message_id?: string | null
+          phone?: string | null
+          processed?: boolean | null
+          suggestion_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_conversations_suggestion_id_fkey"
+            columns: ["suggestion_id"]
+            isOneToOne: false
+            referencedRelation: "optimization_suggestions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      zapi_config: {
+        Row: {
+          client_token: string | null
+          created_at: string | null
+          id: string
+          instance_id: string
+          is_active: boolean | null
+          phone: string
+          token: string
+          updated_at: string | null
+          webhook_configured: boolean | null
+        }
+        Insert: {
+          client_token?: string | null
+          created_at?: string | null
+          id?: string
+          instance_id: string
+          is_active?: boolean | null
+          phone: string
+          token: string
+          updated_at?: string | null
+          webhook_configured?: boolean | null
+        }
+        Update: {
+          client_token?: string | null
+          created_at?: string | null
+          id?: string
+          instance_id?: string
+          is_active?: boolean | null
+          phone?: string
+          token?: string
+          updated_at?: string | null
+          webhook_configured?: boolean | null
         }
         Relationships: []
       }
