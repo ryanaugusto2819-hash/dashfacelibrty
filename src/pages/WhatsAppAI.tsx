@@ -426,7 +426,7 @@ function CampanhasTab() {
               </div>
               <div className="space-y-1.5">
                 <Label>Conta BM</Label>
-                <Select value={(form as Record<string, unknown>).bm_account as string || ""} onValueChange={v => setForm(f => ({ ...f, bm_account: v || null }))}>
+                <Select value={form.bm_account || "auto"} onValueChange={v => setForm(f => ({ ...f, bm_account: v === "auto" ? null : v }))}>
                   <SelectTrigger><SelectValue placeholder="Automático" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="auto">Automático</SelectItem>
