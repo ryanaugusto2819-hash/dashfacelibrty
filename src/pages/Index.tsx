@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { DollarSign, Users, Target, BarChart3, Percent, TrendingUp, Receipt, Wallet, Activity, RefreshCw, Eye, EyeOff, Clock, Shield, LogOut } from "lucide-react";
+import { DollarSign, Users, Target, BarChart3, Percent, TrendingUp, Receipt, Wallet, Activity, RefreshCw, Eye, EyeOff, Clock, Shield, LogOut, Bot } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -556,6 +556,14 @@ const Index = () => {
                 <Shield className="h-4 w-4" />
               </button>
             )}
+            <button
+              onClick={() => navigate("/whatsapp-ai")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-green-400 hover:text-green-300 border border-green-500/30 hover:border-green-400/50 bg-green-500/10 hover:bg-green-500/15"
+              title="Liberty AI — WhatsApp Optimizer"
+            >
+              <Bot className="h-3.5 w-3.5" />
+              Liberty AI
+            </button>
             <button
               onClick={signOut}
               className="p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
