@@ -46,19 +46,19 @@ serve(async (req) => {
       );
     }
 
-    // ── 3. Fetch real Meta metrics (last 7 days + last 2 days) ─
+    // ── 3. Fetch real Meta metrics via facebookMetrics ────────
     const today = new Date().toISOString().split("T")[0];
     const minus7 = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
     const minus2 = new Date(Date.now() - 2 * 86400000).toISOString().split("T")[0];
 
-    const [metrics7d, metrics2d] = await Promise.all([
-      fetchAdsSpend(supabase, minus7, today),
-      fetchAdsSpend(supabase, minus2, today),
+    const [raw7d, raw2d] = await Promise.all([
+      fetchMetrics(minus7, today),
+      fetchMetrics(minus2, today),
     ]);
 
-    // Build lookup by campaign name (since Meta returns name, not DB id)
-    const byName7d = buildCampaignLookup(metrics7d);
-    const byName2d = buildCampaignLookup(metrics2d);
+    // Aggregate per-ad rows into per-campaign summaries keyed by campaign_id and name
+    const byCampaignId7d = aggregateByCampaign(raw7d);
+    const byCampaignId2d = aggregateByCampaign(raw2d);
 
     // ── 4. Load AI training data ──────────────────────────────
     const { data: trainingData } = await supabase
@@ -92,18 +92,18 @@ serve(async (req) => {
         }
       }
 
-      // Match campaign config to real Meta metrics by campaign_id or name
-      const campaignMetrics7d = byName7d[campaign.campaign_id] || byName7d[campaign.name] || null;
-      const campaignMetrics2d = byName2d[campaign.campaign_id] || byName2d[campaign.name] || null;
+      // Match by campaign_id first, then by name
+      const m7d = byCampaignId7d[campaign.campaign_id] || byCampaignId7d[campaign.name] || null;
+      const m2d = byCampaignId2d[campaign.campaign_id] || byCampaignId2d[campaign.name] || null;
 
-      if (!campaignMetrics7d && !campaignMetrics2d) {
+      if (!m7d && !m2d) {
         results.push({ campaign: campaign.name, status: "no_data", reason: "No Meta metrics found for this campaign" });
         continue;
       }
 
       const metricsSnapshot = {
-        period_7d: campaignMetrics7d,
-        period_2d: campaignMetrics2d,
+        period_7d: m7d,
+        period_2d: m2d,
         fetched_at: new Date().toISOString(),
       };
 
@@ -204,12 +204,12 @@ serve(async (req) => {
   }
 });
 
-// ── Helpers ───────────────────────────────────────────────────
+// ── Fetch metrics from facebookMetrics function ───────────────
 
-async function fetchAdsSpend(supabase: ReturnType<typeof createClient>, from: string, to: string) {
+async function fetchMetrics(from: string, to: string): Promise<Array<Record<string, unknown>>> {
   try {
     const res = await fetch(
-      `${Deno.env.get("SUPABASE_URL")}/functions/v1/fetch-ads-spend`,
+      `${Deno.env.get("SUPABASE_URL")}/functions/v1/facebookMetrics`,
       {
         method: "POST",
         headers: {
@@ -219,22 +219,60 @@ async function fetchAdsSpend(supabase: ReturnType<typeof createClient>, from: st
         body: JSON.stringify({ from, to }),
       }
     );
-    if (!res.ok) return null;
-    return await res.json();
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data?.data || [];
   } catch {
-    return null;
+    return [];
   }
 }
 
-function buildCampaignLookup(metrics: Record<string, unknown> | null): Record<string, unknown> {
-  if (!metrics) return {};
-  const campaigns = (metrics.byCampaign as Array<{ name: string; [k: string]: unknown }>) || [];
-  const result: Record<string, unknown> = {};
-  for (const c of campaigns) {
-    result[c.name] = c;
+// ── Aggregate per-ad rows into per-campaign totals ────────────
+
+function aggregateByCampaign(rows: Array<Record<string, unknown>>): Record<string, Record<string, unknown>> {
+  const result: Record<string, Record<string, unknown>> = {};
+
+  for (const row of rows) {
+    const key = (row.campaign_id as string) || (row.campaign_name as string);
+    if (!key) continue;
+
+    if (!result[key]) {
+      result[key] = {
+        campaign_id: row.campaign_id,
+        name: row.campaign_name,
+        spend: 0,
+        impressions: 0,
+        clicks: 0,
+        leads: 0,
+        bm_account: row.bm_account,
+      };
+      // Also index by name for fallback lookup
+      const name = row.campaign_name as string;
+      if (name && name !== key) result[name] = result[key];
+    }
+
+    (result[key].spend as number);
+    result[key].spend = ((result[key].spend as number) || 0) + ((row.spend as number) || 0);
+    result[key].impressions = ((result[key].impressions as number) || 0) + ((row.impressions as number) || 0);
+    result[key].clicks = ((result[key].clicks as number) || 0) + ((row.clicks as number) || 0);
+    result[key].leads = ((result[key].leads as number) || 0) + ((row.leads as number) || 0);
   }
+
+  // Compute derived metrics
+  for (const key of Object.keys(result)) {
+    const c = result[key];
+    const imp = (c.impressions as number) || 0;
+    const clk = (c.clicks as number) || 0;
+    const leads = (c.leads as number) || 0;
+    const spend = (c.spend as number) || 0;
+    c.ctr = imp > 0 ? (clk / imp) * 100 : 0;
+    c.costPerLead = leads > 0 ? spend / leads : null;
+  }
+
   return result;
 }
+
+// ── Build Claude analysis prompt ──────────────────────────────
 
 function buildAnalysisPrompt(
   trainingContext: string,
@@ -251,6 +289,7 @@ function buildAnalysisPrompt(
 Campanha: "${campaign.name}"
 País: ${campaign.country}
 Facebook Campaign ID: ${campaign.campaign_id || "não configurado"}
+Conta BM: ${campaign.bm_account || "não informado"}
 
 Configuração de Orçamento:
 - Orçamento atual registrado: R$ ${campaign.budget_current}
@@ -263,20 +302,20 @@ Metas:
 - CTR alvo: ${campaign.target_ctr ? `${campaign.target_ctr}%` : "não definido"}
 
 Métricas reais dos últimos 2 dias:
-- Gasto: R$ ${(m2d as Record<string, unknown>).spend || 0}
-- Impressões: ${(m2d as Record<string, unknown>).impressions || 0}
-- Cliques: ${(m2d as Record<string, unknown>).clicks || 0}
-- Leads: ${(m2d as Record<string, unknown>).leads || 0}
-- CTR: ${(m2d as Record<string, unknown>).ctr || 0}%
-- CPL (custo por lead): ${(m2d as Record<string, unknown>).costPerLead ? `R$ ${(m2d as Record<string, unknown>).costPerLead}` : "sem leads"}
+- Gasto: R$ ${m2d.spend || 0}
+- Impressões: ${m2d.impressions || 0}
+- Cliques: ${m2d.clicks || 0}
+- Leads: ${m2d.leads || 0}
+- CTR: ${m2d.ctr || 0}%
+- CPL (custo por lead): ${m2d.costPerLead ? `R$ ${m2d.costPerLead}` : "sem leads"}
 
 Métricas reais dos últimos 7 dias:
-- Gasto: R$ ${(m7d as Record<string, unknown>).spend || 0}
-- Impressões: ${(m7d as Record<string, unknown>).impressions || 0}
-- Cliques: ${(m7d as Record<string, unknown>).clicks || 0}
-- Leads: ${(m7d as Record<string, unknown>).leads || 0}
-- CTR: ${(m7d as Record<string, unknown>).ctr || 0}%
-- CPL médio 7d: ${(m7d as Record<string, unknown>).costPerLead ? `R$ ${(m7d as Record<string, unknown>).costPerLead}` : "sem leads"}
+- Gasto: R$ ${m7d.spend || 0}
+- Impressões: ${m7d.impressions || 0}
+- Cliques: ${m7d.clicks || 0}
+- Leads: ${m7d.leads || 0}
+- CTR: ${m7d.ctr || 0}%
+- CPL médio 7d: ${m7d.costPerLead ? `R$ ${m7d.costPerLead}` : "sem leads"}
 
 ===== INSTRUÇÃO =====
 
