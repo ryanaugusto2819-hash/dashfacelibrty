@@ -25,7 +25,8 @@ import {
   useAITrainingData, useUpsertTrainingData, useDeleteTrainingData,
   useOptimizationSuggestions, useWhatsAppConversations, useAIAnalysisLogs,
   useRunCampaignMonitor, useSendTestMessage,
-  type CampaignConfig, type AITrainingData, type ZAPIConfig,
+  useFetchMetaCampaigns, useImportCampaignsFromMeta,
+  type CampaignConfig, type AITrainingData, type ZAPIConfig, type MetaCampaign,
 } from "@/hooks/useWhatsAppAI";
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -242,7 +243,23 @@ function CampanhasTab() {
   const upsert = useUpsertCampaignConfig();
   const deleteCampaign = useDeleteCampaignConfig();
   const runMonitor = useRunCampaignMonitor();
+  const fetchMeta = useFetchMetaCampaigns();
+  const importMeta = useImportCampaignsFromMeta();
   const [open, setOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [metaCampaigns, setMetaCampaigns] = useState<MetaCampaign[]>([]);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  async function handleFetchMeta() {
+    const data = await fetchMeta.mutateAsync();
+    if (data) { setMetaCampaigns(data); setSelected(new Set(data.map(c => c.campaign_id))); setImportOpen(true); }
+  }
+
+  async function handleImport() {
+    const toImport = metaCampaigns.filter(c => selected.has(c.campaign_id));
+    await importMeta.mutateAsync(toImport);
+    setImportOpen(false);
+  }
 
   const emptyForm: Partial<CampaignConfig> = {
     name: "", campaign_id: "", adset_id: "", country: "brasil",
@@ -260,12 +277,54 @@ function CampanhasTab() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">Campanhas Monitoradas</h2>
-          <p className="text-sm text-muted-foreground">Configure as campanhas que a IA deve monitorar e otimizar.</p>
+          <p className="text-sm text-muted-foreground">Importe suas campanhas reais do Meta ou adicione manualmente.</p>
         </div>
-        <Button onClick={openNew} className="gap-2 bg-violet-600 hover:bg-violet-700">
-          <Plus className="w-4 h-4" />Nova Campanha
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2 border-blue-500/30 text-blue-400 hover:bg-blue-500/10" onClick={handleFetchMeta} disabled={fetchMeta.isPending}>
+            {fetchMeta.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Buscando...</> : <><RefreshCw className="w-4 h-4" />Importar do Meta</>}
+          </Button>
+          <Button onClick={openNew} className="gap-2 bg-violet-600 hover:bg-violet-700">
+            <Plus className="w-4 h-4" />Manual
+          </Button>
+        </div>
       </div>
+
+      {/* Import from Meta Dialog */}
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 text-blue-400" />Campanhas encontradas no Meta
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Selecione as campanhas que deseja monitorar. Dados dos últimos 7 dias.</p>
+          <div className="space-y-2 py-2">
+            {metaCampaigns.map(c => (
+              <div key={c.campaign_id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selected.has(c.campaign_id) ? "border-violet-500/40 bg-violet-500/10" : "border-border/40 bg-card/50 opacity-60"}`}
+                onClick={() => setSelected(prev => { const s = new Set(prev); s.has(c.campaign_id) ? s.delete(c.campaign_id) : s.add(c.campaign_id); return s; })}>
+                <div className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center ${selected.has(c.campaign_id) ? "bg-violet-600 border-violet-600" : "border-border"}`}>
+                  {selected.has(c.campaign_id) && <CheckCircle2 className="w-3 h-3 text-white" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{c.name}</p>
+                  <p className="text-xs text-muted-foreground">{c.country === "brasil" ? "🇧🇷 Brasil" : c.country === "uruguay" ? "🇺🇾 Uruguay" : "🌐 Global"}</p>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-right flex-shrink-0">
+                  <div><p className="text-xs text-muted-foreground">Gasto</p><p className="text-sm font-mono">R$ {c.spend.toFixed(0)}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Leads</p><p className="text-sm font-mono">{c.leads}</p></div>
+                  <div><p className="text-xs text-muted-foreground">CPL</p><p className="text-sm font-mono">{c.costPerLead ? `R$ ${c.costPerLead.toFixed(0)}` : "—"}</p></div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2 pt-2">
+            <Button variant="outline" className="flex-1" onClick={() => setImportOpen(false)}>Cancelar</Button>
+            <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={handleImport} disabled={importMeta.isPending || selected.size === 0}>
+              {importMeta.isPending ? "Importando..." : `Importar ${selected.size} campanha(s)`}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {isLoading ? (
         <div className="text-center py-10 text-muted-foreground">Carregando...</div>

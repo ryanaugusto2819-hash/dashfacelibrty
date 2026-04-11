@@ -336,3 +336,95 @@ export function useSendTestMessage() {
     onError: (e: Error) => toast.error(`Erro ao enviar: ${e.message}`),
   });
 }
+
+// ─── Meta Campaign Import ─────────────────────────────────────
+
+export interface MetaCampaign {
+  campaign_id: string;
+  name: string;
+  spend: number;
+  impressions: number;
+  clicks: number;
+  leads: number;
+  ctr: number;
+  costPerLead: number | null;
+  country: "brasil" | "uruguay" | "global";
+}
+
+export function useImportCampaignsFromMeta() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (campaigns: MetaCampaign[]) => {
+      for (const c of campaigns) {
+        // Upsert by campaign_id — update if exists, insert if not
+        const { data: existing } = await db
+          .from("campaign_configs")
+          .select("id")
+          .eq("campaign_id", c.campaign_id)
+          .maybeSingle();
+
+        if (existing) {
+          await db
+            .from("campaign_configs")
+            .update({ name: c.name, budget_current: c.spend, country: c.country })
+            .eq("id", existing.id);
+        } else {
+          await db.from("campaign_configs").insert({
+            name: c.name,
+            campaign_id: c.campaign_id,
+            country: c.country,
+            budget_current: Math.round(c.spend),
+            budget_min: 0,
+            budget_max: Math.round(c.spend * 3),
+            monitoring_enabled: true,
+            monitoring_interval: 60,
+            auto_apply: false,
+          });
+        }
+      }
+    },
+    onSuccess: (_, campaigns) => {
+      qc.invalidateQueries({ queryKey: ["campaign_configs"] });
+      toast.success(`${campaigns.length} campanha(s) importada(s) do Meta!`);
+    },
+    onError: (e: Error) => toast.error(`Erro ao importar: ${e.message}`),
+  });
+}
+
+export function useFetchMetaCampaigns() {
+  return useMutation({
+    mutationFn: async (): Promise<MetaCampaign[]> => {
+      const to = new Date().toISOString().split("T")[0];
+      const from = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
+
+      const { data, error } = await _supabase.functions.invoke("fetch-ads-spend", {
+        body: { from, to },
+      });
+      if (error) throw error;
+
+      const byCampaign: Array<{ name: string; spend: number; impressions: number; clicks: number; leads: number }> =
+        data?.byCampaign || [];
+
+      // fetch-ads-spend doesn't return campaign_id in byCampaign — we use name as key
+      // Also get per-country splits
+      const brasilCampaigns: typeof byCampaign = data?.brasil?.byCampaign || [];
+      const uruguayCampaigns: typeof byCampaign = data?.uruguay?.byCampaign || [];
+
+      const brasilNames = new Set(brasilCampaigns.map((c) => c.name));
+      const uruguayNames = new Set(uruguayCampaigns.map((c) => c.name));
+
+      return byCampaign.map((c, i) => ({
+        campaign_id: `meta_${i}_${c.name.toLowerCase().replace(/\s+/g, "_").slice(0, 20)}`,
+        name: c.name,
+        spend: c.spend,
+        impressions: c.impressions,
+        clicks: c.clicks,
+        leads: c.leads,
+        ctr: c.impressions > 0 ? (c.clicks / c.impressions) * 100 : 0,
+        costPerLead: c.leads > 0 ? c.spend / c.leads : null,
+        country: brasilNames.has(c.name) ? "brasil" : uruguayNames.has(c.name) ? "uruguay" : "global",
+      }));
+    },
+    onError: (e: Error) => toast.error(`Erro ao buscar campanhas: ${e.message}`),
+  });
+}
