@@ -429,7 +429,7 @@ function CampanhasTab() {
                 <Select value={(form as Record<string, unknown>).bm_account as string || ""} onValueChange={v => setForm(f => ({ ...f, bm_account: v || null }))}>
                   <SelectTrigger><SelectValue placeholder="Automático" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Automático</SelectItem>
+                    <SelectItem value="auto">Automático</SelectItem>
                     {["bm1","bm2","bm3","bm4","bm5","bm6","bm7"].map(bm => (
                       <SelectItem key={bm} value={bm}>{bm.toUpperCase()}</SelectItem>
                     ))}
