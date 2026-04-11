@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -249,10 +249,36 @@ function CampanhasTab() {
   const [importOpen, setImportOpen] = useState(false);
   const [metaCampaigns, setMetaCampaigns] = useState<MetaCampaign[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const autoImportDone = useRef(false);
+
+  // Auto-import on first load when no campaigns exist
+  useEffect(() => {
+    if (!isLoading && campaigns.length === 0 && !autoImportDone.current && !fetchMeta.isPending) {
+      autoImportDone.current = true;
+      handleAutoImport();
+    }
+  }, [isLoading, campaigns.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleAutoImport() {
+    try {
+      const data = await fetchMeta.mutateAsync();
+      if (data && data.length > 0) {
+        const withSpend = data.filter(c => c.spend > 0);
+        if (withSpend.length > 0) {
+          await importMeta.mutateAsync(withSpend);
+        }
+      }
+    } catch { /* handled by hook */ }
+  }
 
   async function handleFetchMeta() {
     const data = await fetchMeta.mutateAsync();
-    if (data) { setMetaCampaigns(data); setSelected(new Set(data.map(c => c.campaign_id))); setImportOpen(true); }
+    if (data) {
+      const withSpend = data.filter(c => c.spend > 0);
+      setMetaCampaigns(withSpend.length > 0 ? withSpend : data);
+      setSelected(new Set((withSpend.length > 0 ? withSpend : data).map(c => c.campaign_id)));
+      setImportOpen(true);
+    }
   }
 
   async function handleImport() {
@@ -262,7 +288,7 @@ function CampanhasTab() {
   }
 
   const emptyForm: Partial<CampaignConfig> = {
-    name: "", campaign_id: "", adset_id: "", country: "brasil",
+    name: "", campaign_id: "", adset_id: "", bm_account: null, country: "brasil",
     budget_current: 0, budget_min: 0, budget_max: 1000,
     target_roas: undefined, target_cpa: undefined, target_ctr: undefined,
     monitoring_enabled: true, monitoring_interval: 60, auto_apply: false,
@@ -280,8 +306,11 @@ function CampanhasTab() {
           <p className="text-sm text-muted-foreground">Importe suas campanhas reais do Meta ou adicione manualmente.</p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" className="gap-2 border-green-500/30 text-green-400 hover:bg-green-500/10" onClick={handleAutoImport} disabled={fetchMeta.isPending || importMeta.isPending}>
+            {fetchMeta.isPending || importMeta.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Sincronizando...</> : <><RefreshCw className="w-4 h-4" />Sincronizar Meta</>}
+          </Button>
           <Button variant="outline" className="gap-2 border-blue-500/30 text-blue-400 hover:bg-blue-500/10" onClick={handleFetchMeta} disabled={fetchMeta.isPending}>
-            {fetchMeta.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Buscando...</> : <><RefreshCw className="w-4 h-4" />Importar do Meta</>}
+            {fetchMeta.isPending ? <><RefreshCw className="w-4 h-4 animate-spin" />Buscando...</> : <><RefreshCw className="w-4 h-4" />Escolher</>}
           </Button>
           <Button onClick={openNew} className="gap-2 bg-violet-600 hover:bg-violet-700">
             <Plus className="w-4 h-4" />Manual
@@ -346,6 +375,7 @@ function CampanhasTab() {
                     <CardTitle className="text-base">{c.name}</CardTitle>
                     <CardDescription className="text-xs mt-0.5">
                       {c.campaign_id ? `ID: ${c.campaign_id}` : "Sem ID"} · {c.country === "brasil" ? "🇧🇷 Brasil" : "🇺🇾 Uruguay"}
+                      {(c as Record<string, unknown>).bm_account ? ` · ${((c as Record<string, unknown>).bm_account as string).toUpperCase()}` : ""}
                     </CardDescription>
                   </div>
                   <Badge variant="outline" className={c.monitoring_enabled ? "text-green-400 border-green-500/30 bg-green-500/10" : "text-muted-foreground"}>
@@ -393,6 +423,18 @@ function CampanhasTab() {
               <div className="space-y-1.5">
                 <Label>ID Campanha (Facebook)</Label>
                 <Input placeholder="123456789" value={form.campaign_id || ""} onChange={e => setForm(f => ({ ...f, campaign_id: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Conta BM</Label>
+                <Select value={(form as Record<string, unknown>).bm_account as string || ""} onValueChange={v => setForm(f => ({ ...f, bm_account: v || null }))}>
+                  <SelectTrigger><SelectValue placeholder="Automático" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Automático</SelectItem>
+                    {["bm1","bm2","bm3","bm4","bm5","bm6","bm7"].map(bm => (
+                      <SelectItem key={bm} value={bm}>{bm.toUpperCase()}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-1.5">
                 <Label>País</Label>

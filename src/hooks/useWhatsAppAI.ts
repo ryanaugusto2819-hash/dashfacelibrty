@@ -25,6 +25,7 @@ export interface CampaignConfig {
   name: string;
   campaign_id: string | null;
   adset_id: string | null;
+  bm_account: string | null;
   country: "brasil" | "uruguay" | "global";
   budget_current: number;
   budget_min: number;
@@ -349,6 +350,7 @@ export interface MetaCampaign {
   ctr: number;
   costPerLead: number | null;
   country: "brasil" | "uruguay" | "global";
+  bm_account: string | null;
 }
 
 export function useImportCampaignsFromMeta() {
@@ -366,13 +368,14 @@ export function useImportCampaignsFromMeta() {
         if (existing) {
           await db
             .from("campaign_configs")
-            .update({ name: c.name, budget_current: c.spend, country: c.country })
+            .update({ name: c.name, budget_current: Math.round(c.spend), country: c.country, bm_account: c.bm_account || null })
             .eq("id", existing.id);
         } else {
           await db.from("campaign_configs").insert({
             name: c.name,
             campaign_id: c.campaign_id,
             country: c.country,
+            bm_account: c.bm_account || null,
             budget_current: Math.round(c.spend),
             budget_min: 0,
             budget_max: Math.round(c.spend * 3),
@@ -397,32 +400,53 @@ export function useFetchMetaCampaigns() {
       const to = new Date().toISOString().split("T")[0];
       const from = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
 
-      const { data, error } = await _supabase.functions.invoke("fetch-ads-spend", {
+      const { data, error } = await _supabase.functions.invoke("facebookMetrics", {
         body: { from, to },
       });
       if (error) throw error;
 
-      const byCampaign: Array<{ name: string; spend: number; impressions: number; clicks: number; leads: number }> =
-        data?.byCampaign || [];
+      // Aggregate per-ad rows into per-campaign rows
+      const rows: Array<{
+        campaign_id: string;
+        campaign_name: string;
+        spend: number;
+        impressions: number;
+        clicks: number;
+        leads: number;
+        bm_account: string;
+      }> = data?.data || [];
 
-      // fetch-ads-spend doesn't return campaign_id in byCampaign — we use name as key
-      // Also get per-country splits
-      const brasilCampaigns: typeof byCampaign = data?.brasil?.byCampaign || [];
-      const uruguayCampaigns: typeof byCampaign = data?.uruguay?.byCampaign || [];
+      // BM accounts whose currency is USD (converted to BRL in facebookMetrics already)
+      const uruguayBMs = new Set(["bm4", "bm5"]);
 
-      const brasilNames = new Set(brasilCampaigns.map((c) => c.name));
-      const uruguayNames = new Set(uruguayCampaigns.map((c) => c.name));
+      const byId: Record<string, MetaCampaign> = {};
+      for (const row of rows) {
+        const key = row.campaign_id || row.campaign_name;
+        if (!key) continue;
+        if (!byId[key]) {
+          byId[key] = {
+            campaign_id: row.campaign_id || key,
+            name: row.campaign_name,
+            spend: 0,
+            impressions: 0,
+            clicks: 0,
+            leads: 0,
+            ctr: 0,
+            costPerLead: null,
+            country: uruguayBMs.has(row.bm_account) ? "uruguay" : "brasil",
+            bm_account: row.bm_account || null,
+          };
+        }
+        byId[key].spend += row.spend;
+        byId[key].impressions += row.impressions;
+        byId[key].clicks += row.clicks;
+        byId[key].leads += row.leads;
+      }
 
-      return byCampaign.map((c, i) => ({
-        campaign_id: `meta_${i}_${c.name.toLowerCase().replace(/\s+/g, "_").slice(0, 20)}`,
-        name: c.name,
-        spend: c.spend,
-        impressions: c.impressions,
-        clicks: c.clicks,
-        leads: c.leads,
+      return Object.values(byId).map(c => ({
+        ...c,
         ctr: c.impressions > 0 ? (c.clicks / c.impressions) * 100 : 0,
         costPerLead: c.leads > 0 ? c.spend / c.leads : null,
-        country: brasilNames.has(c.name) ? "brasil" : uruguayNames.has(c.name) ? "uruguay" : "global",
       }));
     },
     onError: (e: Error) => toast.error(`Erro ao buscar campanhas: ${e.message}`),
