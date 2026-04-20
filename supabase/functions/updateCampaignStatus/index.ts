@@ -14,6 +14,7 @@ function getAccessToken(bmAccount?: string): string | undefined {
   if (bmAccount === "bm5") return Deno.env.get("META_ACCESS_TOKEN_5") || mainToken;
   if (bmAccount === "bm6") return Deno.env.get("META_ACCESS_TOKEN_6") || mainToken;
   if (bmAccount === "bm7") return Deno.env.get("META_ACCESS_TOKEN_7") || mainToken;
+  if (bmAccount === "bm8") return Deno.env.get("META_ACCESS_TOKEN_8") || mainToken;
   return mainToken;
 }
 
