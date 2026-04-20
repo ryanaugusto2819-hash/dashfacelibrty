@@ -14,6 +14,7 @@ function getAccessToken(bmAccount?: string): string | undefined {
   if (bmAccount === "bm5") return Deno.env.get("META_ACCESS_TOKEN_5") || mainToken;
   if (bmAccount === "bm6") return Deno.env.get("META_ACCESS_TOKEN_6") || mainToken;
   if (bmAccount === "bm7") return Deno.env.get("META_ACCESS_TOKEN_7") || mainToken;
+  if (bmAccount === "bm8") return Deno.env.get("META_ACCESS_TOKEN_8") || mainToken;
   return mainToken;
 }
 
@@ -43,7 +44,7 @@ serve(async (req) => {
     }
 
     const USD_TO_BRL = 5.10;
-    const isUsd = bm_account === "bm2" || bm_account === "bm3" || bm_account === "bm4" || bm_account === "bm5" || bm_account === "bm6" || bm_account === "bm7";
+    const isUsd = bm_account === "bm2" || bm_account === "bm3" || bm_account === "bm4" || bm_account === "bm5" || bm_account === "bm6" || bm_account === "bm7" || bm_account === "bm8";
     const budgetValue = isUsd ? daily_budget / USD_TO_BRL : daily_budget;
     const budgetInCents = Math.round(budgetValue * 100);
 
