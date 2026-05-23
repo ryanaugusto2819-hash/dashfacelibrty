@@ -179,13 +179,17 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
   // Build rows data
   const allAdNames = ads.map(a => (a.ad_name || a.name || "").toLowerCase().trim()).filter(Boolean);
 
+  // Normalize: lowercase, remove punctuation, collapse whitespace
+  const norm = (s: string) => (s || "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/\s+/g, " ");
+
   // Match sales by CAMPAIGN NAME only (ignore creative/ad name)
   const matchSale = (s: any, _adNameNorm: string, adCampaignNorm: string, adName: string) => {
     if (!adName || !adCampaignNorm) return { match: false, byCreative: false };
-    const campFull = (s.campaign || "").toLowerCase().trim();
-    if (!campFull) return { match: false, byCreative: false };
-    if (adCampaignNorm === campFull) return { match: true, byCreative: false };
-    if (campFull.length > 5 && (adCampaignNorm.includes(campFull) || campFull.includes(adCampaignNorm))) return { match: true, byCreative: false };
+    const campFull = norm(s.campaign || "");
+    const adCamp = norm(adCampaignNorm);
+    if (!campFull || !adCamp) return { match: false, byCreative: false };
+    if (adCamp === campFull) return { match: true, byCreative: false };
+    if (campFull.length > 5 && (adCamp.includes(campFull) || campFull.includes(adCamp))) return { match: true, byCreative: false };
     return { match: false, byCreative: false };
   };
 
