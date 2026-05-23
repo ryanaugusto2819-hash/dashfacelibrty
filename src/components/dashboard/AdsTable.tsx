@@ -179,38 +179,71 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
   // Build rows data
   const allAdNames = ads.map(a => (a.ad_name || a.name || "").toLowerCase().trim()).filter(Boolean);
 
+  // Classify each sale: tied to a specific creative, or only to a campaign (to be distributed)
+  const matchSale = (s: any, adNameNorm: string, adCampaignNorm: string, adName: string) => {
+    if (!adName) return { match: false, byCreative: false };
+    const cFull = (s.creative || "").toLowerCase().trim();
+    const campFull = (s.campaign || "").toLowerCase().trim();
+    // Creative-level (specific) matches
+    if (cFull && adNameNorm === cFull) return { match: true, byCreative: true };
+    if (cFull) {
+      const cStripped = cFull.replace(/ ar$/, "");
+      if (cStripped !== cFull && !allAdNames.includes(cFull) && adNameNorm === cStripped)
+        return { match: true, byCreative: true };
+    }
+    // Campaign-level matches (will be distributed across ads of the campaign)
+    if (campFull && adCampaignNorm && adCampaignNorm === campFull) return { match: true, byCreative: false };
+    if (campFull && adCampaignNorm && campFull.length > 5 && (adCampaignNorm.includes(campFull) || campFull.includes(adCampaignNorm))) return { match: true, byCreative: false };
+    if (cFull && adCampaignNorm && cFull.length > 5 && (adCampaignNorm.includes(cFull) || cFull.includes(adCampaignNorm))) return { match: true, byCreative: false };
+    return { match: false, byCreative: false };
+  };
+
+  // Pre-count: for each sale, how many ads match it at campaign-only level (no creative match)
+  const saleCampaignAdCount = new Map<any, number>();
+  salesData.forEach((s) => {
+    let creativeHit = 0;
+    let campaignHit = 0;
+    ads.forEach((ad) => {
+      const adName = ad.ad_name || ad.name || "";
+      const r = matchSale(s, adName.toLowerCase().trim(), (ad.campaign_name || "").toLowerCase().trim(), adName);
+      if (r.match && r.byCreative) creativeHit++;
+      else if (r.match) campaignHit++;
+    });
+    // If any creative-level match exists, campaign-only matches are ignored entirely
+    saleCampaignAdCount.set(s, creativeHit > 0 ? 0 : campaignHit);
+  });
+
+  const convertRev = (s: any) => {
+    const raw = Number(s.revenue || 0);
+    const currency = (s.currency || "").toUpperCase();
+    if (currency === "UYU") return raw / 7.93;
+    if (currency === "ARS") return raw / 278.39;
+    return raw;
+  };
+
   const rows = ads.map((ad) => {
     const adName = ad.ad_name || ad.name || "";
     const adNameNorm = adName.toLowerCase().trim();
     const adCampaignNorm = (ad.campaign_name || "").toLowerCase().trim();
-    const matchedSales = salesData.filter(s => {
-      if (!adName) return false;
-      const cFull = (s.creative || "").toLowerCase().trim();
-      const campFull = (s.campaign || "").toLowerCase().trim();
-      // Exact match by ad name
-      if (cFull && adNameNorm === cFull) return true;
-      // Exact match by campaign name
-      if (campFull && adCampaignNorm && adCampaignNorm === campFull) return true;
-      // Fuzzy match: one contains the other (handles missing parentheses/typos)
-      if (campFull && adCampaignNorm && campFull.length > 5 && (adCampaignNorm.includes(campFull) || campFull.includes(adCampaignNorm))) return true;
-      if (cFull && adCampaignNorm && cFull.length > 5 && (adCampaignNorm.includes(cFull) || cFull.includes(adCampaignNorm))) return true;
-      // Fallback: stripped AR suffix
-      if (cFull) {
-        const cStripped = cFull.replace(/ ar$/, "");
-        if (cStripped !== cFull && !allAdNames.includes(cFull) && adNameNorm === cStripped) return true;
+    let sales = 0;
+    let revenue = 0;
+    salesData.forEach((s) => {
+      const r = matchSale(s, adNameNorm, adCampaignNorm, adName);
+      if (!r.match) return;
+      if (r.byCreative) {
+        sales += Number(s.sales || 0);
+        revenue += convertRev(s);
+      } else {
+        // Distribute campaign-only sale across all ads in the campaign
+        const denom = saleCampaignAdCount.get(s) || 0;
+        if (denom > 0) {
+          sales += Number(s.sales || 0) / denom;
+          revenue += convertRev(s) / denom;
+        }
       }
-      return false;
     });
     const spend = ad.spend ?? ad.spent ?? 0;
     const leads = ad.leads ?? 0;
-    const sales = matchedSales.reduce((sum, s) => sum + Number(s.sales || 0), 0);
-    const revenue = matchedSales.reduce((sum, s) => {
-      const raw = Number(s.revenue || 0);
-      const currency = (s.currency || "").toUpperCase();
-      if (currency === "UYU") return sum + raw / 7.93;
-      if (currency === "ARS") return sum + raw / 278.39;
-      return sum + raw;
-    }, 0);
     const cpl = ad.costPerLead ?? ad.cpl ?? (leads > 0 ? spend / leads : 0);
     const cpa = ad.cpa ?? (sales > 0 ? spend / sales : 0);
     const convRate = leads > 0 ? (sales / leads) * 100 : 0;
