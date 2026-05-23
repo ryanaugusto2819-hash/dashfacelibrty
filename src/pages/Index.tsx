@@ -144,8 +144,8 @@ const Index = () => {
   const [error, setError] = useState<string | null>(null);
   const [hideValues, setHideValues] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "brasil">("all");
-  const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "emagrecimento">("all");
+  const [countryFilter, setCountryFilter] = useState<"all" | "uruguay" | "brasil" | "argentina">("all");
+  const [nichoFilter, setNichoFilter] = useState<"all" | "adulto" | "emagrecimento" | "prostata" | "diabetes">("all");
   const [bmFilter, setBmFilter] = useState<"all" | "bm1" | "bm2" | "bm3">("all");
   const [campaignBudgets, setCampaignBudgets] = useState<Record<string, { daily_budget: number; name: string; status: string }>>({});
 
@@ -292,19 +292,23 @@ const Index = () => {
     fetchData();
   }, [range, customRange, bmFilter]);
 
-  const isAdCountry = (ad: any, country: "uruguay" | "brasil") => {
+  const isAdCountry = (ad: any, country: "uruguay" | "brasil" | "argentina") => {
     const campaignName = (ad.campaign_name || "").toUpperCase();
     const isAR = campaignName.includes("(AR-") || campaignName.includes("(AR ");
     const isUY = campaignName.includes("(UY-") || campaignName.includes("(UY ");
     const isBR = campaignName.includes("(BR-") || campaignName.includes("(BR ");
     if (country === "brasil") return isBR;
+    if (country === "argentina") return isAR;
     return isUY || (!isAR && !isBR);
   };
 
-  const isAdNicho = (ad: any, nicho: "adulto" | "emagrecimento") => {
+  const isAdNicho = (ad: any, nicho: "adulto" | "emagrecimento" | "prostata" | "diabetes") => {
     const campaignName = (ad.campaign_name || "").toLowerCase();
+    const adName = (ad.ad_name || ad.name || "").toLowerCase();
     if (nicho === "adulto") return campaignName.includes("adulto");
     if (nicho === "emagrecimento") return campaignName.includes("ema");
+    if (nicho === "prostata") return campaignName.includes("prosta") || adName.includes("prosta");
+    if (nicho === "diabetes") return campaignName.includes("diabe") || adName.includes("diabe");
     return true;
   };
 
@@ -326,9 +330,10 @@ const Index = () => {
       result = result.filter(s => {
         const country = (s.country || "").toLowerCase();
         const creative = (s.creative || "").toLowerCase().trim();
-        const isAR = country.includes("argentin") || creative.endsWith(" ar");
+        const isAR = country.includes("argentin") || country === "ar" || creative.endsWith(" ar");
         const isBR = country.includes("brasil") || country.includes("brazil") || creative.endsWith(" br");
         if (countryFilter === "brasil") return isBR;
+        if (countryFilter === "argentina") return isAR;
         return !isAR && !isBR;
       });
     }
@@ -363,9 +368,10 @@ const Index = () => {
       result = result.filter(s => {
         const country = (s.country || "").toLowerCase();
         const creative = (s.creative || "").toLowerCase().trim();
-        const isAR = country.includes("argentin") || creative.endsWith(" ar");
+        const isAR = country.includes("argentin") || country === "ar" || creative.endsWith(" ar");
         const isBR = country.includes("brasil") || country.includes("brazil") || creative.endsWith(" br");
         if (countryFilter === "brasil") return isBR;
+        if (countryFilter === "argentina") return isAR;
         return !isAR && !isBR;
       });
     }
@@ -524,6 +530,7 @@ const Index = () => {
                 <TabsTrigger value="all" className="text-xs px-3 h-6">Todos</TabsTrigger>
                 <TabsTrigger value="uruguay" className="text-xs px-3 h-6">🇺🇾 Uruguai</TabsTrigger>
                 <TabsTrigger value="brasil" className="text-xs px-3 h-6">🇧🇷 Brasil</TabsTrigger>
+                <TabsTrigger value="argentina" className="text-xs px-3 h-6">🇦🇷 Argentina</TabsTrigger>
               </TabsList>
             </Tabs>
             <Tabs value={nichoFilter} onValueChange={(v) => setNichoFilter(v as any)}>
@@ -531,6 +538,8 @@ const Index = () => {
                 <TabsTrigger value="all" className="text-xs px-3 h-6">Todos</TabsTrigger>
                 <TabsTrigger value="adulto" className="text-xs px-3 h-6">Adulto</TabsTrigger>
                 <TabsTrigger value="emagrecimento" className="text-xs px-3 h-6">Emagrecimento</TabsTrigger>
+                <TabsTrigger value="prostata" className="text-xs px-3 h-6">Próstata</TabsTrigger>
+                <TabsTrigger value="diabetes" className="text-xs px-3 h-6">Diabetes</TabsTrigger>
               </TabsList>
             </Tabs>
             <button
