@@ -12,7 +12,19 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
+    const rawText = await req.text();
+    console.log("=== RAW WEBHOOK PAYLOAD ===", rawText);
+    let body: any;
+    try {
+      body = JSON.parse(rawText);
+    } catch {
+      console.error("Invalid JSON received:", rawText);
+      return new Response(JSON.stringify({ error: "Invalid JSON", raw: rawText }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    console.log("=== PARSED BODY ===", JSON.stringify(body));
     const entries = Array.isArray(body) ? body : [body];
 
     if (entries.length === 0) {
