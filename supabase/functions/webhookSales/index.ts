@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
         date: entry.date || entry.data || nowBRT,
         campaign: entry.campaign || entry.campanha || "",
         revenue: toNumber(entry.revenue ?? entry.valor ?? entry.value),
-        sales: Number(entry.sales || entry.vendas || entry.quantity || 1),
+        sales: 1,
         creative: entry.creative || entry.criativo || "",
         country,
       };
