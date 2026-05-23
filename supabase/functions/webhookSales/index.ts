@@ -43,15 +43,12 @@ Deno.serve(async (req) => {
     const nowBRT = new Date().toLocaleString("en-CA", { timeZone: "America/Sao_Paulo" }).split(",")[0];
 
     const rows = entries.map((entry: any) => {
-      const currency = (entry.currency || entry.moeda || "BRL").toUpperCase();
       return {
         date: entry.date || entry.data || nowBRT,
         campaign: entry.campaign || entry.campanha || "",
         revenue: Number(entry.revenue || entry.valor || entry.value || 0),
-        country: entry.country || entry.pais || entry.país || "",
         sales: Number(entry.sales || entry.vendas || entry.quantity || 1),
-        currency,
-        creative: entry.campaign || entry.campanha || "",
+        creative: entry.creative || entry.criativo || "",
       };
     });
 
