@@ -85,6 +85,7 @@ Deno.serve(async (req) => {
     const rows = entries.map((entry: any) => {
       const country = (entry.country || entry.pais || entry["país"] || entry.Pais || "").toString().toUpperCase().trim();
       const isUY = country === "UY" || country === "URUGUAY" || country === "URUGUAI";
+      const isAR = country === "AR" || country === "ARGENTINA";
       return {
         date: entry.date || entry.data || nowBRT,
         campaign: entry.campaign || entry.campanha || "",
@@ -92,7 +93,7 @@ Deno.serve(async (req) => {
         sales: 1,
         creative: entry.creative || entry.criativo || "",
         country,
-        currency: isUY ? "UYU" : "BRL",
+        currency: isUY ? "UYU" : isAR ? "ARS" : "BRL",
       };
     });
 
