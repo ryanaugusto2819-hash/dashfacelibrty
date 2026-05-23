@@ -207,7 +207,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     const revenue = matchedSales.reduce((sum, s) => {
       const raw = Number(s.revenue || 0);
       const currency = (s.currency || "").toUpperCase();
-      if (currency === "UYU") return sum + raw / 7.49;
+      if (currency === "UYU") return sum + raw / 7.93;
       if (currency === "ARS") return sum + raw / 266;
       return sum + raw;
     }, 0);
@@ -254,7 +254,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
       const revenue = matchedSales.reduce((sum, s) => {
         const raw = Number(s.revenue || 0);
         const currency = (s.currency || "").toUpperCase();
-        if (currency === "UYU") return sum + raw / 7.49;
+        if (currency === "UYU") return sum + raw / 7.93;
         if (currency === "ARS") return sum + raw / 266;
         return sum + raw;
       }, 0);
@@ -296,7 +296,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
   const uRevenue = unmatchedSales.reduce((sum, s) => {
     const raw = Number(s.revenue || 0);
     const currency = (s.currency || "").toUpperCase();
-    if (currency === "UYU") return sum + raw / 7.49;
+    if (currency === "UYU") return sum + raw / 7.93;
     if (currency === "ARS") return sum + raw / 266;
     return sum + raw;
   }, 0);
