@@ -52,7 +52,7 @@ const getPreviousDateRange = (from: Date, to: Date) => {
 };
 
 const UYU_TO_BRL = 7.93;
-const ARS_TO_BRL = 266;
+const ARS_TO_BRL = 278.39;
 const USD_TO_BRL = 5.10;
 
 const applyUsdConversion = (items: any[]) =>

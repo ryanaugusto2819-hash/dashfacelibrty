@@ -208,7 +208,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
       const raw = Number(s.revenue || 0);
       const currency = (s.currency || "").toUpperCase();
       if (currency === "UYU") return sum + raw / 7.93;
-      if (currency === "ARS") return sum + raw / 266;
+      if (currency === "ARS") return sum + raw / 278.39;
       return sum + raw;
     }, 0);
     const cpl = ad.costPerLead ?? ad.cpl ?? (leads > 0 ? spend / leads : 0);
@@ -255,7 +255,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
         const raw = Number(s.revenue || 0);
         const currency = (s.currency || "").toUpperCase();
         if (currency === "UYU") return sum + raw / 7.93;
-        if (currency === "ARS") return sum + raw / 266;
+        if (currency === "ARS") return sum + raw / 278.39;
         return sum + raw;
       }, 0);
       const cpl = ad.costPerLead ?? ad.cpl ?? (leads > 0 ? spend / leads : 0);
@@ -297,7 +297,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     const raw = Number(s.revenue || 0);
     const currency = (s.currency || "").toUpperCase();
     if (currency === "UYU") return sum + raw / 7.93;
-    if (currency === "ARS") return sum + raw / 266;
+    if (currency === "ARS") return sum + raw / 278.39;
     return sum + raw;
   }, 0);
 
