@@ -36,7 +36,7 @@ interface AdVideo {
 
 type CountryFilter = "all" | "uruguay";
 
-type SortKey = "adName" | "spend" | "cpa" | "cpl" | "leads" | "sales" | "convRate" | "avgTicket" | "hookRate" | "bodyRate" | "ctr" | "cpm" | "revenue" | "roi" | "lucro70" | "lucro60" | "lucro50" | "lucro40";
+type SortKey = "adName" | "spend" | "cpa" | "cpl" | "leads" | "convRate" | "avgTicket" | "hookRate" | "bodyRate" | "ctr" | "cpm" | "revenue" | "roi" | "lucro70" | "lucro60" | "lucro50" | "lucro40";
 type SortDir = "asc" | "desc";
 
 interface AdsTableProps {
@@ -458,7 +458,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                 <th colSpan={3} className="text-center text-[9px] font-bold uppercase tracking-[0.15em] text-primary/70 py-2 bg-primary/[0.03] border-x border-border/10">
                   💰 Custos
                 </th>
-                <th colSpan={4} className="text-center text-[9px] font-bold uppercase tracking-[0.15em] text-info/70 py-2 bg-info/[0.03] border-r border-border/10">
+                <th colSpan={3} className="text-center text-[9px] font-bold uppercase tracking-[0.15em] text-info/70 py-2 bg-info/[0.03] border-r border-border/10">
                   📊 Conversão
                 </th>
                 <th colSpan={4} className="text-center text-[9px] font-bold uppercase tracking-[0.15em] text-warning/70 py-2 bg-warning/[0.03] border-r border-border/10">
@@ -482,7 +482,6 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                 <th onClick={() => toggleSort("cpl")} className={`text-right ${thBase} bg-primary/[0.02] border-r border-border/10`}>CPL <SortIcon col="cpl" /></th>
                 {/* Conversão */}
                 <th onClick={() => toggleSort("leads")} className={`text-right ${thBase} bg-info/[0.02]`}>Leads <SortIcon col="leads" /></th>
-                <th onClick={() => toggleSort("sales")} className={`text-right ${thBase} bg-info/[0.02]`}>Vendas <SortIcon col="sales" /></th>
                 <th onClick={() => toggleSort("convRate")} className={`text-right ${thBase} bg-info/[0.02]`}>Tx Conv. <SortIcon col="convRate" /></th>
                 <th onClick={() => toggleSort("avgTicket")} className={`text-right ${thBase} bg-info/[0.02] border-r border-border/10`}>Ticket <SortIcon col="avgTicket" /></th>
                 {/* Engajamento */}
@@ -653,14 +652,6 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                         <div>{Math.round(leads)}</div>
                         {prev && prev.leads > 0 && (
                           <div className="text-[10px] text-muted-foreground/60 mt-0.5">{Math.round(prev.leads)}</div>
-                        )}
-                      </div>
-                    </td>
-                    <td className={`${tc} bg-info/[0.01] font-medium`}>
-                      <div>
-                        <div>{Math.round(sales)}</div>
-                        {prev && prev.sales > 0 && (
-                          <div className="text-[10px] text-muted-foreground/60 mt-0.5">{Math.round(prev.sales)}</div>
                         )}
                       </div>
                     </td>
