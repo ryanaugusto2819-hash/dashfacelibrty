@@ -179,22 +179,13 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
   // Build rows data
   const allAdNames = ads.map(a => (a.ad_name || a.name || "").toLowerCase().trim()).filter(Boolean);
 
-  // Classify each sale: tied to a specific creative, or only to a campaign (to be distributed)
-  const matchSale = (s: any, adNameNorm: string, adCampaignNorm: string, adName: string) => {
-    if (!adName) return { match: false, byCreative: false };
-    const cFull = (s.creative || "").toLowerCase().trim();
+  // Match sales by CAMPAIGN NAME only (ignore creative/ad name)
+  const matchSale = (s: any, _adNameNorm: string, adCampaignNorm: string, adName: string) => {
+    if (!adName || !adCampaignNorm) return { match: false, byCreative: false };
     const campFull = (s.campaign || "").toLowerCase().trim();
-    // Creative-level (specific) matches
-    if (cFull && adNameNorm === cFull) return { match: true, byCreative: true };
-    if (cFull) {
-      const cStripped = cFull.replace(/ ar$/, "");
-      if (cStripped !== cFull && !allAdNames.includes(cFull) && adNameNorm === cStripped)
-        return { match: true, byCreative: true };
-    }
-    // Campaign-level matches (will be distributed across ads of the campaign)
-    if (campFull && adCampaignNorm && adCampaignNorm === campFull) return { match: true, byCreative: false };
-    if (campFull && adCampaignNorm && campFull.length > 5 && (adCampaignNorm.includes(campFull) || campFull.includes(adCampaignNorm))) return { match: true, byCreative: false };
-    if (cFull && adCampaignNorm && cFull.length > 5 && (adCampaignNorm.includes(cFull) || cFull.includes(adCampaignNorm))) return { match: true, byCreative: false };
+    if (!campFull) return { match: false, byCreative: false };
+    if (adCampaignNorm === campFull) return { match: true, byCreative: false };
+    if (campFull.length > 5 && (adCampaignNorm.includes(campFull) || campFull.includes(adCampaignNorm))) return { match: true, byCreative: false };
     return { match: false, byCreative: false };
   };
 
