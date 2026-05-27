@@ -103,6 +103,7 @@ const WebhookHistory = () => {
                   <td className="px-4 py-2 max-w-[280px] truncate" title={r.campaign}>{r.campaign || <span className="text-muted-foreground italic">—</span>}</td>
                   <td className="px-4 py-2 max-w-[180px] truncate" title={r.creative}>{r.creative || <span className="text-muted-foreground italic">—</span>}</td>
                   <td className="px-4 py-2 whitespace-nowrap">{r.country || "—"}</td>
+                  <td className="px-4 py-2 whitespace-nowrap font-mono text-[11px]">{r.phone || <span className="text-muted-foreground">—</span>}</td>
                   <td className="px-4 py-2 text-right tabular-nums">{r.sales}</td>
                   <td className={`px-4 py-2 text-right tabular-nums font-medium ${zero ? "text-amber-400" : ""}`}>
                     {formatRevenue(Number(r.revenue), r.currency)}
