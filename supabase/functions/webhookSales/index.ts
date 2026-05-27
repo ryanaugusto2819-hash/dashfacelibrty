@@ -25,15 +25,19 @@ Deno.serve(async (req) => {
 
       try { return JSON.parse(t); } catch { /* still malformed */ }
 
-      // Fix loose "key: value" lines -> "key": "value"
-      let fixed = t.replace(/"([A-Za-z_][\wÀ-ÿ]*)\s*:\s*([^"]*)"/g, '"$1": "$2"');
+      // Fix "key" "value" (missing colon) -> "key": "value"
+      let fixed = t.replace(/("[A-Za-z_][\wÀ-ÿ]*")\s+("[^"]*"|\d+(?:\.\d+)?|true|false|null)/g, '$1: $2');
+      // Fix loose "key: value" inside a single quoted string -> "key": "value"
+      fixed = fixed.replace(/"([A-Za-z_][\wÀ-ÿ]*)\s*:\s*([^"]*)"/g, '"$1": "$2"');
       // Add missing commas between property lines
       fixed = fixed.replace(/("\s*:\s*("[^"]*"|[\d.]+|true|false|null))\s*\n(\s*")/g, '$1,\n$3');
+      // Remove trailing commas before } or ]
+      fixed = fixed.replace(/,(\s*[}\]])/g, '$1');
 
       try { return JSON.parse(fixed); } catch (e) {
         console.error("Tolerant parse failed:", e, "fixed=", fixed);
         const grab = (key: string) => {
-          const re = new RegExp(`"${key}"\\s*[:=]\\s*"?([^",}\\n]+)"?`, "i");
+          const re = new RegExp(`"${key}"\\s*[:=]?\\s*"?([^",}\\n]+)"?`, "i");
           return t.match(re)?.[1]?.trim();
         };
         return {
@@ -41,6 +45,7 @@ Deno.serve(async (req) => {
           creative: grab("creative") || grab("criativo") || "",
           revenue: grab("revenue") || grab("valor") || grab("value") || 0,
           country: grab("country") || grab("pais") || grab("país") || "",
+          phone: grab("phone") || grab("telefone") || grab("celular") || grab("whatsapp") || "",
           date: grab("date") || grab("data"),
         };
       }
