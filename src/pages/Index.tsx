@@ -685,6 +685,17 @@ const Index = () => {
             <AdsTable ads={deduplicatedAds} salesData={filteredSalesData} prevAds={deduplicatedPrevAds} prevSalesData={filteredPrevSalesData} isAdmin={isAdmin} campaignBudgets={campaignBudgets} bmFilter={bmFilter} />
           </section>
         )}
+
+        {/* Section: Webhook History */}
+        <section className="animate-fade-in-up" style={{ animationDelay: "400ms" }}>
+          <div className="flex items-center gap-2.5 mb-5">
+            <div className="h-4 w-[3px] rounded-full" style={{ background: "linear-gradient(180deg, #f472b6, #db2777)" }} />
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+              Histórico de Webhooks
+            </h2>
+          </div>
+          <WebhookHistory />
+        </section>
       </main>
     </div>
   );
