@@ -1,0 +1,1 @@
+ALTER TABLE public.webhook_sales ADD COLUMN IF NOT EXISTS phone TEXT;
