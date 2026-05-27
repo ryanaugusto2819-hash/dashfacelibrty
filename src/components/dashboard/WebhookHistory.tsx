@@ -83,7 +83,7 @@ const WebhookHistory = () => {
               <th className="px-4 py-2 font-semibold">País</th>
               <th className="px-4 py-2 font-semibold">Telefone</th>
               <th className="px-4 py-2 font-semibold text-right">Vendas</th>
-              <th className="px-4 py-2 font-semibold text-right">Receita</th>
+              <th className="px-4 py-2 font-semibold text-right">Valor</th>
             </tr>
           </thead>
           <tbody>
