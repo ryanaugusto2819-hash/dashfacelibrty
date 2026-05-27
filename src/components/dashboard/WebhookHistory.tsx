@@ -12,6 +12,7 @@ interface WebhookRow {
   sales: number;
   revenue: number;
   currency: string;
+  phone: string | null;
 }
 
 const formatDateTime = (iso: string) => {
