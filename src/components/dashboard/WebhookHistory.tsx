@@ -81,6 +81,7 @@ const WebhookHistory = () => {
               <th className="px-4 py-2 font-semibold">Campanha</th>
               <th className="px-4 py-2 font-semibold">Criativo</th>
               <th className="px-4 py-2 font-semibold">País</th>
+              <th className="px-4 py-2 font-semibold">Telefone</th>
               <th className="px-4 py-2 font-semibold text-right">Vendas</th>
               <th className="px-4 py-2 font-semibold text-right">Receita</th>
             </tr>
@@ -88,7 +89,7 @@ const WebhookHistory = () => {
           <tbody>
             {rows.length === 0 && !loading && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
                   Nenhum webhook recebido ainda.
                 </td>
               </tr>
