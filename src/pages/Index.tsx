@@ -9,6 +9,7 @@ import KPICard from "@/components/dashboard/KPICard";
 import DateFilter from "@/components/dashboard/DateFilter";
 import AdsTable from "@/components/dashboard/AdsTable";
 import SpendChart from "@/components/dashboard/SpendChart";
+import WebhookHistory from "@/components/dashboard/WebhookHistory";
 
 interface SaleEntry {
   date: string;
