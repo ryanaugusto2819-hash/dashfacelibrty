@@ -288,6 +288,7 @@ export type Database = {
           currency: string
           date: string
           id: string
+          phone: string | null
           revenue: number
           sales: number
         }
@@ -299,6 +300,7 @@ export type Database = {
           currency?: string
           date?: string
           id?: string
+          phone?: string | null
           revenue?: number
           sales?: number
         }
@@ -310,6 +312,7 @@ export type Database = {
           currency?: string
           date?: string
           id?: string
+          phone?: string | null
           revenue?: number
           sales?: number
         }

@@ -82,18 +82,32 @@ Deno.serve(async (req) => {
       return isNaN(n) ? 0 : n;
     };
 
+    // Case-insensitive key lookup (accepts VALOR, valor, Valor, etc.)
+    const pick = (obj: any, ...keys: string[]): any => {
+      if (!obj || typeof obj !== "object") return undefined;
+      const map: Record<string, any> = {};
+      for (const k of Object.keys(obj)) map[k.toLowerCase().trim()] = obj[k];
+      for (const k of keys) {
+        const v = map[k.toLowerCase().trim()];
+        if (v !== undefined && v !== null && v !== "") return v;
+      }
+      return undefined;
+    };
+
     const rows = entries.map((entry: any) => {
-      const country = (entry.country || entry.pais || entry["país"] || entry.Pais || "").toString().toUpperCase().trim();
+      const country = String(pick(entry, "country", "pais", "país") || "").toUpperCase().trim();
       const isUY = country === "UY" || country === "URUGUAY" || country === "URUGUAI";
       const isAR = country === "AR" || country === "ARGENTINA";
+      const phoneRaw = pick(entry, "phone", "telefone", "celular", "whatsapp", "telephone");
       return {
-        date: entry.date || entry.data || nowBRT,
-        campaign: entry.campaign || entry.campanha || "",
-        revenue: toNumber(entry.revenue ?? entry.valor ?? entry.value),
+        date: pick(entry, "date", "data") || nowBRT,
+        campaign: String(pick(entry, "campaign", "campanha") || ""),
+        revenue: toNumber(pick(entry, "revenue", "valor", "value", "price", "preco", "preço")),
         sales: 1,
-        creative: entry.creative || entry.criativo || "",
+        creative: String(pick(entry, "creative", "criativo", "ad", "anuncio", "anúncio") || ""),
         country,
         currency: isUY ? "UYU" : isAR ? "ARS" : "BRL",
+        phone: phoneRaw ? String(phoneRaw).trim() : null,
       };
     });
 

@@ -12,6 +12,7 @@ interface WebhookRow {
   sales: number;
   revenue: number;
   currency: string;
+  phone: string | null;
 }
 
 const formatDateTime = (iso: string) => {
@@ -80,6 +81,7 @@ const WebhookHistory = () => {
               <th className="px-4 py-2 font-semibold">Campanha</th>
               <th className="px-4 py-2 font-semibold">Criativo</th>
               <th className="px-4 py-2 font-semibold">País</th>
+              <th className="px-4 py-2 font-semibold">Telefone</th>
               <th className="px-4 py-2 font-semibold text-right">Vendas</th>
               <th className="px-4 py-2 font-semibold text-right">Receita</th>
             </tr>
@@ -87,7 +89,7 @@ const WebhookHistory = () => {
           <tbody>
             {rows.length === 0 && !loading && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
                   Nenhum webhook recebido ainda.
                 </td>
               </tr>
@@ -101,6 +103,7 @@ const WebhookHistory = () => {
                   <td className="px-4 py-2 max-w-[280px] truncate" title={r.campaign}>{r.campaign || <span className="text-muted-foreground italic">—</span>}</td>
                   <td className="px-4 py-2 max-w-[180px] truncate" title={r.creative}>{r.creative || <span className="text-muted-foreground italic">—</span>}</td>
                   <td className="px-4 py-2 whitespace-nowrap">{r.country || "—"}</td>
+                  <td className="px-4 py-2 whitespace-nowrap font-mono text-[11px]">{r.phone || <span className="text-muted-foreground">—</span>}</td>
                   <td className="px-4 py-2 text-right tabular-nums">{r.sales}</td>
                   <td className={`px-4 py-2 text-right tabular-nums font-medium ${zero ? "text-amber-400" : ""}`}>
                     {formatRevenue(Number(r.revenue), r.currency)}
