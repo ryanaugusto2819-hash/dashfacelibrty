@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Video, Upload, Trash2, Play, TrendingUp, TrendingDown, Minus, Search, ArrowUp, ArrowDown, ArrowUpDown, DollarSign, Check, X, Loader2 } from "lucide-react";
+import { Video, Upload, Trash2, Play, TrendingUp, TrendingDown, Minus, Search, ArrowUp, ArrowDown, ArrowUpDown, DollarSign, Check, X, Loader2, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Dialog,
   DialogContent,
@@ -48,11 +49,29 @@ interface AdsTableProps {
   campaignBudgets?: Record<string, { daily_budget: number; name: string; status: string }>;
   bmFilter?: string;
 }
-
 const fmt = (n: number | null | undefined) => {
   if (n == null || isNaN(n)) return "0,00";
   return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
+
+const timeAgo = (iso: string): string => {
+  const diff = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return "agora";
+  if (min < 60) return `há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `há ${h}h`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `há ${d}d`;
+  const mo = Math.floor(d / 30);
+  return `há ${mo}mes${mo > 1 ? "es" : ""}`;
+};
+
+interface BudgetHistoryEntry {
+  previous_budget: number | null;
+  new_budget: number;
+  created_at: string;
+}
 
 const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdmin = false, campaignBudgets = {}, bmFilter }: AdsTableProps) => {
   const [adVideos, setAdVideos] = useState<Record<string, AdVideo>>({});
@@ -68,8 +87,35 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
   const [updatingBudget, setUpdatingBudget] = useState<string | null>(null);
   const [togglingStatus, setTogglingStatus] = useState<string | null>(null);
   const [localStatuses, setLocalStatuses] = useState<Record<string, string>>({});
+  const [budgetHistory, setBudgetHistory] = useState<Record<string, BudgetHistoryEntry>>({});
+  const { user } = useAuth();
 
-  const handleBudgetUpdate = async (adName: string, campaignIds: string[], bmAccount?: string) => {
+  useEffect(() => {
+    if (!user?.id || !isAdmin) return;
+    (async () => {
+      const { data } = await supabase
+        .from("campaign_budget_history")
+        .select("campaign_id, previous_budget, new_budget, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (data) {
+        const map: Record<string, BudgetHistoryEntry> = {};
+        for (const row of data as any[]) {
+          if (!map[row.campaign_id]) {
+            map[row.campaign_id] = {
+              previous_budget: row.previous_budget,
+              new_budget: Number(row.new_budget),
+              created_at: row.created_at,
+            };
+          }
+        }
+        setBudgetHistory(map);
+      }
+    })();
+  }, [user?.id, isAdmin]);
+
+  const handleBudgetUpdate = async (adName: string, campaignIds: string[], bmAccount?: string, previousBudget?: number | null) => {
     const value = parseFloat(budgetValue.replace(",", "."));
     if (isNaN(value) || value <= 0) {
       toast.error("Valor inválido");
@@ -83,6 +129,25 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.details?.message || data.error);
+      }
+      // Save history per campaign (best-effort)
+      if (user?.id) {
+        const nowIso = new Date().toISOString();
+        const rows = campaignIds.map((cid) => ({
+          campaign_id: cid,
+          ad_name: adName,
+          previous_budget: previousBudget ?? null,
+          new_budget: value,
+          user_id: user.id,
+        }));
+        await supabase.from("campaign_budget_history").insert(rows);
+        setBudgetHistory((prev) => {
+          const next = { ...prev };
+          for (const cid of campaignIds) {
+            next[cid] = { previous_budget: previousBudget ?? null, new_budget: value, created_at: nowIso };
+          }
+          return next;
+        });
       }
       toast.success(`Orçamento atualizado para R$${value.toFixed(2)}`);
       setEditingBudget(null);
@@ -550,10 +615,29 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                   >
                     {/* Name - sticky */}
                     <td className="px-4 py-3.5 font-medium text-sm whitespace-nowrap sticky left-0 bg-background/80 backdrop-blur-sm z-10 group-hover:bg-accent/40 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? 'bg-profit' : 'bg-muted-foreground/40'}`} />
-                        <span className="truncate max-w-[160px]" title={ad.campaign_name || adName}>{ad.campaign_name || adName || "—"}</span>
-                      </div>
+                      {(() => {
+                        const lastEdit = campaignIds
+                          .map((cid) => budgetHistory[cid])
+                          .filter((e): e is BudgetHistoryEntry => !!e)
+                          .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))[0];
+                        return (
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? 'bg-profit' : 'bg-muted-foreground/40'}`} />
+                              <span className="truncate max-w-[160px]" title={ad.campaign_name || adName}>{ad.campaign_name || adName || "—"}</span>
+                            </div>
+                            {lastEdit && (
+                              <div
+                                className="flex items-center gap-1 pl-3.5 text-[10px] text-muted-foreground/70"
+                                title={`Você alterou para R$${fmt(lastEdit.new_budget)} em ${new Date(lastEdit.created_at).toLocaleString("pt-BR")}`}
+                              >
+                                <History className="h-2.5 w-2.5" />
+                                <span>Editado {timeAgo(lastEdit.created_at)}</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </td>
                     {/* Status with toggle */}
                     <td className="px-2 py-3.5 text-center">
@@ -593,6 +677,10 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                           .filter((b: number | undefined): b is number => b != null && b > 0);
                         const currentBudget = budgetValues.length > 0 ? Math.max(...budgetValues) : null;
                         const budgetKey = ad.campaign_id || ad.campaign_name || adName;
+                        const lastEdit = cIds
+                          .map((cid) => budgetHistory[cid])
+                          .filter((e): e is BudgetHistoryEntry => !!e)
+                          .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))[0];
 
                         if (!isAdmin || cIds.length === 0) {
                           return <span className="text-muted-foreground text-xs">—</span>;
@@ -618,6 +706,11 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                                       R${fmt(currentBudget)}
                                     </span>
                                     <span className="text-[9px] text-muted-foreground/60">diário</span>
+                                    {lastEdit && lastEdit.previous_budget != null && (
+                                      <span className="text-[9px] text-muted-foreground/60 line-through" title="Valor anterior">
+                                        antes R${fmt(lastEdit.previous_budget)}
+                                      </span>
+                                    )}
                                   </>
                                 ) : (
                                   <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
@@ -641,14 +734,14 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                                     className="h-8 text-sm"
                                     autoFocus
                                     onKeyDown={(e) => {
-                                      if (e.key === "Enter") handleBudgetUpdate(budgetKey, cIds, ad.bm_account);
+                                      if (e.key === "Enter") handleBudgetUpdate(budgetKey, cIds, ad.bm_account, currentBudget);
                                     }}
                                   />
                                   <Button
                                     size="icon"
                                     className="h-8 w-8 flex-shrink-0"
                                     disabled={updatingBudget === budgetKey || !budgetValue}
-                                    onClick={() => handleBudgetUpdate(budgetKey, cIds, ad.bm_account)}
+                                    onClick={() => handleBudgetUpdate(budgetKey, cIds, ad.bm_account, currentBudget)}
                                   >
                                     {updatingBudget === budgetKey ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
                                   </Button>
