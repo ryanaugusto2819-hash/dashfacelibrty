@@ -677,6 +677,10 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                           .filter((b: number | undefined): b is number => b != null && b > 0);
                         const currentBudget = budgetValues.length > 0 ? Math.max(...budgetValues) : null;
                         const budgetKey = ad.campaign_id || ad.campaign_name || adName;
+                        const lastEdit = cIds
+                          .map((cid) => budgetHistory[cid])
+                          .filter((e): e is BudgetHistoryEntry => !!e)
+                          .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))[0];
 
                         if (!isAdmin || cIds.length === 0) {
                           return <span className="text-muted-foreground text-xs">—</span>;
@@ -702,6 +706,11 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                                       R${fmt(currentBudget)}
                                     </span>
                                     <span className="text-[9px] text-muted-foreground/60">diário</span>
+                                    {lastEdit && lastEdit.previous_budget != null && (
+                                      <span className="text-[9px] text-muted-foreground/60 line-through" title="Valor anterior">
+                                        antes R${fmt(lastEdit.previous_budget)}
+                                      </span>
+                                    )}
                                   </>
                                 ) : (
                                   <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
