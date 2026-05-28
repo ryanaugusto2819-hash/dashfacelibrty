@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Video, Upload, Trash2, Play, TrendingUp, TrendingDown, Minus, Search, ArrowUp, ArrowDown, ArrowUpDown, DollarSign, Check, X, Loader2 } from "lucide-react";
+import { Video, Upload, Trash2, Play, TrendingUp, TrendingDown, Minus, Search, ArrowUp, ArrowDown, ArrowUpDown, DollarSign, Check, X, Loader2, History } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Dialog,
   DialogContent,
