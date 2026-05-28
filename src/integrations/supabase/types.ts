@@ -121,6 +121,36 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_budget_history: {
+        Row: {
+          ad_name: string | null
+          campaign_id: string
+          created_at: string
+          id: string
+          new_budget: number
+          previous_budget: number | null
+          user_id: string
+        }
+        Insert: {
+          ad_name?: string | null
+          campaign_id: string
+          created_at?: string
+          id?: string
+          new_budget: number
+          previous_budget?: number | null
+          user_id: string
+        }
+        Update: {
+          ad_name?: string | null
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          new_budget?: number
+          previous_budget?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       campaign_configs: {
         Row: {
           adset_id: string | null
