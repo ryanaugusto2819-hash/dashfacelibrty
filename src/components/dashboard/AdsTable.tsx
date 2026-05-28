@@ -49,10 +49,29 @@ interface AdsTableProps {
   campaignBudgets?: Record<string, { daily_budget: number; name: string; status: string }>;
   bmFilter?: string;
 }
-
 const fmt = (n: number | null | undefined) => {
   if (n == null || isNaN(n)) return "0,00";
   return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
+const timeAgo = (iso: string): string => {
+  const diff = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return "agora";
+  if (min < 60) return `há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `há ${h}h`;
+  const d = Math.floor(h / 24);
+  if (d < 30) return `há ${d}d`;
+  const mo = Math.floor(d / 30);
+  return `há ${mo}mes${mo > 1 ? "es" : ""}`;
+};
+
+interface BudgetHistoryEntry {
+  previous_budget: number | null;
+  new_budget: number;
+  created_at: string;
+}
 };
 
 const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdmin = false, campaignBudgets = {}, bmFilter }: AdsTableProps) => {
