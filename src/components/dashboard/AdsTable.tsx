@@ -72,7 +72,6 @@ interface BudgetHistoryEntry {
   new_budget: number;
   created_at: string;
 }
-};
 
 const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdmin = false, campaignBudgets = {}, bmFilter }: AdsTableProps) => {
   const [adVideos, setAdVideos] = useState<Record<string, AdVideo>>({});
@@ -88,6 +87,33 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
   const [updatingBudget, setUpdatingBudget] = useState<string | null>(null);
   const [togglingStatus, setTogglingStatus] = useState<string | null>(null);
   const [localStatuses, setLocalStatuses] = useState<Record<string, string>>({});
+  const [budgetHistory, setBudgetHistory] = useState<Record<string, BudgetHistoryEntry>>({});
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user?.id || !isAdmin) return;
+    (async () => {
+      const { data } = await supabase
+        .from("campaign_budget_history")
+        .select("campaign_id, previous_budget, new_budget, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (data) {
+        const map: Record<string, BudgetHistoryEntry> = {};
+        for (const row of data as any[]) {
+          if (!map[row.campaign_id]) {
+            map[row.campaign_id] = {
+              previous_budget: row.previous_budget,
+              new_budget: Number(row.new_budget),
+              created_at: row.created_at,
+            };
+          }
+        }
+        setBudgetHistory(map);
+      }
+    })();
+  }, [user?.id, isAdmin]);
 
   const handleBudgetUpdate = async (adName: string, campaignIds: string[], bmAccount?: string) => {
     const value = parseFloat(budgetValue.replace(",", "."));
