@@ -615,10 +615,29 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
                   >
                     {/* Name - sticky */}
                     <td className="px-4 py-3.5 font-medium text-sm whitespace-nowrap sticky left-0 bg-background/80 backdrop-blur-sm z-10 group-hover:bg-accent/40 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? 'bg-profit' : 'bg-muted-foreground/40'}`} />
-                        <span className="truncate max-w-[160px]" title={ad.campaign_name || adName}>{ad.campaign_name || adName || "—"}</span>
-                      </div>
+                      {(() => {
+                        const lastEdit = campaignIds
+                          .map((cid) => budgetHistory[cid])
+                          .filter((e): e is BudgetHistoryEntry => !!e)
+                          .sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at))[0];
+                        return (
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? 'bg-profit' : 'bg-muted-foreground/40'}`} />
+                              <span className="truncate max-w-[160px]" title={ad.campaign_name || adName}>{ad.campaign_name || adName || "—"}</span>
+                            </div>
+                            {lastEdit && (
+                              <div
+                                className="flex items-center gap-1 pl-3.5 text-[10px] text-muted-foreground/70"
+                                title={`Você alterou para R$${fmt(lastEdit.new_budget)} em ${new Date(lastEdit.created_at).toLocaleString("pt-BR")}`}
+                              >
+                                <History className="h-2.5 w-2.5" />
+                                <span>Editado {timeAgo(lastEdit.created_at)}</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </td>
                     {/* Status with toggle */}
                     <td className="px-2 py-3.5 text-center">
