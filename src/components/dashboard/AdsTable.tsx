@@ -115,7 +115,7 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     })();
   }, [user?.id, isAdmin]);
 
-  const handleBudgetUpdate = async (adName: string, campaignIds: string[], bmAccount?: string) => {
+  const handleBudgetUpdate = async (adName: string, campaignIds: string[], bmAccount?: string, previousBudget?: number | null) => {
     const value = parseFloat(budgetValue.replace(",", "."));
     if (isNaN(value) || value <= 0) {
       toast.error("Valor inválido");
@@ -129,6 +129,25 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
         });
         if (error) throw error;
         if (data?.error) throw new Error(data.details?.message || data.error);
+      }
+      // Save history per campaign (best-effort)
+      if (user?.id) {
+        const nowIso = new Date().toISOString();
+        const rows = campaignIds.map((cid) => ({
+          campaign_id: cid,
+          ad_name: adName,
+          previous_budget: previousBudget ?? null,
+          new_budget: value,
+          user_id: user.id,
+        }));
+        await supabase.from("campaign_budget_history").insert(rows);
+        setBudgetHistory((prev) => {
+          const next = { ...prev };
+          for (const cid of campaignIds) {
+            next[cid] = { previous_budget: previousBudget ?? null, new_budget: value, created_at: nowIso };
+          }
+          return next;
+        });
       }
       toast.success(`Orçamento atualizado para R$${value.toFixed(2)}`);
       setEditingBudget(null);
