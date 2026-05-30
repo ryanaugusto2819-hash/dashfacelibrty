@@ -76,10 +76,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (mounted) checkUserStatus(data.session?.user ?? null);
-    });
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (mounted) checkUserStatus(session?.user ?? null);
     });
@@ -88,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [checkUserStatus]);
 
   const signOut = () => supabase.auth.signOut();
 
