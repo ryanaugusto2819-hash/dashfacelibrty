@@ -30,28 +30,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [approved, setApproved] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const lastCheckedUserId = useRef<string | null>(null);
   const statusCheckId = useRef(0);
 
   const checkUserStatus = useCallback(async (u: User | null) => {
     const checkId = ++statusCheckId.current;
 
     if (!u) {
-      lastCheckedUserId.current = null;
       setUser(null);
       setApproved(false);
       setIsAdmin(false);
       setLoading(false);
       return;
     }
-    // Skip duplicate checks for the same user
-    if (lastCheckedUserId.current === u.id) {
-      setLoading(false);
-      return;
-    }
     setLoading(true);
     setUser(u);
-    lastCheckedUserId.current = u.id;
 
     try {
       const profileRes = await fetchWithRetry(async () => {
@@ -75,8 +67,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       if (checkId !== statusCheckId.current) return;
       console.error("Error checking user status:", err);
-      // Reset so a future auth event can retry
-      lastCheckedUserId.current = null;
       setApproved(false);
       setIsAdmin(false);
     }
