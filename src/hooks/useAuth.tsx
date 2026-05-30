@@ -44,12 +44,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
       return;
     }
-    setUser(u);
     // Skip duplicate checks for the same user
     if (lastCheckedUserId.current === u.id) {
       setLoading(false);
       return;
     }
+    setLoading(true);
+    setUser(u);
     lastCheckedUserId.current = u.id;
 
     try {
