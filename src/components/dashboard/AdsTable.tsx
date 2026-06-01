@@ -67,6 +67,20 @@ const timeAgo = (iso: string): string => {
   return `há ${mo}mes${mo > 1 ? "es" : ""}`;
 };
 
+const hasCountryTag = (value: string, tag: "BR" | "UY" | "AR") => {
+  const normalized = (value || "").toUpperCase();
+  return new RegExp(`(^|[^A-Z0-9])${tag}([^A-Z0-9]|$)`).test(normalized);
+};
+
+const getAdCountryFlags = (ad: any) => {
+  const source = [ad.campaign_name, ad.ad_name, ad.name].filter(Boolean).join(" ");
+  return {
+    isAR: hasCountryTag(source, "AR") || /ARGENTINA/i.test(source),
+    isUY: hasCountryTag(source, "UY") || /URUGUAI|URUGUAY/i.test(source),
+    isBR: hasCountryTag(source, "BR") || /BRASIL|BRAZIL/i.test(source),
+  };
+};
+
 interface BudgetHistoryEntry {
   previous_budget: number | null;
   new_budget: number;
@@ -407,9 +421,8 @@ const AdsTable = ({ ads, salesData = [], prevAds = [], prevSalesData = [], isAdm
     let result = rows.filter(r => r.spend > 0);
     if (countryFilter !== "all") {
       result = result.filter(r => {
-        const campaign = (r.ad.campaign_name || "").toUpperCase();
-        const isUY = campaign.includes("(UY-") || campaign.includes("(UY ");
-        return isUY || (!campaign.includes("(AR-") && !campaign.includes("(AR "));
+        const { isAR, isBR, isUY } = getAdCountryFlags(r.ad);
+        return isUY || (!isAR && !isBR);
       });
     }
     if (searchQuery.trim()) {
