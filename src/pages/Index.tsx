@@ -120,6 +120,30 @@ const normalizeMetaErrorMessage = (message: string) => {
   return message;
 };
 
+const hasCountryTag = (value: string, tag: "BR" | "UY" | "AR") => {
+  const normalized = (value || "").toUpperCase();
+  return new RegExp(`(^|[^A-Z0-9])${tag}([^A-Z0-9]|$)`).test(normalized);
+};
+
+const getAdCountryFlags = (ad: any) => {
+  const source = [ad.campaign_name, ad.ad_name, ad.name].filter(Boolean).join(" ");
+  return {
+    isAR: hasCountryTag(source, "AR") || /ARGENTINA/i.test(source),
+    isUY: hasCountryTag(source, "UY") || /URUGUAI|URUGUAY/i.test(source),
+    isBR: hasCountryTag(source, "BR") || /BRASIL|BRAZIL/i.test(source),
+  };
+};
+
+const getSaleCountryFlags = (sale: any) => {
+  const country = (sale.country || "").toLowerCase().trim();
+  const source = [sale.creative, sale.campaign].filter(Boolean).join(" ");
+  return {
+    isAR: country.includes("argentin") || country === "ar" || hasCountryTag(source, "AR"),
+    isUY: country.includes("uruguai") || country.includes("uruguay") || country === "uy" || hasCountryTag(source, "UY"),
+    isBR: country.includes("brasil") || country.includes("brazil") || country === "br" || hasCountryTag(source, "BR"),
+  };
+};
+
 const SkeletonCard = () => (
   <div className="glass-card p-5 relative overflow-hidden">
     <div className="absolute inset-x-0 top-0 h-[3px] shimmer" />
@@ -294,19 +318,7 @@ const Index = () => {
   }, [range, customRange, bmFilter]);
 
   const isAdCountry = (ad: any, country: "uruguay" | "brasil" | "argentina") => {
-    const campaignName = (ad.campaign_name || "").toUpperCase();
-    const hasTag = (tag: string) =>
-      campaignName.includes(`(${tag}-`) ||
-      campaignName.includes(`(${tag} `) ||
-      campaignName.includes(`-${tag}-`) ||
-      campaignName.includes(`-${tag} `) ||
-      campaignName.includes(` ${tag} `) ||
-      campaignName.endsWith(`-${tag}`) ||
-      campaignName.endsWith(` ${tag}`) ||
-      campaignName.endsWith(`(${tag})`);
-    const isAR = hasTag("AR");
-    const isUY = hasTag("UY");
-    const isBR = hasTag("BR");
+    const { isAR, isUY, isBR } = getAdCountryFlags(ad);
     if (country === "brasil") return isBR;
     if (country === "argentina") return isAR;
     return isUY || (!isAR && !isBR);
@@ -338,13 +350,10 @@ const Index = () => {
     let result = salesData;
     if (countryFilter !== "all") {
       result = result.filter(s => {
-        const country = (s.country || "").toLowerCase();
-        const creative = (s.creative || "").toLowerCase().trim();
-        const isAR = country.includes("argentin") || country === "ar" || creative.endsWith(" ar");
-        const isBR = country.includes("brasil") || country.includes("brazil") || creative.endsWith(" br");
+        const { isAR, isUY, isBR } = getSaleCountryFlags(s);
         if (countryFilter === "brasil") return isBR;
         if (countryFilter === "argentina") return isAR;
-        return !isAR && !isBR;
+        return isUY || (!isAR && !isBR);
       });
     }
     if (nichoFilter !== "all") {
@@ -376,13 +385,10 @@ const Index = () => {
     let result = prevSalesData;
     if (countryFilter !== "all") {
       result = result.filter(s => {
-        const country = (s.country || "").toLowerCase();
-        const creative = (s.creative || "").toLowerCase().trim();
-        const isAR = country.includes("argentin") || country === "ar" || creative.endsWith(" ar");
-        const isBR = country.includes("brasil") || country.includes("brazil") || creative.endsWith(" br");
+        const { isAR, isUY, isBR } = getSaleCountryFlags(s);
         if (countryFilter === "brasil") return isBR;
         if (countryFilter === "argentina") return isAR;
-        return !isAR && !isBR;
+        return isUY || (!isAR && !isBR);
       });
     }
     if (nichoFilter !== "all") {
