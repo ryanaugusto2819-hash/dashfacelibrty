@@ -295,9 +295,18 @@ const Index = () => {
 
   const isAdCountry = (ad: any, country: "uruguay" | "brasil" | "argentina") => {
     const campaignName = (ad.campaign_name || "").toUpperCase();
-    const isAR = campaignName.includes("(AR-") || campaignName.includes("(AR ");
-    const isUY = campaignName.includes("(UY-") || campaignName.includes("(UY ");
-    const isBR = campaignName.includes("(BR-") || campaignName.includes("(BR ");
+    const hasTag = (tag: string) =>
+      campaignName.includes(`(${tag}-`) ||
+      campaignName.includes(`(${tag} `) ||
+      campaignName.includes(`-${tag}-`) ||
+      campaignName.includes(`-${tag} `) ||
+      campaignName.includes(` ${tag} `) ||
+      campaignName.endsWith(`-${tag}`) ||
+      campaignName.endsWith(` ${tag}`) ||
+      campaignName.endsWith(`(${tag})`);
+    const isAR = hasTag("AR");
+    const isUY = hasTag("UY");
+    const isBR = hasTag("BR");
     if (country === "brasil") return isBR;
     if (country === "argentina") return isAR;
     return isUY || (!isAR && !isBR);
